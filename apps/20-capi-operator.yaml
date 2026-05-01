@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: capi-operator
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-10"
+spec:
+  project: default
+  source:
+    repoURL: https://kubernetes-sigs.github.io/cluster-api-operator
+    chart: cluster-api-operator
+    targetRevision: 0.14.0
+    helm:
+      releaseName: capi-operator
+      values: |
+        cert-manager:
+          enabled: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: capi-operator-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
