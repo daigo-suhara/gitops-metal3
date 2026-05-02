@@ -7,8 +7,8 @@ spec:
   template:
     spec:
       image:
-        url: http://172.16.10.50:6180/images/fedora-coreos.qcow2
-        checksum: http://172.16.10.50:6180/images/fedora-coreos.qcow2.sha256
+        url: http://172.16.10.50:6180/images/ubuntu-2204-kube-v1.30.0.qcow2
+        checksum: http://172.16.10.50:6180/images/ubuntu-2204-kube-v1.30.0.qcow2.sha256
         format: qcow2
       hostSelector:
         matchLabels:
@@ -50,7 +50,6 @@ metadata:
 spec:
   template:
     spec:
-      format: ignition
       joinConfiguration:
         nodeRegistration:
           kubeletExtraArgs: {}
