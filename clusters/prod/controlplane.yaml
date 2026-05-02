@@ -20,39 +20,31 @@ metadata:
   name: prod-control-plane
   namespace: metal3
 spec:
-  replicas: 1
-  version: v1.30.0
-  machineTemplate:
-    infrastructureRef:
-      apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-      kind: Metal3MachineTemplate
-      name: prod-control-plane
+  spec:
+    image:
+      url: http://172.16.10.50:6180/os-images/fedora-coreos.qcow2
+      checksum: http://172.16.10.50:6180/os-images/fedora-coreos.qcow2.sha256
+      format: qcow2
+    kind: Metal3MachineTemplate
+    name: prod-control-plane
   kubeadmConfigSpec:
-    initConfiguration:
-      nodeRegistration:
-        kubeletExtraArgs: {}
-    joinConfiguration:
-      nodeRegistration:
-        kubeletExtraArgs: {}
-    clusterConfiguration:
-      apiServer:
-        certSANs:
-          - 172.16.10.10
-      controllerManager:
-        extraArgs:
-          enable-hostpath-provisioner: "true"
-    preKubeadmCommands:
-      - DEBIAN_FRONTEND=noninteractive apt-get update -y
-      - DEBIAN_FRONTEND=noninteractive apt-get install -y apt-transport-https ca-certificates curl gnupg
-      - install -m 0755 -d /etc/apt/keyrings
-      - curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-      - chmod a+r /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-      - echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /' | tee /etc/apt/sources.list.d/kubernetes.list
-      - apt-get update -y
-      - DEBIAN_FRONTEND=noninteractive apt-get install -y containerd kubelet kubeadm kubectl
-      - systemctl enable --now containerd
-      - systemctl enable --now kubelet
-    files:
+  format: ignition
+  initConfiguration:
+    nodeRegistration:
+      kubeletExtraArgs: {}
+  joinConfiguration:
+    nodeRegistration:
+      kubeletExtraArgs: {}
+  clusterConfiguration:
+    apiServer:
+      certSANs:
+        - 172.16.10.10
+    controllerManager:
+      extraArgs:
+        enable-hostpath-provisioner: "true"
+  # FCOS handles networking and pre-reqs via Ignition/built-in defaults.
+  # We still keep the kube-vip static pod manifest.
+  files:
       - content: |
           apiVersion: v1
           kind: Pod

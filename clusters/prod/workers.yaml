@@ -7,8 +7,8 @@ spec:
   template:
     spec:
       image:
-        url: http://172.16.10.50:6180/os-images/ubuntu-24.04.qcow2
-        checksum: http://172.16.10.50:6180/os-images/ubuntu-24.04.qcow2.sha256
+        url: http://172.16.10.50:6180/os-images/fedora-coreos.qcow2
+        checksum: http://172.16.10.50:6180/os-images/fedora-coreos.qcow2.sha256
         format: qcow2
       hostSelector:
         matchLabels:
@@ -50,20 +50,10 @@ metadata:
 spec:
   template:
     spec:
+      format: ignition
       joinConfiguration:
         nodeRegistration:
           kubeletExtraArgs: {}
-      preKubeadmCommands:
-        - DEBIAN_FRONTEND=noninteractive apt-get update -y
-        - DEBIAN_FRONTEND=noninteractive apt-get install -y apt-transport-https ca-certificates curl gnupg
-        - install -m 0755 -d /etc/apt/keyrings
-        - curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-        - chmod a+r /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-        - echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /' | tee /etc/apt/sources.list.d/kubernetes.list
-        - apt-get update -y
-        - DEBIAN_FRONTEND=noninteractive apt-get install -y containerd kubelet kubeadm kubectl
-        - systemctl enable --now containerd
-        - systemctl enable --now kubelet
       users:
         - name: metal3
           sudo: "ALL=(ALL) NOPASSWD:ALL"
