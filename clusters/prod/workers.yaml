@@ -21,7 +21,7 @@ metadata:
   namespace: metal3
 spec:
   clusterName: prod
-  replicas: 2
+  replicas: 0
   selector:
     matchLabels:
       cluster.x-k8s.io/cluster-name: prod

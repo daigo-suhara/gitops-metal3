@@ -4,7 +4,7 @@ metadata:
   name: tx1320-03
   namespace: metal3
   labels:
-    cluster-role: worker
+    cluster-role: control-plane
 spec:
   online: true
   bootMode: UEFI
