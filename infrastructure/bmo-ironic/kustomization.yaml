@@ -76,36 +76,36 @@ patches:
       name: baremetal-operator-ironic
     patch: |
       - op: add
-        path: /spec/template/spec/volumes/-
-        value:
-          name: os-images
-          emptyDir: {}
-      - op: add
         path: /spec/template/spec/initContainers/-
         value:
           name: image-downloader
-          image: curlimages/curl:8.7.1
+          image: alpine:3.20
           command: ["sh", "-c"]
           args:
             - |
               set -ex
+              apk add --no-cache curl xz
               DEST=/shared/html/os-images
               mkdir -p $DEST
               # TinyIPA
               [ -f $DEST/ironic-python-agent.kernel ] || curl -L -o $DEST/ironic-python-agent.kernel https://tarballs.openstack.org/ironic-python-agent/tinyipa/files/tinyipa-master.vmlinuz
               [ -f $DEST/ironic-python-agent.initramfs ] || curl -L -o $DEST/ironic-python-agent.initramfs https://tarballs.openstack.org/ironic-python-agent/tinyipa/files/tinyipa-master.gz
               # Fedora CoreOS (Stable QCOW2)
-              [ -f $DEST/fedora-coreos.qcow2 ] || curl -L -o $DEST/fedora-coreos.qcow2 https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/41.20250126.3.0/x86_64/fedora-coreos-41.20250126.3.0-qemu.x86_64.qcow2.xz && unxz $DEST/fedora-coreos.qcow2.xz
-              # Checksums (dummy for now as FCOS builds vary)
+              if [ ! -f $DEST/fedora-coreos.qcow2 ]; then
+                curl -L -o $DEST/fedora-coreos.qcow2.xz https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/41.20250126.3.0/x86_64/fedora-coreos-41.20250126.3.0-qemu.x86_64.qcow2.xz
+                unxz $DEST/fedora-coreos.qcow2.xz
+              fi
+              # Checksums
               sha256sum $DEST/fedora-coreos.qcow2 | cut -d' ' -f1 > $DEST/fedora-coreos.qcow2.sha256
           volumeMounts:
-            - name: os-images
-              mountPath: /shared/html/os-images
+            - name: ironic-data-volume
+              mountPath: /shared
       - op: add
         path: /spec/template/spec/containers/3/volumeMounts/-
         value:
-          name: os-images
+          name: ironic-data-volume
           mountPath: /shared/html/os-images
+          subPath: html/os-images
       # ConfigMap 名を固定のものに強制置換
       - op: replace
         path: /spec/template/spec/containers/0/envFrom/0/configMapRef/name
