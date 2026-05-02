@@ -6,7 +6,8 @@ resources:
   - 00-namespace.yaml
   - ironic-htpasswd.yaml
   - ironic-bmo-configmap.yaml
-  # Pull upstream BMO + Ironic deployment from metal3-io/baremetal-operator
   - https://github.com/metal3-io/baremetal-operator//config/default?ref=release-0.9
   - https://github.com/metal3-io/baremetal-operator//ironic-deployment/default?ref=release-0.9
+
+components:
   - https://github.com/metal3-io/baremetal-operator//ironic-deployment/components/basic-auth?ref=release-0.9
