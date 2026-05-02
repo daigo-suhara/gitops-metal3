@@ -31,6 +31,48 @@ patches:
       - op: replace
         path: /metadata/annotations/cert-manager.io~1inject-ca-from
         value: metal3/baremetal-operator-serving-cert
+  - target:
+      kind: CustomResourceDefinition
+      name: hostclaims.metal3.io
+    patch: |
+      - op: add
+        path: /metadata/annotations/cert-manager.io~1inject-ca-from
+        value: metal3/baremetal-operator-serving-cert
+  - target:
+      kind: CustomResourceDefinition
+      name: bmceventsubscriptions.metal3.io
+    patch: |
+      - op: add
+        path: /metadata/annotations/cert-manager.io~1inject-ca-from
+        value: metal3/baremetal-operator-serving-cert
+  - target:
+      kind: CustomResourceDefinition
+      name: dataimages.metal3.io
+    patch: |
+      - op: add
+        path: /metadata/annotations/cert-manager.io~1inject-ca-from
+        value: metal3/baremetal-operator-serving-cert
+  - target:
+      kind: CustomResourceDefinition
+      name: hostfirmwarecomponents.metal3.io
+    patch: |
+      - op: add
+        path: /metadata/annotations/cert-manager.io~1inject-ca-from
+        value: metal3/baremetal-operator-serving-cert
+  - target:
+      kind: CustomResourceDefinition
+      name: hostfirmwaresettings.metal3.io
+    patch: |
+      - op: add
+        path: /metadata/annotations/cert-manager.io~1inject-ca-from
+        value: metal3/baremetal-operator-serving-cert
+  - target:
+      kind: CustomResourceDefinition
+      name: preprovisioningimages.metal3.io
+    patch: |
+      - op: add
+        path: /metadata/annotations/cert-manager.io~1inject-ca-from
+        value: metal3/baremetal-operator-serving-cert
 
 configMapGenerator:
   - name: ironic-bmo-configmap
