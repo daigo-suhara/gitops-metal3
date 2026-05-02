@@ -1,0 +1,61 @@
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: Metal3MachineTemplate
+metadata:
+  name: prod-worker
+  namespace: metal3
+spec:
+  template:
+    spec:
+      image:
+        url: http://172.16.10.50:6180/images/ubuntu-24.04.qcow2
+        checksum: http://172.16.10.50:6180/images/ubuntu-24.04.qcow2.sha256
+        format: qcow2
+      hostSelector:
+        matchLabels:
+          cluster-role: worker
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachineDeployment
+metadata:
+  name: prod-worker
+  namespace: metal3
+spec:
+  clusterName: prod
+  replicas: 2
+  selector:
+    matchLabels:
+      cluster.x-k8s.io/cluster-name: prod
+  template:
+    metadata:
+      labels:
+        cluster.x-k8s.io/cluster-name: prod
+    spec:
+      clusterName: prod
+      version: v1.30.0
+      bootstrap:
+        configRef:
+          apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+          kind: KubeadmConfigTemplate
+          name: prod-worker
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: Metal3MachineTemplate
+        name: prod-worker
+---
+apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+kind: KubeadmConfigTemplate
+metadata:
+  name: prod-worker
+  namespace: metal3
+spec:
+  template:
+    spec:
+      joinConfiguration:
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-ip: '{{ ds.meta_data.ip }}'
+      users:
+        - name: metal3
+          sudo: "ALL=(ALL) NOPASSWD:ALL"
+          sshAuthorizedKeys:
+            - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID+3Q/eAOgoIs0pNtGvQ8ueXK1Gg8CnIdhcU9rwpeMFm suharadaigo"

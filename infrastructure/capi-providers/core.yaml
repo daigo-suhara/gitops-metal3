@@ -5,3 +5,14 @@ metadata:
   namespace: capi-system
 spec:
   version: v1.8.0
+  configSecret:
+    name: capi-features
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: capi-features
+  namespace: capi-system
+type: Opaque
+stringData:
+  EXP_CLUSTER_RESOURCE_SET: "true"
