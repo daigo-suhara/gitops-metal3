@@ -76,6 +76,16 @@ patches:
           name: os-images
           mountPath: /shared/html/images
 
+  - target:
+      kind: Certificate
+      name: baremetal-operator-serving-cert
+    patch: |
+      - op: replace
+        path: /spec/dnsNames
+        value:
+          - baremetal-operator-webhook-service.metal3.svc
+          - baremetal-operator-webhook-service.metal3.svc.cluster.local
+
 configMapGenerator:
   - name: ironic-bmo-configmap
     behavior: merge
