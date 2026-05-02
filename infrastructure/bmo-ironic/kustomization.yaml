@@ -75,6 +75,18 @@ patches:
         value:
           runAsUser: 0
       - op: replace
+        path: /spec/template/spec/containers/1/livenessProbe/failureThreshold
+        value: 30
+      - op: replace
+        path: /spec/template/spec/containers/1/readinessProbe/failureThreshold
+        value: 30
+      - op: replace
+        path: /spec/template/spec/containers/3/livenessProbe/failureThreshold
+        value: 30
+      - op: replace
+        path: /spec/template/spec/containers/3/readinessProbe/failureThreshold
+        value: 30
+      - op: replace
         path: /spec/template/spec/containers/0/envFrom/0/configMapRef/name
         value: ironic
       - op: replace
