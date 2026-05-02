@@ -63,13 +63,18 @@ patches:
       kind: Deployment
       name: baremetal-operator-ironic
     patch: |
-      - op: replace
-        path: /spec/template/spec/volumes/0
+      - op: add
+        path: /spec/template/spec/volumes/-
         value:
-          name: ironic-data-volume
+          name: os-images
           hostPath:
             path: /home/ubuntu/images
-            type: DirectoryOrCreate
+            type: Directory
+      - op: add
+        path: /spec/template/spec/containers/3/volumeMounts/-
+        value:
+          name: os-images
+          mountPath: /shared/html/images
 
 configMapGenerator:
   - name: ironic-bmo-configmap
