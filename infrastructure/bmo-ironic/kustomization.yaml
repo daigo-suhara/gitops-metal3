@@ -8,6 +8,10 @@ resources:
   - https://github.com/metal3-io/baremetal-operator//config/default?ref=release-0.9
   - https://github.com/metal3-io/baremetal-operator//ironic-deployment/default?ref=release-0.9
 
+# ConfigMap の名前を固定し、Ironic ポッドに正しい設定を渡す
+generatorOptions:
+  disableNameSuffixHash: true
+
 patches:
   - target:
       kind: CustomResourceDefinition
@@ -75,6 +79,24 @@ patches:
         value:
           name: os-images
           mountPath: /shared/html/images
+      # ConfigMap 名を固定のものに強制置換
+      - op: replace
+        path: /spec/template/spec/containers/0/envFrom/0/configMapRef/name
+        value: ironic
+      - op: replace
+        path: /spec/template/spec/containers/1/envFrom/0/configMapRef/name
+        value: ironic
+      - op: replace
+        path: /spec/template/spec/containers/3/envFrom/0/configMapRef/name
+        value: ironic
+
+  - target:
+      kind: Deployment
+      name: baremetal-operator-controller-manager
+    patch: |
+      - op: replace
+        path: /spec/template/spec/containers/0/envFrom/0/configMapRef/name
+        value: ironic
 
   - target:
       kind: Certificate
@@ -106,6 +128,8 @@ configMapGenerator:
       - IPA_BASE_URL=http://172.16.10.50:6180/images
       - IPA_KERNEL_URL=http://172.16.10.50:6180/images/ironic-python-agent.kernel
       - IPA_RAMDISK_URL=http://172.16.10.50:6180/images/ironic-python-agent.initramfs
+      - DEPLOY_KERNEL_URL=http://172.16.10.50:6180/images/ironic-python-agent.kernel
+      - DEPLOY_RAMDISK_URL=http://172.16.10.50:6180/images/ironic-python-agent.initramfs
       - IRONIC_ENDPOINT=http://172.16.10.50:6385/v1/
       - IRONIC_BASE_URL=http://172.16.10.50:6385
       - CACHEURL=http://172.16.10.50:6180/images
