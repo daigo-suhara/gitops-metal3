@@ -10,22 +10,6 @@ resources:
 
 patches:
   - target:
-      kind: Certificate
-      name: baremetal-operator-serving-cert
-    patch: |
-      - op: replace
-        path: /spec/dnsNames
-        value:
-          - baremetal-operator-webhook-service.metal3.svc
-          - baremetal-operator-webhook-service.metal3.svc.cluster.local
-  - target:
-      kind: ValidatingWebhookConfiguration
-      name: baremetal-operator-validating-webhook-configuration
-    patch: |
-      - op: replace
-        path: /metadata/annotations/cert-manager.io~1inject-ca-from
-        value: metal3/baremetal-operator-serving-cert
-  - target:
       kind: CustomResourceDefinition
       name: baremetalhosts.metal3.io
     patch: |
@@ -75,6 +59,18 @@ patches:
         path: /metadata/annotations/cert-manager.io~1inject-ca-from
         value: metal3/baremetal-operator-serving-cert
 
+  - target:
+      kind: Deployment
+      name: baremetal-operator-ironic
+    patch: |
+      - op: replace
+        path: /spec/template/spec/volumes/0
+        value:
+          name: ironic-data-volume
+          hostPath:
+            path: /home/ubuntu/images
+            type: DirectoryOrCreate
+
 configMapGenerator:
   - name: ironic-bmo-configmap
     behavior: merge
@@ -82,25 +78,19 @@ configMapGenerator:
       - PROVISIONING_INTERFACE=eth1
       - PROVISIONING_IP=172.16.10.50
       - PROVISIONING_CIDR=16
-      - DHCP_RANGE=172.16.10.100,172.16.10.150
-      - DEPLOY_KERNEL_URL=http://172.16.10.50:6180/images/ironic-python-agent.kernel
-      - DEPLOY_RAMDISK_URL=http://172.16.10.50:6180/images/ironic-python-agent.initramfs
-      - IRONIC_ENDPOINT=http://172.16.10.50:6385/v1/
-      - IRONIC_INSPECTOR_ENDPOINT=http://172.16.10.50:5050/v1/
-      - CACHEURL=http://172.16.10.50:6180/images
-      - IRONIC_FAST_TRACK=true
-      - USE_IRONIC_INSPECTOR=true
+      - PROVISIONING_NETMASK=255.255.0.0
+      - IRONIC_REVERSE_PROXY_SETUP=false
+      - IRONIC_USE_MARIADB=false
+      - IRONIC_ENABLE_PBOOT=false
       - IRONIC_KERNEL_PARAMS=console=ttyS0
-      - IRONIC_BOOT_ISO_SOURCE=http
-      - HTTP_PORT=6180
-      - IRONIC_BASE_URL=http://172.16.10.50:6385
-  - name: ironic
-    behavior: merge
-    literals:
-      - PROVISIONING_INTERFACE=eth1
-      - DHCP_RANGE=172.16.10.100,172.16.10.150
-      - DEPLOY_KERNEL_URL=http://172.16.10.50:6180/images/ironic-python-agent.kernel
-      - DEPLOY_RAMDISK_URL=http://172.16.10.50:6180/images/ironic-python-agent.initramfs
+      - INSPECTOR_REVERSE_PROXY_SETUP=false
+      - IRONIC_FAST_TRACK_TIMEOUT=0
+      - IRONIC_RAMDISK_TYPE=tinyipa
+      - IRONIC_INSPECTOR_VLAN_INTERFACES=all
+      - IRONIC_PROVISIONING_INTERFACE=eth1
+      - IPA_BASE_URL=http://172.16.10.50:6180/images
+      - IPA_KERNEL_URL=http://172.16.10.50:6180/images/ironic-python-agent.kernel
+      - IPA_RAMDISK_URL=http://172.16.10.50:6180/images/ironic-python-agent.initramfs
       - IRONIC_ENDPOINT=http://172.16.10.50:6385/v1/
       - IRONIC_BASE_URL=http://172.16.10.50:6385
       - CACHEURL=http://172.16.10.50:6180/images
