@@ -35,11 +35,8 @@ kubectl apply -f bootstrap/root-app.yaml
 ---
 
 ## 自動化されている事項
-- **OS イメージ**: Ironic 起動時に Fedora CoreOS と TinyIPA を自動取得。
+- **OS イメージ**: Ironic  起動時に Fedora CoreOS と TinyIPA を自動取得。
 - **ブートモード**: 全ホスト `UEFI` 統一。
 - **形式**: Fedora CoreOS + Ignition による堅牢な初期化。
 - **ネットワーク**: Ironic DHCP によるゲートウェイ・DNS の配布。
 - **VIP**: `kube-vip` によるコントロールプレーン VIP 管理。
-
---127.0.0.1:6443
-```
