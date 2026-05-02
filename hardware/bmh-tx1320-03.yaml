@@ -6,7 +6,7 @@ metadata:
   labels:
     cluster-role: worker
 spec:
-  online: true
+  online: false
   bootMode: UEFI
   bootMACAddress: "4c:52:62:17:10:ef"
   bmc:
