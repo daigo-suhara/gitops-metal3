@@ -56,11 +56,12 @@ patches:
               # TinyIPA
               [ -f $DEST/ironic-python-agent.kernel ] || curl -L --retry 5 -o $DEST/ironic-python-agent.kernel https://tarballs.openstack.org/ironic-python-agent/tinyipa/files/tinyipa-master.vmlinuz
               [ -f $DEST/ironic-python-agent.initramfs ] || curl -L --retry 5 -o $DEST/ironic-python-agent.initramfs https://tarballs.openstack.org/ironic-python-agent/tinyipa/files/tinyipa-master.gz
-              # Ubuntu 22.04 CAPI Official Image
-              if [ ! -f $DEST/ubuntu-2204-kube-v1.30.0.qcow2 ]; then
-                curl -L --retry 5 -o $DEST/ubuntu-2204-kube-v1.30.0.qcow2 https://syself.com/files/ubuntu-2204-kube-v1.30.0.qcow2
-                curl -L --retry 5 -o $DEST/ubuntu-2204-kube-v1.30.0.qcow2.sha256 https://syself.com/files/ubuntu-2204-kube-v1.30.0.qcow2.sha256
+              # Flatcar Container Linux (Stable)
+              if [ ! -f $DEST/flatcar_production_qemu_image.img ]; then
+                curl -L --retry 5 -o $DEST/flatcar_production_qemu_image.img https://stable.release.flatcar-linux.net/amd64-usr/current/flatcar_production_qemu_image.img
               fi
+              cd $DEST
+              sha256sum flatcar_production_qemu_image.img > flatcar_production_qemu_image.img.sha256
           volumeMounts:
             - name: ironic-data-volume
               mountPath: /shared

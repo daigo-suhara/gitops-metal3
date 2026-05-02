@@ -15,48 +15,18 @@
 ## 構築手順 (Step-by-Step)
 
 ### 1. ホストマシンの準備
-管理ホスト（Ubuntu 等）で以下のツールをインストールします。
-- Docker
-- Kind
-- kubectl
-- Helm
-
+管理ホスト（Ubuntu 等）で Docker, Kind, kubectl, Helm をインストールします。
 ```bash
-# スクリプトを利用する場合
 sudo bash bootstrap/install-mgmt-host.sh
 ```
 
-### 2. イメージファイルの準備 (重要)
-Metal3 が物理マシンに OS を書き込むためのイメージファイルを準備し、Kind ノード内に転送します。
-
-```bash
-# ホスト側でディレクトリ作成
-mkdir -p /tmp/images
-cd /tmp/images
-
-# TinyIPA (起動用エージェント) のダウンロード
-curl -Lo ironic-python-agent.kernel https://tarballs.openstack.org/ironic-python-agent/tinyipa/files/tinyipa-master.vmlinuz
-curl -Lo ironic-python-agent.initramfs https://tarballs.openstack.org/ironic-python-agent/tinyipa/files/tinyipa-master.gz
-
-# Ubuntu OS イメージの準備 (適切な qcow2 イメージを配置)
-# 例: ubuntu-24.04.qcow2
-```
-
-### 3. 管理クラスタ (Kind) の起動
+### 2. 管理クラスタ (Kind) の起動
 ```bash
 kind create cluster --config bootstrap/kind-cluster.yaml
 ```
 
-### 4. イメージの Kind ノードへの転送
-Kind の `hostPath` マウントの制限を回避するため、ファイルを物理的に Kind ノードコンテナ内にコピーします。
-
-```bash
-docker exec metal3-mgmt-control-plane mkdir -p /var/images
-docker cp /tmp/images/. metal3-mgmt-control-plane:/var/images/
-```
-
-### 5. GitOps の起動
-ArgoCD をインストールし、このレポジトリの同期を開始します。
+### 3. GitOps の起動
+ArgoCD をインストールし、このレポジトリの同期を開始します。**イメージのダウンロードは Ironic 起動時に自動的に行われます。**
 
 ```bash
 kubectl apply -f bootstrap/root-app.yaml
@@ -64,14 +34,12 @@ kubectl apply -f bootstrap/root-app.yaml
 
 ---
 
-## 自動化されている修正事項
-以下の項目は Git 上の YAML に反映済みのため、自動的に適用されます：
+## 自動化されている事項
+- **OS イメージ**: Ironic 起動時に Fedora CoreOS と TinyIPA を自動取得。
 - **ブートモード**: 全ホスト `UEFI` 統一。
-- **クリーニング**: スタック防止のため `automatedCleaningMode: disabled`。
-- **K8s インストール**: `preKubeadmCommands` によるパッケージ自動インストール。
+- **形式**: Fedora CoreOS + Ignition による堅牢な初期化。
 - **ネットワーク**: Ironic DHCP によるゲートウェイ・DNS の配布。
-- **VIP**: `kube-vip` のブートストラップモード設定。
-- **CNI**: Cilium の API サーバー直接指定設定。
+- **VIP**: `kube-vip` によるコントロールプレーン VIP 管理。
 
 ---
 
