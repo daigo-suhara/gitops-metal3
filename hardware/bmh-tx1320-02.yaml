@@ -1,0 +1,18 @@
+apiVersion: metal3.io/v1alpha1
+kind: BareMetalHost
+metadata:
+  name: tx1320-02
+  namespace: metal3
+  labels:
+    cluster-role: worker
+spec:
+  online: false
+  bootMode: UEFI
+  bootMACAddress: "4c:52:62:16:8b:9f"
+  bmc:
+    address: ipmi://172.16.1.12
+    credentialsName: bmc-admin-shared
+    disableCertificateVerification: true
+  rootDeviceHints:
+    deviceName: "/dev/sda"
+  automatedCleaningMode: metadata
