@@ -4,6 +4,7 @@ namespace: metal3
 
 resources:
   - 00-namespace.yaml
+  - hostclaims-crd.yaml
   - https://github.com/metal3-io/baremetal-operator//config/default?ref=release-0.9
   - https://github.com/metal3-io/baremetal-operator//ironic-deployment/default?ref=release-0.9
 
