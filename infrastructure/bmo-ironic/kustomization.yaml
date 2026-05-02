@@ -92,15 +92,16 @@ patches:
           args:
             - |
               set -ex
-              apk add --no-cache curl xz
+              apk add --no-cache curl xz jq
               DEST=/shared/html/os-images
               mkdir -p $DEST
               # TinyIPA
-              [ -f $DEST/ironic-python-agent.kernel ] || curl -L -o $DEST/ironic-python-agent.kernel https://tarballs.openstack.org/ironic-python-agent/tinyipa/files/tinyipa-master.vmlinuz
-              [ -f $DEST/ironic-python-agent.initramfs ] || curl -L -o $DEST/ironic-python-agent.initramfs https://tarballs.openstack.org/ironic-python-agent/tinyipa/files/tinyipa-master.gz
-              # Fedora CoreOS (Stable QCOW2)
+              [ -f $DEST/ironic-python-agent.kernel ] || curl -L --retry 5 -o $DEST/ironic-python-agent.kernel https://tarballs.openstack.org/ironic-python-agent/tinyipa/files/tinyipa-master.vmlinuz
+              [ -f $DEST/ironic-python-agent.initramfs ] || curl -L --retry 5 -o $DEST/ironic-python-agent.initramfs https://tarballs.openstack.org/ironic-python-agent/tinyipa/files/tinyipa-master.gz
+              # Fedora CoreOS (Latest Stable QCOW2)
               if [ ! -f $DEST/fedora-coreos.qcow2 ]; then
-                curl -L -o $DEST/fedora-coreos.qcow2.xz https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/41.20250126.3.0/x86_64/fedora-coreos-41.20250126.3.0-qemu.x86_64.qcow2.xz
+                URL=$(curl -s https://builds.coreos.fedoraproject.org/streams/stable.json | jq -r '.architectures.x86_64.artifacts.qemu.formats."qcow2.xz".location')
+                curl -L --retry 5 -o $DEST/fedora-coreos.qcow2.xz "$URL"
                 unxz $DEST/fedora-coreos.qcow2.xz
               fi
               # Checksums
