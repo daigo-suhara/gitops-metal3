@@ -93,7 +93,7 @@ patches:
             - |
               set -ex
               apk add --no-cache curl xz jq
-              DEST=/shared/html/os-images
+              DEST=/shared/html/images
               mkdir -p $DEST
               chmod -R 777 /shared/html
               # TinyIPA
@@ -114,8 +114,8 @@ patches:
         path: /spec/template/spec/containers/3/volumeMounts/-
         value:
           name: ironic-data-volume
-          mountPath: /shared/html/os-images
-          subPath: html/os-images
+          mountPath: /shared/html/images
+          subPath: html/images
       - op: replace
         path: /spec/template/spec/containers/3/securityContext
         value:
@@ -169,12 +169,12 @@ configMapGenerator:
       - IRONIC_RAMDISK_TYPE=tinyipa
       - IRONIC_INSPECTOR_VLAN_INTERFACES=all
       - IRONIC_PROVISIONING_INTERFACE=eth1
-      - IPA_BASE_URL=http://172.16.10.50:6180/os-images
-      - IPA_KERNEL_URL=http://172.16.10.50:6180/os-images/ironic-python-agent.kernel
-      - IPA_RAMDISK_URL=http://172.16.10.50:6180/os-images/ironic-python-agent.initramfs
-      - DEPLOY_KERNEL_URL=http://172.16.10.50:6180/os-images/ironic-python-agent.kernel
-      - DEPLOY_RAMDISK_URL=http://172.16.10.50:6180/os-images/ironic-python-agent.initramfs
+      - IPA_BASE_URL=http://172.16.10.50:6180/images
+      - IPA_KERNEL_URL=http://172.16.10.50:6180/images/ironic-python-agent.kernel
+      - IPA_RAMDISK_URL=http://172.16.10.50:6180/images/ironic-python-agent.initramfs
+      - DEPLOY_KERNEL_URL=http://172.16.10.50:6180/images/ironic-python-agent.kernel
+      - DEPLOY_RAMDISK_URL=http://172.16.10.50:6180/images/ironic-python-agent.initramfs
       - IRONIC_ENDPOINT=http://172.16.10.50:6385/v1/
       - IRONIC_BASE_URL=http://172.16.10.50:6385
-      - CACHEURL=http://172.16.10.50:6180/os-images
+      - CACHEURL=http://172.16.10.50:6180/images
       - HTTP_PORT=6180
