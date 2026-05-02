@@ -63,6 +63,8 @@ data:
       name: cilium-config
       namespace: kube-system
     data:
+      k8s-service-host: "172.16.10.10"
+      k8s-service-port: "6443"
     
       # Identity allocation mode selects how identities are shared between cilium
       # nodes by setting how they are stored. The options are "crd" or "kvstore".
@@ -1177,7 +1179,7 @@ data:
     spec:
       # See docs on ServerCapabilities.LeasesResourceLock in file pkg/k8s/version/version.go
       # for more details.
-      replicas: 2
+      replicas: 1
       selector:
         matchLabels:
           io.cilium/app: operator
