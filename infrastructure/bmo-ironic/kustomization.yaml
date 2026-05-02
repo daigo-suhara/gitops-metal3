@@ -100,7 +100,7 @@ patches:
               [ -f $DEST/ironic-python-agent.initramfs ] || curl -L --retry 5 -o $DEST/ironic-python-agent.initramfs https://tarballs.openstack.org/ironic-python-agent/tinyipa/files/tinyipa-master.gz
               # Fedora CoreOS (Latest Stable QCOW2)
               if [ ! -f $DEST/fedora-coreos.qcow2 ]; then
-                URL=$(curl -s https://builds.coreos.fedoraproject.org/streams/stable.json | jq -r '.architectures.x86_64.artifacts.qemu.formats."qcow2.xz".location')
+                URL=$(curl -s https://builds.coreos.fedoraproject.org/streams/stable.json | jq -r '.architectures.x86_64.artifacts.qemu.formats."qcow2.xz".disk.location')
                 curl -L --retry 5 -o $DEST/fedora-coreos.qcow2.xz "$URL"
                 unxz $DEST/fedora-coreos.qcow2.xz
               fi
