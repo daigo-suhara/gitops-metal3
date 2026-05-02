@@ -95,6 +95,7 @@ patches:
               apk add --no-cache curl xz jq
               DEST=/shared/html/os-images
               mkdir -p $DEST
+              chmod -R 777 /shared/html
               # TinyIPA
               [ -f $DEST/ironic-python-agent.kernel ] || curl -L --retry 5 -o $DEST/ironic-python-agent.kernel https://tarballs.openstack.org/ironic-python-agent/tinyipa/files/tinyipa-master.vmlinuz
               [ -f $DEST/ironic-python-agent.initramfs ] || curl -L --retry 5 -o $DEST/ironic-python-agent.initramfs https://tarballs.openstack.org/ironic-python-agent/tinyipa/files/tinyipa-master.gz
