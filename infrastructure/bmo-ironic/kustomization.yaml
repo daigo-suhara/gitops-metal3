@@ -68,7 +68,7 @@ patches:
         value:
           name: os-images
           hostPath:
-            path: /home/ubuntu/images
+            path: /tmp/images
             type: Directory
       - op: add
         path: /spec/template/spec/containers/3/volumeMounts/-
