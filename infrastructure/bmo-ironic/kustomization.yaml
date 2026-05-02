@@ -50,6 +50,7 @@ configMapGenerator:
       - IRONIC_KERNEL_PARAMS=console=ttyS0
       - IRONIC_BOOT_ISO_SOURCE=http
       - HTTP_PORT=6180
+      - IRONIC_BASE_URL=http://172.16.10.50:6385
   - name: ironic
     behavior: merge
     literals:
@@ -58,5 +59,6 @@ configMapGenerator:
       - DEPLOY_KERNEL_URL=http://172.16.10.50:6180/images/ironic-python-agent.kernel
       - DEPLOY_RAMDISK_URL=http://172.16.10.50:6180/images/ironic-python-agent.initramfs
       - IRONIC_ENDPOINT=http://172.16.10.50:6385/v1/
+      - IRONIC_BASE_URL=http://172.16.10.50:6385
       - CACHEURL=http://172.16.10.50:6180/images
       - HTTP_PORT=6180
