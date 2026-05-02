@@ -17,6 +17,20 @@ patches:
         value:
           - baremetal-operator-webhook-service.metal3.svc
           - baremetal-operator-webhook-service.metal3.svc.cluster.local
+  - target:
+      kind: ValidatingWebhookConfiguration
+      name: baremetal-operator-validating-webhook-configuration
+    patch: |
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1inject-ca-from
+        value: metal3/baremetal-operator-serving-cert
+  - target:
+      kind: CustomResourceDefinition
+      name: baremetalhosts.metal3.io
+    patch: |
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1inject-ca-from
+        value: metal3/baremetal-operator-serving-cert
 
 configMapGenerator:
   - name: ironic-bmo-configmap
