@@ -75,6 +75,9 @@ patches:
       kind: Deployment
       name: baremetal-operator-ironic
     patch: |
+      - op: replace
+        path: /spec/template/spec/initContainers/0/command
+        value: ["sh", "-c", "exit 0"]
       - op: add
         path: /spec/template/spec/initContainers/-
         value:
