@@ -6,7 +6,7 @@ metadata:
   labels:
     cluster-role: control-plane
 spec:
-  online: false
+  online: true
   bootMode: UEFI
   bootMACAddress: "4c:52:62:16:33:8d"
   bmc:
