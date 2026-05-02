@@ -29,6 +29,17 @@ patches:
         value: metal3/baremetal-operator-serving-cert
 
   - target:
+      kind: Certificate
+      name: baremetal-operator-serving-cert
+    patch: |
+      - op: replace
+        path: /spec/dnsNames/0
+        value: baremetal-operator-webhook-service.metal3.svc
+      - op: replace
+        path: /spec/dnsNames/1
+        value: baremetal-operator-webhook-service.metal3.svc.cluster.local
+
+  - target:
       kind: Deployment
       name: baremetal-operator-ironic
     patch: |
