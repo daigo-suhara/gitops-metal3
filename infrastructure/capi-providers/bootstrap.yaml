@@ -5,3 +5,14 @@ metadata:
   namespace: capi-kubeadm-bootstrap-system
 spec:
   version: v1.8.0
+  configSecret:
+    name: cabpk-features
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cabpk-features
+  namespace: capi-kubeadm-bootstrap-system
+type: Opaque
+stringData:
+  EXP_KUBEADM_BOOTSTRAP_FORMAT_IGNITION: "true"

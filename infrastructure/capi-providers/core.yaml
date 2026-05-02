@@ -16,3 +16,4 @@ metadata:
 type: Opaque
 stringData:
   EXP_CLUSTER_RESOURCE_SET: "true"
+  EXP_KUBEADM_BOOTSTRAP_FORMAT_IGNITION: "true"

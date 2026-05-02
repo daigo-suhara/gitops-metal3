@@ -5,3 +5,14 @@ metadata:
   namespace: capi-kubeadm-control-plane-system
 spec:
   version: v1.8.0
+  configSecret:
+    name: kcp-features
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kcp-features
+  namespace: capi-kubeadm-control-plane-system
+type: Opaque
+stringData:
+  EXP_KUBEADM_BOOTSTRAP_FORMAT_IGNITION: "true"
