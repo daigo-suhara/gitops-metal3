@@ -80,7 +80,7 @@ patches:
         value:
           name: os-images
           hostPath:
-            path: /tmp/images
+            path: /var/images
             type: Directory
       - op: add
         path: /spec/template/spec/containers/3/volumeMounts/-
