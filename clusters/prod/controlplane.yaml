@@ -68,4 +68,4 @@ spec:
         sudo: "ALL=(ALL) NOPASSWD:ALL"
         sshAuthorizedKeys:
           - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID+3Q/eAOgoIs0pNtGvQ8ueXK1Gg8CnIdhcU9rwpeMFm suharadaigo"
-  version: v1.30.0
+  version: v1.35.0
