@@ -41,6 +41,52 @@ spec:
       controllerManager:
         extraArgs:
           enable-hostpath-provisioner: "true"
+    files:
+      - content: |
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: kube-vip
+            namespace: kube-system
+          spec:
+            containers:
+            - args:
+              - manager
+              env:
+              - name: vip_arp
+                value: "true"
+              - name: port
+                value: "6443"
+              - name: vip_interface
+                value: eno1
+              - name: vip_address
+                value: 172.16.10.10
+              - name: cp_enable
+                value: "true"
+              - name: cp_namespace
+                value: kube-system
+              - name: vip_leaderelection
+                value: "true"
+              - name: vip_leaseduration
+                value: "5"
+              - name: vip_renewdeadline
+                value: "3"
+              - name: vip_retryperiod
+                value: "1"
+              image: ghcr.io/kube-vip/kube-vip:v0.8.2
+              imagePullPolicy: IfNotPresent
+              name: kube-vip
+              resources: {}
+              securityContext:
+                capabilities:
+                  add:
+                  - NET_ADMIN
+                  - NET_RAW
+                  - SYS_TIME
+            hostNetwork: true
+        owner: root:root
+        path: /etc/kubernetes/manifests/kube-vip.yaml
+        permissions: "0644"
     users:
       - name: metal3
         sudo: "ALL=(ALL) NOPASSWD:ALL"
