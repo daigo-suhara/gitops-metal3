@@ -87,7 +87,7 @@ patches:
           - baremetal-operator-webhook-service.metal3.svc.cluster.local
 
 configMapGenerator:
-  - name: ironic-bmo-configmap
+  - name: ironic
     behavior: merge
     literals:
       - PROVISIONING_INTERFACE=eth1
