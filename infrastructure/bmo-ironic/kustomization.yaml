@@ -116,6 +116,10 @@ patches:
           name: ironic-data-volume
           mountPath: /shared/html/os-images
           subPath: html/os-images
+      - op: replace
+        path: /spec/template/spec/containers/3/securityContext
+        value:
+          runAsUser: 0
       # ConfigMap 名を固定のものに強制置換
       - op: replace
         path: /spec/template/spec/containers/0/envFrom/0/configMapRef/name
