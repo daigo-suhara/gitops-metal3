@@ -52,8 +52,7 @@ spec:
     spec:
       joinConfiguration:
         nodeRegistration:
-          kubeletExtraArgs:
-            node-ip: '{{ ds.meta_data.ip }}'
+          kubeletExtraArgs: {}
       users:
         - name: metal3
           sudo: "ALL=(ALL) NOPASSWD:ALL"

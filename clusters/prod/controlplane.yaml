@@ -30,12 +30,10 @@ spec:
   kubeadmConfigSpec:
     initConfiguration:
       nodeRegistration:
-        kubeletExtraArgs:
-          node-ip: '{{ ds.meta_data.ip }}'
+        kubeletExtraArgs: {}
     joinConfiguration:
       nodeRegistration:
-        kubeletExtraArgs:
-          node-ip: '{{ ds.meta_data.ip }}'
+        kubeletExtraArgs: {}
     clusterConfiguration:
       apiServer:
         certSANs:
