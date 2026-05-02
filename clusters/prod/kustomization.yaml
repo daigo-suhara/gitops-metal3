@@ -7,3 +7,4 @@ resources:
   - controlplane.yaml
   - workers.yaml
   - cilium.yaml
+  - metallb.yaml
