@@ -113,8 +113,12 @@ patches:
         path: /spec/template/spec/containers/1/envFrom/0/configMapRef/name
         value: ironic
       - op: replace
-        path: /spec/template/spec/containers/3/envFrom/0/configMapRef/name
-        value: ironic
+        path: /spec/template/spec/volumes/0
+        value:
+          name: ironic-data-volume
+          hostPath:
+            path: /home/ubuntu/ironic-images
+            type: DirectoryOrCreate
 
 configMapGenerator:
   - name: ironic
