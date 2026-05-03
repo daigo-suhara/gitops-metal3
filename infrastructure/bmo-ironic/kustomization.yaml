@@ -69,13 +69,18 @@ patches:
               [ -f $DEST/ironic-python-agent.initramfs ] || curl -L --retry 5 -o $DEST/ironic-python-agent.initramfs https://tarballs.openstack.org/ironic-python-agent/tinyipa/files/tinyipa-master.gz
               
               # Ubuntu 24.04 CAPI Image from OSISM (pre-baked with K8s binaries)
-              IMAGE_NAME="ubuntu-2404-kube-v1.35.4.qcow2"
-              if [ ! -f $DEST/$IMAGE_NAME ]; then
+              IMAGE_NAME_QCOW2="ubuntu-2404-kube-v1.35.4.qcow2"
+              IMAGE_NAME_RAW="ubuntu-2404-kube-v1.35.4.raw"
+              if [ ! -f $DEST/$IMAGE_NAME_RAW ]; then
                 # OSISM K8s CAPI Images
-                curl -L --retry 5 -o $DEST/$IMAGE_NAME https://nbg1.your-objectstorage.com/osism/openstack-k8s-capi-images/ubuntu-2404-kube-v1.35/ubuntu-2404-kube-v1.35.4.qcow2
+                curl -L --retry 5 -o $DEST/$IMAGE_NAME_QCOW2 https://nbg1.your-objectstorage.com/osism/openstack-k8s-capi-images/ubuntu-2404-kube-v1.35/ubuntu-2404-kube-v1.35.4.qcow2
+                # Convert QCOW2 to RAW
+                apk add --no-cache qemu-img
+                qemu-img convert -f qcow2 -O raw $DEST/$IMAGE_NAME_QCOW2 $DEST/$IMAGE_NAME_RAW
+                rm $DEST/$IMAGE_NAME_QCOW2
               fi
               cd $DEST
-              sha256sum $IMAGE_NAME > $IMAGE_NAME.sha256
+              sha256sum $IMAGE_NAME_RAW > $IMAGE_NAME_RAW.sha256
           volumeMounts:
             - name: ironic-data-volume
               mountPath: /shared
