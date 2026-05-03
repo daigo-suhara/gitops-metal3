@@ -67,12 +67,13 @@ patches:
               # TinyIPA
               [ -f $DEST/ironic-python-agent.kernel ] || curl -L --retry 5 -o $DEST/ironic-python-agent.kernel https://tarballs.openstack.org/ironic-python-agent/tinyipa/files/tinyipa-master.vmlinuz
               [ -f $DEST/ironic-python-agent.initramfs ] || curl -L --retry 5 -o $DEST/ironic-python-agent.initramfs https://tarballs.openstack.org/ironic-python-agent/tinyipa/files/tinyipa-master.gz
-              # Flatcar Container Linux (Stable)
-              if [ ! -f $DEST/flatcar_production_qemu_image.img ]; then
-                curl -L --retry 5 -o $DEST/flatcar_production_qemu_image.img https://stable.release.flatcar-linux.net/amd64-usr/current/flatcar_production_qemu_image.img
+              # Flatcar Container Linux (Stable) Bare Metal
+              if [ ! -f $DEST/flatcar_production_image.bin ]; then
+                curl -L --retry 5 -o $DEST/flatcar_production_image.bin.bz2 https://stable.release.flatcar-linux.net/amd64-usr/current/flatcar_production_image.bin.bz2
+                bunzip2 $DEST/flatcar_production_image.bin.bz2
               fi
               cd $DEST
-              sha256sum flatcar_production_qemu_image.img > flatcar_production_qemu_image.img.sha256
+              sha256sum flatcar_production_image.bin > flatcar_production_image.bin.sha256
           volumeMounts:
             - name: ironic-data-volume
               mountPath: /shared
