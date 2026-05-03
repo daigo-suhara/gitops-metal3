@@ -7,9 +7,9 @@ spec:
   template:
     spec:
       image:
-        url: http://172.16.10.50:6180/images/flatcar_production_image.bin
-        checksum: http://172.16.10.50:6180/images/flatcar_production_image.bin.sha256
-        format: raw
+        url: http://172.16.10.50:6180/images/ubuntu-2404-kube-v1.35.4.qcow2
+        checksum: http://172.16.10.50:6180/images/ubuntu-2404-kube-v1.35.4.qcow2.sha256
+        format: qcow2
       hostSelector:
         matchLabels:
           cluster-role: worker
@@ -31,7 +31,7 @@ spec:
         cluster.x-k8s.io/cluster-name: prod
     spec:
       clusterName: prod
-      version: v1.35.0
+      version: v1.35.4
       bootstrap:
         configRef:
           apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
@@ -50,7 +50,7 @@ metadata:
 spec:
   template:
     spec:
-      format: ignition
+      format: cloud-config
       joinConfiguration:
         nodeRegistration:
           kubeletExtraArgs: {}

@@ -7,9 +7,9 @@ spec:
   template:
     spec:
       image:
-        url: http://172.16.10.50:6180/images/flatcar_production_image.bin
-        checksum: http://172.16.10.50:6180/images/flatcar_production_image.bin.sha256
-        format: raw
+        url: http://172.16.10.50:6180/images/ubuntu-2404-kube-v1.35.4.qcow2
+        checksum: http://172.16.10.50:6180/images/ubuntu-2404-kube-v1.35.4.qcow2.sha256
+        format: qcow2
       hostSelector:
         matchLabels:
           cluster-role: control-plane
@@ -27,7 +27,7 @@ spec:
       kind: Metal3MachineTemplate
       name: prod-control-plane
   kubeadmConfigSpec:
-    format: ignition
+    format: cloud-config
     initConfiguration:
       nodeRegistration:
         kubeletExtraArgs: {}
@@ -69,4 +69,4 @@ spec:
         sudo: "ALL=(ALL) NOPASSWD:ALL"
         sshAuthorizedKeys:
           - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID+3Q/eAOgoIs0pNtGvQ8ueXK1Gg8CnIdhcU9rwpeMFm suharadaigo"
-  version: v1.35.0
+  version: v1.35.4

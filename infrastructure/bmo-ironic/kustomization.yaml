@@ -67,13 +67,15 @@ patches:
               # TinyIPA
               [ -f $DEST/ironic-python-agent.kernel ] || curl -L --retry 5 -o $DEST/ironic-python-agent.kernel https://tarballs.openstack.org/ironic-python-agent/tinyipa/files/tinyipa-master.vmlinuz
               [ -f $DEST/ironic-python-agent.initramfs ] || curl -L --retry 5 -o $DEST/ironic-python-agent.initramfs https://tarballs.openstack.org/ironic-python-agent/tinyipa/files/tinyipa-master.gz
-              # Flatcar Container Linux (Stable) Bare Metal
-              if [ ! -f $DEST/flatcar_production_image.bin ]; then
-                curl -L --retry 5 -o $DEST/flatcar_production_image.bin.bz2 https://stable.release.flatcar-linux.net/amd64-usr/current/flatcar_production_image.bin.bz2
-                bunzip2 $DEST/flatcar_production_image.bin.bz2
+              
+              # Ubuntu 24.04 CAPI Image from OSISM (pre-baked with K8s binaries)
+              IMAGE_NAME="ubuntu-2404-kube-v1.35.4.qcow2"
+              if [ ! -f $DEST/$IMAGE_NAME ]; then
+                # OSISM K8s CAPI Images
+                curl -L --retry 5 -o $DEST/$IMAGE_NAME https://nbg1.your-objectstorage.com/osism/openstack-k8s-capi-images/ubuntu-2404-kube-v1.35/ubuntu-2404-kube-v1.35.4.qcow2
               fi
               cd $DEST
-              sha256sum flatcar_production_image.bin > flatcar_production_image.bin.sha256
+              sha256sum $IMAGE_NAME > $IMAGE_NAME.sha256
           volumeMounts:
             - name: ironic-data-volume
               mountPath: /shared
