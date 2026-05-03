@@ -1,0 +1,83 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: argocd-cluster-sync
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "create", "patch", "update"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: argocd-cluster-sync
+  namespace: metal3
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: argocd-cluster-sync
+subjects:
+  - kind: ServiceAccount
+    name: argocd-cluster-sync
+    namespace: metal3
+roleRef:
+  kind: ClusterRole
+  name: argocd-cluster-sync
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: argocd-cluster-sync
+  namespace: metal3
+spec:
+  schedule: "*/2 * * * *"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: argocd-cluster-sync
+          containers:
+            - name: sync
+              image: bitnami/kubectl:latest
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -e
+                  echo "Checking for prod-kubeconfig..."
+                  if ! kubectl get secret prod-kubeconfig -n metal3 > /dev/null 2>&1; then
+                    echo "prod-kubeconfig not found. Exiting."
+                    exit 0
+                  fi
+                  
+                  kubectl get secret prod-kubeconfig -n metal3 -o jsonpath='{.data.value}' | base64 -d > /tmp/kubeconfig
+                  
+                  SERVER=$(kubectl --kubeconfig /tmp/kubeconfig config view --minify -o jsonpath='{.clusters[0].cluster.server}')
+                  CA_DATA=$(kubectl --kubeconfig /tmp/kubeconfig config view --minify --raw -o jsonpath='{.clusters[0].cluster.certificate-authority-data}')
+                  CERT_DATA=$(kubectl --kubeconfig /tmp/kubeconfig config view --minify --raw -o jsonpath='{.users[0].user.client-certificate-data}')
+                  KEY_DATA=$(kubectl --kubeconfig /tmp/kubeconfig config view --minify --raw -o jsonpath='{.users[0].user.client-key-data}')
+                  
+                  cat <<EOF > /tmp/config.json
+                  {
+                    "tlsClientConfig": {
+                      "insecure": false,
+                      "caData": "${CA_DATA}",
+                      "certData": "${CERT_DATA}",
+                      "keyData": "${KEY_DATA}"
+                    }
+                  }
+                  EOF
+                  
+                  kubectl create secret generic cluster-prod -n argocd \
+                    --from-literal=name=prod \
+                    --from-literal=server=${SERVER} \
+                    --from-file=config=/tmp/config.json \
+                    --dry-run=client -o yaml | kubectl apply -f -
+                    
+                  kubectl label secret cluster-prod -n argocd argocd.argoproj.io/secret-type=cluster --overwrite
+                  echo "Successfully synced prod cluster to ArgoCD."
+          restartPolicy: OnFailure
