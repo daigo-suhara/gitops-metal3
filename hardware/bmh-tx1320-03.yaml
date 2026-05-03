@@ -1,6 +1,8 @@
 apiVersion: metal3.io/v1alpha1
 kind: BareMetalHost
 metadata:
+  annotations:
+    inspect.metal3.io: disabled
   name: tx1320-03
   namespace: metal3
   labels:
@@ -15,4 +17,4 @@ spec:
     disableCertificateVerification: true
   rootDeviceHints:
     deviceName: "/dev/sda"
-  automatedCleaningMode: metadata
+  automatedCleaningMode: disabled
