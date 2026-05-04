@@ -88,12 +88,6 @@ patches:
           volumeMounts:
             - name: ironic-data-volume
               mountPath: /shared
-      - op: add
-        path: /spec/template/spec/containers/3/volumeMounts/-
-        value:
-          name: ironic-data-volume
-          mountPath: /shared/html/images
-          subPath: html/images
       - op: replace
         path: /spec/template/spec/containers/3/securityContext
         value:

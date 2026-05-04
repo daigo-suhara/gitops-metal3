@@ -32,7 +32,7 @@ metadata:
   name: argocd-cluster-sync
   namespace: metal3
 spec:
-  schedule: "*/2 * * * *"
+  schedule: "*/15 * * * *"
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
   jobTemplate:
