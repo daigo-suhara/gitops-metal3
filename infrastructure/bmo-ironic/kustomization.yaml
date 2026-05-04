@@ -81,7 +81,9 @@ patches:
               fi
               cd $DEST
               sha256sum $IMAGE_NAME_RAW > $IMAGE_NAME_RAW.sha256
-          volumeMounts:
+
+              # Fix permissions for all ironic containers
+              chmod -R 777 /shared          volumeMounts:
             - name: ironic-data-volume
               mountPath: /shared
       - op: add
