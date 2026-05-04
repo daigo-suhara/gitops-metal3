@@ -82,7 +82,8 @@ patches:
               cd $DEST
               sha256sum $IMAGE_NAME_RAW > $IMAGE_NAME_RAW.sha256
 
-              # Fix permissions for all ironic containers
+              # Pre-create directories for ironic containers to avoid permission issues
+              mkdir -p /shared/html/images /shared/tftpboot /shared/ironic /shared/db
               chmod -R 777 /shared          volumeMounts:
             - name: ironic-data-volume
               mountPath: /shared
