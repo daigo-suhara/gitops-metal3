@@ -46,9 +46,6 @@ patches:
       - op: replace
         path: /spec/template/spec/securityContext/runAsNonRoot
         value: false
-      - op: replace
-        path: /spec/template/spec/initContainers/0/command
-        value: ["sh", "-c", "exit 0"]
       - op: add
         path: /spec/template/spec/initContainers/-
         value:
@@ -64,10 +61,11 @@ patches:
               DEST=/shared/html/images
               mkdir -p $DEST
               chmod -R 777 /shared/html
-              # TinyIPA
-              [ -f $DEST/ironic-python-agent.kernel ] || curl -L --retry 5 -o $DEST/ironic-python-agent.kernel https://tarballs.openstack.org/ironic-python-agent/tinyipa/files/tinyipa-master.vmlinuz
-              [ -f $DEST/ironic-python-agent.initramfs ] || curl -L --retry 5 -o $DEST/ironic-python-agent.initramfs https://tarballs.openstack.org/ironic-python-agent/tinyipa/files/tinyipa-master.gz
-              
+              # IPA kernel/initramfs are downloaded by the upstream
+              # ironic-ipa-downloader initContainer (full DIB-built IPA with
+              # grub2-install and ESP detection). tinyipa is intentionally
+              # not used because it cannot install a UEFI bootloader.
+
               # Ubuntu 24.04 CAPI Image from OSISM (pre-baked with K8s binaries)
               IMAGE_NAME_QCOW2="ubuntu-2404-kube-v1.35.4.qcow2"
               IMAGE_NAME_RAW="ubuntu-2404-kube-v1.35.4.raw"
@@ -149,7 +147,6 @@ configMapGenerator:
       - IRONIC_FAST_TRACK=true
       - IRONIC_FAST_TRACK_TIMEOUT=0
       - IRONIC_IPMI_POWER_OFF_TIMEOUT=0
-      - IRONIC_RAMDISK_TYPE=tinyipa
       - IRONIC_INSPECTOR_VLAN_INTERFACES=all
       - IRONIC_PROVISIONING_INTERFACE=enx00e04c247a98
       - IPA_BASE_URL=http://172.16.10.50:6180/images
