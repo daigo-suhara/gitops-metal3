@@ -115,6 +115,16 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/1/envFrom/0/configMapRef/name
         value: ironic
+      - op: add
+        path: /spec/template/spec/containers/2/envFrom
+        value:
+          - configMapRef:
+              name: ironic
+      - op: add
+        path: /spec/template/spec/containers/3/envFrom
+        value:
+          - configMapRef:
+              name: ironic
       - op: replace
         path: /spec/template/spec/volumes/0
         value:
