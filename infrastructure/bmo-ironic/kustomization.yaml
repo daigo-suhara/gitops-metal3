@@ -84,7 +84,8 @@ patches:
 
               # Pre-create directories for ironic containers to avoid permission issues
               mkdir -p /shared/html/images /shared/tftpboot /shared/ironic /shared/db
-              chmod -R 777 /shared          volumeMounts:
+              chmod -R 777 /shared
+          volumeMounts:
             - name: ironic-data-volume
               mountPath: /shared
       - op: add
