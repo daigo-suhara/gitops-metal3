@@ -66,13 +66,13 @@ patches:
               # grub2-install and ESP detection). tinyipa is intentionally
               # not used because it cannot install a UEFI bootloader.
 
-              # Ubuntu 24.04 CAPI Image from OSISM (pre-baked with K8s binaries)
-              IMAGE_NAME_QCOW2="ubuntu-2404-kube-v1.35.4.qcow2"
-              IMAGE_NAME_RAW="ubuntu-2404-kube-v1.35.4.raw"
+              # Canonical Ubuntu 24.04 (noble) cloudimg
+              # cloud-init datasource_list defaults to NoCloud,ConfigDrive,Ec2
+              # so Ironic-injected configdrive partition is recognised on boot.
+              IMAGE_NAME_QCOW2="noble-server-cloudimg-amd64.img"
+              IMAGE_NAME_RAW="noble-server-cloudimg-amd64.raw"
               if [ ! -f $DEST/$IMAGE_NAME_RAW ]; then
-                # OSISM K8s CAPI Images
-                curl -L --retry 5 -o $DEST/$IMAGE_NAME_QCOW2 https://nbg1.your-objectstorage.com/osism/openstack-k8s-capi-images/ubuntu-2404-kube-v1.35/ubuntu-2404-kube-v1.35.4.qcow2
-                # Convert QCOW2 to RAW
+                curl -L --retry 5 -o $DEST/$IMAGE_NAME_QCOW2 https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
                 apk add --no-cache qemu-img
                 qemu-img convert -f qcow2 -O raw $DEST/$IMAGE_NAME_QCOW2 $DEST/$IMAGE_NAME_RAW
                 rm $DEST/$IMAGE_NAME_QCOW2
