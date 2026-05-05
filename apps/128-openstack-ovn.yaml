@@ -33,11 +33,11 @@ spec:
 
         images:
           tags:
-            ovn_ovsdb_nb: "docker.io/openstackhelm/ovn:latest-ubuntu_focal"
-            ovn_ovsdb_sb: "docker.io/openstackhelm/ovn:latest-ubuntu_focal"
-            ovn_northd: "docker.io/openstackhelm/ovn:latest-ubuntu_focal"
-            ovn_controller: "docker.io/openstackhelm/ovn:latest-ubuntu_focal"
-            ovn_controller_gw: "docker.io/openstackhelm/ovn:latest-ubuntu_focal"
+            ovn_ovsdb_nb: "openstackhelm/ovn:latest-ubuntu_focal"
+            ovn_ovsdb_sb: "openstackhelm/ovn:latest-ubuntu_focal"
+            ovn_northd: "openstackhelm/ovn:latest-ubuntu_focal"
+            ovn_controller: "openstackhelm/ovn:latest-ubuntu_focal"
+            ovn_controller_gw: "openstackhelm/ovn:latest-ubuntu_focal"
             dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_focal"
             image_repo_sync: "docker.io/library/docker:17.07.0"
 
