@@ -38,14 +38,13 @@ spec:
             local_settings:
               config:
                 allowed_hosts: "'*'"
-                openstack_keystone_url: "http://keystone.openstack.local/v3"
-                openstack_host: "keystone.openstack.local"
+                openstack_keystone_url: "http://keystone-api.openstack.svc.cluster.local/v3"
+                openstack_host: "keystone-api.openstack.svc.cluster.local"
 
         endpoints:
           identity:
             hosts:
               default: keystone-api
-              public: keystone.openstack.local
             port:
               api:
                 public: 80

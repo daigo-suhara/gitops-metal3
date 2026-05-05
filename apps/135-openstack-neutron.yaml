@@ -121,7 +121,6 @@ spec:
           network:
             hosts:
               default: neutron-server
-              public: neutron.openstack.local
   destination:
     server: https://172.16.10.10:6443
     namespace: openstack

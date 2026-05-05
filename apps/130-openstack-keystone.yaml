@@ -58,7 +58,6 @@ spec:
             name: keystone
             hosts:
               default: keystone-api
-              public: keystone.openstack.local
             port:
               api:
                 default: 5000

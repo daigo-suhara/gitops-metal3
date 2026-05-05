@@ -127,11 +127,9 @@ spec:
           compute:
             hosts:
               default: nova-api
-              public: nova.openstack.local
           compute_novnc_proxy:
             hosts:
               default: nova-novncproxy
-              public: novnc.openstack.local
   destination:
     server: https://172.16.10.10:6443
     namespace: openstack

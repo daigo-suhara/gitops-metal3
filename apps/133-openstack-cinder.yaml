@@ -94,7 +94,6 @@ spec:
           volume:
             hosts:
               default: cinder-api
-              public: cinder.openstack.local
   destination:
     server: https://172.16.10.10:6443
     namespace: openstack
