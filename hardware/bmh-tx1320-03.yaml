@@ -17,4 +17,4 @@ spec:
     disableCertificateVerification: true
   rootDeviceHints:
     deviceName: "/dev/sda"
-  automatedCleaningMode: disabled
+  automatedCleaningMode: metadata
