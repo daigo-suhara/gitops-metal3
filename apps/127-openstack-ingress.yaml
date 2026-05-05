@@ -18,9 +18,10 @@ spec:
           kind: DaemonSet
           hostNetwork: true
           ingressClassResource:
-            name: nginx
+            name: ingress-openstack
             enabled: true
             default: false
+          ingressClass: ingress-openstack
           nodeSelector:
             openstack-control-plane: "enabled"
           image:
