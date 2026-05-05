@@ -54,6 +54,11 @@ spec:
           mkdir -p /etc/systemd/resolved.conf.d
           printf '[Resolve]\nDNS=8.8.8.8 1.1.1.1\n' >/etc/systemd/resolved.conf.d/99-public.conf
           systemctl restart systemd-resolved
+          # kube-vip's k8s client falls back to https://kubernetes:6443
+          # before kube-apiserver advertises the VIP. Map it to localhost so
+          # kube-vip can authenticate to the local apiserver and claim the
+          # VIP, which unblocks the post-init kubeadm phases.
+          grep -q '^127.0.0.1 kubernetes$' /etc/hosts || echo '127.0.0.1 kubernetes' >>/etc/hosts
           # disable swap
           swapoff -a || true
           sed -i '/\sswap\s/ s/^/#/' /etc/fstab
