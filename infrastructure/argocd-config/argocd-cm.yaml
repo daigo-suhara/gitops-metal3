@@ -14,10 +14,13 @@ data:
     jqPathExpressions:
       - .status.terminatingReplicas
 
-  # Prevent SSA from claiming ownership of immutable PVC spec fields.
-  # Bound PVCs reject any spec update except storage expansion; claiming
-  # storageClassName or volumeMode via SSA triggers the immutability error.
-  resource.customizations.ignoreDifferences.v1_PersistentVolumeClaim: |
-    jqPathExpressions:
-      - .spec.storageClassName
-      - .spec.volumeMode
+  # Exclude PVCs from ArgoCD management on the workload cluster.
+  # PVCs hold persistent data; automatic deletion by ArgoCD (prune) is
+  # dangerous, and SSA claiming immutable spec fields causes apply errors.
+  resource.exclusions: |
+    - apiGroups:
+        - ""
+      kinds:
+        - PersistentVolumeClaim
+      clusters:
+        - https://172.16.10.10:6443
