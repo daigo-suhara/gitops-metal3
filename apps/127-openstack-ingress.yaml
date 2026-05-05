@@ -32,7 +32,7 @@ spec:
         images:
           tags:
             ingress: "registry.k8s.io/ingress-nginx/controller:v1.11.2"
-            error_pages: "docker.io/openstackhelm/error-pages:latest-ubuntu_jammy"
+            error_pages: "quay.io/airshipit/error-pages:latest-ubuntu_noble"
             dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
             image_repo_sync: "docker.io/docker:17.07.0"
 
