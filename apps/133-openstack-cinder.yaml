@@ -33,20 +33,20 @@ spec:
 
         images:
           tags:
-            bootstrap: "openstackhelm/heat:wallaby-ubuntu_focal"
-            db_init: "openstackhelm/heat:wallaby-ubuntu_focal"
-            cinder_db_sync: "openstackhelm/cinder:latest-ubuntu_focal"
-            db_drop: "openstackhelm/heat:wallaby-ubuntu_focal"
-            ks_endpoints: "openstackhelm/heat:wallaby-ubuntu_focal"
-            ks_service: "openstackhelm/heat:wallaby-ubuntu_focal"
-            ks_user: "openstackhelm/heat:wallaby-ubuntu_focal"
+            bootstrap: "quay.io/airshipit/openstack-client:2026.1-ubuntu_noble"
+            db_init: "quay.io/airshipit/openstack-client:2026.1-ubuntu_noble"
+            cinder_db_sync: "quay.io/airshipit/cinder:2026.1-ubuntu_noble"
+            db_drop: "quay.io/airshipit/openstack-client:2026.1-ubuntu_noble"
+            ks_endpoints: "quay.io/airshipit/openstack-client:2026.1-ubuntu_noble"
+            ks_service: "quay.io/airshipit/openstack-client:2026.1-ubuntu_noble"
+            ks_user: "quay.io/airshipit/openstack-client:2026.1-ubuntu_noble"
             rabbit_init: "docker.io/library/rabbitmq:3.13-management"
-            cinder_api: "openstackhelm/cinder:latest-ubuntu_focal"
-            cinder_backup: "openstackhelm/cinder:latest-ubuntu_focal"
-            cinder_scheduler: "openstackhelm/cinder:latest-ubuntu_focal"
-            cinder_volume: "openstackhelm/cinder:latest-ubuntu_focal"
-            cinder_volume_usage_audit: "openstackhelm/cinder:latest-ubuntu_focal"
-            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_focal"
+            cinder_api: "quay.io/airshipit/cinder:2026.1-ubuntu_noble"
+            cinder_backup: "quay.io/airshipit/cinder:2026.1-ubuntu_noble"
+            cinder_scheduler: "quay.io/airshipit/cinder:2026.1-ubuntu_noble"
+            cinder_volume: "quay.io/airshipit/cinder:2026.1-ubuntu_noble"
+            cinder_volume_usage_audit: "quay.io/airshipit/cinder:2026.1-ubuntu_noble"
+            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
             image_repo_sync: "docker.io/library/docker:17.07.0"
 
         manifests:

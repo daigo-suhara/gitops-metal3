@@ -24,20 +24,20 @@ spec:
 
         images:
           tags:
-            bootstrap: "openstackhelm/heat:wallaby-ubuntu_focal"
-            db_init: "openstackhelm/heat:wallaby-ubuntu_focal"
-            keystone_db_sync: "openstackhelm/keystone:latest-ubuntu_focal"
-            db_drop: "openstackhelm/heat:wallaby-ubuntu_focal"
-            ks_user: "openstackhelm/heat:wallaby-ubuntu_focal"
+            bootstrap: "quay.io/airshipit/openstack-client:2026.1-ubuntu_noble"
+            db_init: "quay.io/airshipit/openstack-client:2026.1-ubuntu_noble"
+            keystone_db_sync: "quay.io/airshipit/keystone:2026.1-ubuntu_noble"
+            db_drop: "quay.io/airshipit/openstack-client:2026.1-ubuntu_noble"
+            ks_user: "quay.io/airshipit/openstack-client:2026.1-ubuntu_noble"
             rabbit_init: "docker.io/library/rabbitmq:3.13-management"
-            keystone_fernet_setup: "openstackhelm/keystone:latest-ubuntu_focal"
-            keystone_fernet_rotate: "openstackhelm/keystone:latest-ubuntu_focal"
-            keystone_credential_setup: "openstackhelm/keystone:latest-ubuntu_focal"
-            keystone_credential_rotate: "openstackhelm/keystone:latest-ubuntu_focal"
-            keystone_credential_cleanup: "openstackhelm/heat:wallaby-ubuntu_focal"
-            keystone_api: "openstackhelm/keystone:latest-ubuntu_focal"
-            keystone_domain_manage: "openstackhelm/keystone:latest-ubuntu_focal"
-            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_focal"
+            keystone_fernet_setup: "quay.io/airshipit/keystone:2026.1-ubuntu_noble"
+            keystone_fernet_rotate: "quay.io/airshipit/keystone:2026.1-ubuntu_noble"
+            keystone_credential_setup: "quay.io/airshipit/keystone:2026.1-ubuntu_noble"
+            keystone_credential_rotate: "quay.io/airshipit/keystone:2026.1-ubuntu_noble"
+            keystone_credential_cleanup: "quay.io/airshipit/openstack-client:2026.1-ubuntu_noble"
+            keystone_api: "quay.io/airshipit/keystone:2026.1-ubuntu_noble"
+            keystone_domain_manage: "quay.io/airshipit/keystone:2026.1-ubuntu_noble"
+            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
             image_repo_sync: "docker.io/library/docker:17.07.0"
 
         manifests:

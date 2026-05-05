@@ -31,8 +31,8 @@ spec:
 
         images:
           tags:
-            libvirt: "openstackhelm/libvirt:latest-ubuntu_focal"
-            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_focal"
+            libvirt: "quay.io/airshipit/libvirt:2026.1-ubuntu_noble"
+            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
             image_repo_sync: "docker.io/library/docker:17.07.0"
             libvirt_exporter: "docker.io/prom/libvirt-exporter:v0.1.0"
 
