@@ -22,13 +22,6 @@ spec:
             node_selector_key: openstack-control-plane
             node_selector_value: enabled
 
-        images:
-          tags:
-            ingress: "quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.23.0"
-            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
-            error_pages: "docker.io/openshift/origin-haproxy-router:v3.9.0"
-            image_repo_sync: "docker.io/docker:17.07.0"
-
         network:
           host_namespace: true
 

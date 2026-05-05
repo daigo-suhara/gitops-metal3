@@ -20,12 +20,6 @@ spec:
               node_selector_key: openstack-compute-node
               node_selector_value: enabled
 
-        images:
-          tags:
-            libvirt: "docker.io/openstackhelm/libvirt:latest-ubuntu_jammy"
-            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
-            image_repo_sync: "docker.io/docker:17.07.0"
-
         conf:
           qemu:
             user: "root"
