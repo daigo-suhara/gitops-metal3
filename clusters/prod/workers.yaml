@@ -53,7 +53,8 @@ spec:
       format: cloud-config
       joinConfiguration:
         nodeRegistration:
-          kubeletExtraArgs: {}
+          kubeletExtraArgs:
+            node-labels: "metal3.io/uuid={{ ds.meta_data.uuid }}"
       preKubeadmCommands:
         - /opt/install-k8s.sh
       files:

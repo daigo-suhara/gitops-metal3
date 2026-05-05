@@ -30,7 +30,8 @@ spec:
     format: cloud-config
     initConfiguration:
       nodeRegistration:
-        kubeletExtraArgs: {}
+        kubeletExtraArgs:
+          node-labels: "metal3.io/uuid={{ ds.meta_data.uuid }}"
     clusterConfiguration:
       apiServer:
         certSANs:
