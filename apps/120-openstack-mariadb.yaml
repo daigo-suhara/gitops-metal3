@@ -38,6 +38,7 @@ spec:
           size: 10Gi
 
         images:
+          pull_policy: "IfNotPresent"
           tags:
             mariadb: "quay.io/airshipit/mariadb:10.11-ubuntu_noble"
             mariadb_perms: "quay.io/airshipit/mariadb:10.11-ubuntu_noble"
