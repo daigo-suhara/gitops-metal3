@@ -40,10 +40,10 @@ spec:
         images:
           pull_policy: "IfNotPresent"
           tags:
-            mariadb: "quay.io/airshipit/mariadb:latest-ubuntu_noble"
-            mariadb_perms: "quay.io/airshipit/mariadb:latest-ubuntu_noble"
-            db_init: "quay.io/airshipit/openstack-client:2026.1-ubuntu_noble"
-            db_drop: "quay.io/airshipit/openstack-client:2026.1-ubuntu_noble"
+            mariadb: "quay.io/airshipit/mariadb:ubuntu_noble"
+            mariadb_perms: "quay.io/airshipit/mariadb:ubuntu_noble"
+            db_init: "quay.io/airshipit/openstack-client:ubuntu_noble"
+            db_drop: "quay.io/airshipit/openstack-client:ubuntu_noble"
             dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
             image_repo_sync: "docker.io/library/docker:17.07.0"
             prometheus_mysql_exporter: "docker.io/prom/mysqld-exporter:v0.12.1"
