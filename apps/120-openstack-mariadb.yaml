@@ -31,6 +31,7 @@ spec:
         pod:
           replicas:
             server: 3
+          management_policy: Parallel
 
         volume:
           enabled: true
