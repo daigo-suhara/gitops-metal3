@@ -11,6 +11,18 @@ spec:
     repoURL: https://metallb.github.io/metallb
     targetRevision: 0.14.3
     chart: metallb
+    helm:
+      values: |
+        controller:
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
+        speaker:
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
   destination:
     server: https://172.16.10.10:6443
     namespace: metallb-system
