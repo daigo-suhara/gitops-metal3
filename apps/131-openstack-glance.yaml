@@ -27,15 +27,15 @@ spec:
 
         images:
           tags:
-            bootstrap: "quay.io/airshipit/openstack-client:ubuntu_noble"
-            db_init: "quay.io/airshipit/openstack-client:ubuntu_noble"
-            glance_db_sync: "quay.io/airshipit/glance:ubuntu_noble"
-            db_drop: "quay.io/airshipit/openstack-client:ubuntu_noble"
-            ks_endpoints: "quay.io/airshipit/openstack-client:ubuntu_noble"
-            ks_service: "quay.io/airshipit/openstack-client:ubuntu_noble"
-            ks_user: "quay.io/airshipit/openstack-client:ubuntu_noble"
+            bootstrap: "quay.io/airshipit/openstack-client:latest-ubuntu_noble"
+            db_init: "quay.io/airshipit/openstack-client:latest-ubuntu_noble"
+            glance_db_sync: "quay.io/airshipit/glance:latest-ubuntu_noble"
+            db_drop: "quay.io/airshipit/openstack-client:latest-ubuntu_noble"
+            ks_endpoints: "quay.io/airshipit/openstack-client:latest-ubuntu_noble"
+            ks_service: "quay.io/airshipit/openstack-client:latest-ubuntu_noble"
+            ks_user: "quay.io/airshipit/openstack-client:latest-ubuntu_noble"
             rabbit_init: "docker.io/library/rabbitmq:3.13-management"
-            glance_api: "quay.io/airshipit/glance:ubuntu_noble"
+            glance_api: "quay.io/airshipit/glance:latest-ubuntu_noble"
             dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
             image_repo_sync: "docker.io/library/docker:17.07.0"
 
