@@ -24,3 +24,16 @@ stringData:
   type: helm
   url: https://tarballs.opendev.org/openstack/openstack-helm-infra/
   name: openstack-helm-infra
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ingress-nginx-repo
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/secret-type: repository
+type: Opaque
+stringData:
+  type: helm
+  url: https://kubernetes.github.io/ingress-nginx
+  name: ingress-nginx

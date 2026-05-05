@@ -8,8 +8,8 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://opendev.org/openstack/openstack-helm-infra.git
-    path: openvswitch
+    repoURL: https://opendev.org/openstack/openstack-helm.git
+    path: ovn
     targetRevision: master
     helm:
       releaseName: ovn

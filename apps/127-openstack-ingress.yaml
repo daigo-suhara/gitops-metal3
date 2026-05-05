@@ -8,52 +8,35 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://opendev.org/openstack/openstack-helm-infra.git
-    path: ingress
-    targetRevision: master
+    repoURL: https://kubernetes.github.io/ingress-nginx
+    chart: ingress-nginx
+    targetRevision: "4.11.2"
     helm:
       releaseName: ingress-openstack
       values: |
-        labels:
-          server:
-            node_selector_key: openstack-control-plane
-            node_selector_value: enabled
-          error_page:
-            node_selector_key: openstack-control-plane
-            node_selector_value: enabled
-
-        network:
-          host_namespace: true
-
-        deployment:
-          mode: cluster
-          type: DaemonSet
-
-        images:
-          tags:
-            ingress: "registry.k8s.io/ingress-nginx/controller:v1.11.2"
-            error_pages: "quay.io/airshipit/error-pages:latest-ubuntu_noble"
-            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
-            image_repo_sync: "docker.io/docker:17.07.0"
-
-        conf:
-          ingress:
-            annotations:
-              nginx.ingress.kubernetes.io/proxy-body-size: "0"
-
-        endpoints:
-          ingress:
-            hosts:
-              default: ingress
-            port:
-              ingress:
-                default: 80
-              ingress_ssl:
-                default: 443
-
-        service:
-          type: LoadBalancer
-          loadBalancerIP: 172.16.10.210
+        controller:
+          kind: DaemonSet
+          hostNetwork: true
+          ingressClassResource:
+            name: nginx
+            enabled: true
+            default: false
+          nodeSelector:
+            openstack-control-plane: "enabled"
+          image:
+            registry: registry.k8s.io
+            image: ingress-nginx/controller
+            tag: "v1.11.2"
+            digest: ""
+          service:
+            type: LoadBalancer
+            loadBalancerIP: 172.16.10.210
+          config:
+            proxy-body-size: "0"
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
   destination:
     server: https://172.16.10.10:6443
     namespace: openstack
