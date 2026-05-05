@@ -48,6 +48,12 @@ spec:
           set -euxo pipefail
           export DEBIAN_FRONTEND=noninteractive
           K8S_MINOR=v1.35
+          # Ironic dnsmasq does not provide gateway/DNS via DHCP, so set
+          # them up before any network call.
+          ip route replace default via 172.16.0.1 || true
+          mkdir -p /etc/systemd/resolved.conf.d
+          printf '[Resolve]\nDNS=8.8.8.8 1.1.1.1\n' >/etc/systemd/resolved.conf.d/99-public.conf
+          systemctl restart systemd-resolved
           # disable swap
           swapoff -a || true
           sed -i '/\sswap\s/ s/^/#/' /etc/fstab
