@@ -41,6 +41,9 @@ spec:
             dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
             image_repo_sync: "docker.io/docker:17.07.0"
 
+        volume:
+          class_name: ceph-rbd
+
         conf:
           ovn_bridge_mappings: "external:br-ex"
           ovn_system_id_compat: false

@@ -39,7 +39,7 @@ spec:
 
         images:
           tags:
-            mariadb: "docker.io/library/mariadb:10.6"
+            mariadb: "quay.io/airshipit/mariadb:10.6-ubuntu_noble"
             dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
             image_repo_sync: "docker.io/docker:17.07.0"
             prometheus_mysql_exporter: "docker.io/prom/mysqld-exporter:v0.14.0"

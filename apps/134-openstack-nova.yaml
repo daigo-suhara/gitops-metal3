@@ -130,6 +130,10 @@ spec:
           compute_novnc_proxy:
             hosts:
               default: nova-novncproxy
+          ceph_block_storage:
+            auth:
+              nova:
+                secret: nova-ceph-client-key
   destination:
     server: https://172.16.10.10:6443
     namespace: openstack
