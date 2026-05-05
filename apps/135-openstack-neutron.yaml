@@ -37,21 +37,21 @@ spec:
 
         images:
           tags:
-            bootstrap: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
-            db_init: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
-            neutron_db_sync: "quay.io/airshipit/neutron:2025.1-ubuntu_noble"
-            db_drop: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
-            ks_endpoints: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
-            ks_service: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
-            ks_user: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
+            bootstrap: "docker.io/openstackhelm/heat:wallaby-ubuntu_focal"
+            db_init: "docker.io/openstackhelm/heat:wallaby-ubuntu_focal"
+            neutron_db_sync: "docker.io/openstackhelm/neutron:latest-ubuntu_focal"
+            db_drop: "docker.io/openstackhelm/heat:wallaby-ubuntu_focal"
+            ks_endpoints: "docker.io/openstackhelm/heat:wallaby-ubuntu_focal"
+            ks_service: "docker.io/openstackhelm/heat:wallaby-ubuntu_focal"
+            ks_user: "docker.io/openstackhelm/heat:wallaby-ubuntu_focal"
             rabbit_init: "docker.io/library/rabbitmq:3.13-management"
-            neutron_server: "quay.io/airshipit/neutron:2025.1-ubuntu_noble"
-            neutron_dhcp: "quay.io/airshipit/neutron:2025.1-ubuntu_noble"
-            neutron_metadata: "quay.io/airshipit/neutron:2025.1-ubuntu_noble"
-            neutron_l3: "quay.io/airshipit/neutron:2025.1-ubuntu_noble"
-            neutron_ovn_vpn_agent: "quay.io/airshipit/neutron:2025.1-ubuntu_noble"
-            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
-            image_repo_sync: "docker.io/docker:17.07.0"
+            neutron_server: "docker.io/openstackhelm/neutron:latest-ubuntu_focal"
+            neutron_dhcp: "docker.io/openstackhelm/neutron:latest-ubuntu_focal"
+            neutron_metadata: "docker.io/openstackhelm/neutron:latest-ubuntu_focal"
+            neutron_l3: "docker.io/openstackhelm/neutron:latest-ubuntu_focal"
+            neutron_ovn_vpn_agent: "docker.io/openstackhelm/neutron:latest-ubuntu_focal"
+            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_focal"
+            image_repo_sync: "docker.io/library/docker:17.07.0"
 
         manifests:
           test: false

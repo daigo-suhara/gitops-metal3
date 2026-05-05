@@ -42,30 +42,33 @@ spec:
 
         images:
           tags:
-            bootstrap: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
-            db_init: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
-            nova_db_sync: "quay.io/airshipit/nova:2025.1-ubuntu_noble"
-            db_drop: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
-            ks_endpoints: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
-            ks_service: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
-            ks_user: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
+            bootstrap: "docker.io/openstackhelm/heat:wallaby-ubuntu_focal"
+            db_init: "docker.io/openstackhelm/heat:wallaby-ubuntu_focal"
+            nova_db_sync: "docker.io/openstackhelm/nova:latest-ubuntu_focal"
+            db_drop: "docker.io/openstackhelm/heat:wallaby-ubuntu_focal"
+            ks_endpoints: "docker.io/openstackhelm/heat:wallaby-ubuntu_focal"
+            ks_service: "docker.io/openstackhelm/heat:wallaby-ubuntu_focal"
+            ks_user: "docker.io/openstackhelm/heat:wallaby-ubuntu_focal"
             rabbit_init: "docker.io/library/rabbitmq:3.13-management"
-            nova_api: "quay.io/airshipit/nova:2025.1-ubuntu_noble"
-            nova_api_osapi: "quay.io/airshipit/nova:2025.1-ubuntu_noble"
-            nova_api_metadata: "quay.io/airshipit/nova:2025.1-ubuntu_noble"
-            nova_compute: "quay.io/airshipit/nova:2025.1-ubuntu_noble"
-            nova_compute_ssh: "quay.io/airshipit/nova:2025.1-ubuntu_noble"
-            nova_conductor: "quay.io/airshipit/nova:2025.1-ubuntu_noble"
-            nova_novncproxy: "quay.io/airshipit/nova:2025.1-ubuntu_noble"
-            nova_scheduler: "quay.io/airshipit/nova:2025.1-ubuntu_noble"
-            nova_cell_setup: "quay.io/airshipit/nova:2025.1-ubuntu_noble"
-            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
-            image_repo_sync: "docker.io/docker:17.07.0"
+            nova_api: "docker.io/openstackhelm/nova:latest-ubuntu_focal"
+            nova_api_osapi: "docker.io/openstackhelm/nova:latest-ubuntu_focal"
+            nova_api_metadata: "docker.io/openstackhelm/nova:latest-ubuntu_focal"
+            nova_compute: "docker.io/openstackhelm/nova:latest-ubuntu_focal"
+            nova_compute_ssh: "docker.io/openstackhelm/nova:latest-ubuntu_focal"
+            nova_conductor: "docker.io/openstackhelm/nova:latest-ubuntu_focal"
+            nova_novncproxy: "docker.io/openstackhelm/nova:latest-ubuntu_focal"
+            nova_scheduler: "docker.io/openstackhelm/nova:latest-ubuntu_focal"
+            nova_cell_setup: "docker.io/openstackhelm/nova:latest-ubuntu_focal"
+            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_focal"
+            image_repo_sync: "docker.io/library/docker:17.07.0"
 
-        manifests:
-          test: false
+        bootstrap:
+          wait_for_computes:
+            enabled: true
 
         conf:
+          ceph:
+            enabled: true
           nova:
             DEFAULT:
               log_config_append: null

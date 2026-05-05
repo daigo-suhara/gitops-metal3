@@ -39,13 +39,13 @@ spec:
 
         images:
           tags:
-            mariadb: "quay.io/airshipit/mariadb:2025.1-ubuntu_noble"
-            mariadb_perms: "quay.io/airshipit/mariadb:2025.1-ubuntu_noble"
-            db_init: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
-            db_drop: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
-            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
-            image_repo_sync: "docker.io/docker:17.07.0"
-            prometheus_mysql_exporter: "docker.io/prom/mysqld-exporter:v0.14.0"
+            mariadb: "docker.io/openstackhelm/mariadb:latest-ubuntu_focal"
+            mariadb_perms: "docker.io/openstackhelm/mariadb:latest-ubuntu_focal"
+            db_init: "docker.io/openstackhelm/heat:wallaby-ubuntu_focal"
+            db_drop: "docker.io/openstackhelm/heat:wallaby-ubuntu_focal"
+            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_focal"
+            image_repo_sync: "docker.io/library/docker:17.07.0"
+            prometheus_mysql_exporter: "docker.io/prom/mysqld-exporter:v0.12.1"
 
         bootstrap:
           enabled: true
