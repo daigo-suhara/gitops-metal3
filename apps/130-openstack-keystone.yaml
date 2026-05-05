@@ -1,0 +1,99 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: openstack-keystone
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "130"
+spec:
+  project: default
+  source:
+    repoURL: https://tarballs.opendev.org/openstack/openstack-helm/
+    chart: keystone
+    targetRevision: "2025.2.20+1bbff8f95"
+    helm:
+      releaseName: keystone
+      values: |
+        labels:
+          api:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
+          job:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
+
+        images:
+          tags:
+            bootstrap: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
+            db_init: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
+            keystone_db_sync: "quay.io/airshipit/keystone:2025.1-ubuntu_noble"
+            db_drop: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
+            ks_user: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
+            rabbit_init: "docker.io/library/rabbitmq:3.13-management"
+            keystone_fernet_setup: "quay.io/airshipit/keystone:2025.1-ubuntu_noble"
+            keystone_fernet_rotate: "quay.io/airshipit/keystone:2025.1-ubuntu_noble"
+            keystone_credential_setup: "quay.io/airshipit/keystone:2025.1-ubuntu_noble"
+            keystone_credential_rotate: "quay.io/airshipit/keystone:2025.1-ubuntu_noble"
+            keystone_credential_cleanup: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
+            keystone_api: "quay.io/airshipit/keystone:2025.1-ubuntu_noble"
+            keystone_domain_manage: "quay.io/airshipit/keystone:2025.1-ubuntu_noble"
+            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
+            image_repo_sync: "docker.io/docker:17.07.0"
+
+        manifests:
+          job_credential_cleanup: false
+          test: false
+
+        conf:
+          keystone:
+            DEFAULT:
+              log_config_append: null
+            cache:
+              backend: oslo_cache.backends.memcache
+              enabled: true
+              memcache_servers: "memcached.openstack.svc.cluster.local:11211"
+
+        endpoints:
+          identity:
+            name: keystone
+            hosts:
+              default: keystone-api
+              public: keystone.openstack.local
+            port:
+              api:
+                default: 5000
+                public: 80
+            scheme:
+              default: http
+              public: http
+          oslo_db:
+            auth:
+              admin:
+                password: openstack-changeme
+              keystone:
+                password: openstack-changeme
+          oslo_messaging:
+            auth:
+              admin:
+                username: admin
+                password: openstack-changeme
+              keystone:
+                username: keystone
+                password: openstack-changeme
+
+        bootstrap:
+          enabled: true
+          script: |
+            openstack role create --or-show admin
+            openstack role create --or-show member
+            openstack role create --or-show reader
+  destination:
+    server: https://172.16.10.10:6443
+    namespace: openstack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

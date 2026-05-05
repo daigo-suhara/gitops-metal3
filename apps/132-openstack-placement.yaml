@@ -1,0 +1,67 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: openstack-placement
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "132"
+spec:
+  project: default
+  source:
+    repoURL: https://tarballs.opendev.org/openstack/openstack-helm/
+    chart: placement
+    targetRevision: "2025.2.16+c665eedfa"
+    helm:
+      releaseName: placement
+      values: |
+        labels:
+          api:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
+          job:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
+
+        images:
+          tags:
+            bootstrap: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
+            db_init: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
+            placement_db_sync: "quay.io/airshipit/placement:2025.1-ubuntu_noble"
+            db_drop: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
+            ks_endpoints: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
+            ks_service: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
+            ks_user: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
+            placement_api: "quay.io/airshipit/placement:2025.1-ubuntu_noble"
+            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
+            image_repo_sync: "docker.io/docker:17.07.0"
+
+        manifests:
+          test: false
+
+        endpoints:
+          identity:
+            auth:
+              admin:
+                password: openstack-changeme
+              placement:
+                password: openstack-changeme
+          oslo_db:
+            auth:
+              admin:
+                password: openstack-changeme
+              placement:
+                password: openstack-changeme
+          placement:
+            hosts:
+              default: placement-api
+              public: placement.openstack.local
+  destination:
+    server: https://172.16.10.10:6443
+    namespace: openstack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

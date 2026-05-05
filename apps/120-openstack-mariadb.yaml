@@ -1,0 +1,63 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: openstack-mariadb
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "120"
+spec:
+  project: default
+  source:
+    repoURL: https://tarballs.opendev.org/openstack/openstack-helm-infra/
+    chart: mariadb
+    targetRevision: "2024.2.238+628a320c"
+    helm:
+      releaseName: mariadb
+      values: |
+        labels:
+          server:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
+          ingress:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
+          error_page:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
+          prometheus_mysql_exporter:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
+
+        pod:
+          replicas:
+            server: 3
+
+        volume:
+          enabled: true
+          class_name: ceph-rbd
+          size: 10Gi
+
+        images:
+          tags:
+            mariadb: "docker.io/library/mariadb:10.6"
+            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
+            image_repo_sync: "docker.io/docker:17.07.0"
+            prometheus_mysql_exporter: "docker.io/prom/mysqld-exporter:v0.14.0"
+
+        endpoints:
+          oslo_db:
+            auth:
+              admin:
+                password: openstack-changeme
+              exporter:
+                password: openstack-changeme
+  destination:
+    server: https://172.16.10.10:6443
+    namespace: openstack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

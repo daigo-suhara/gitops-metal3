@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ceph-adapter-rook
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "112"
+spec:
+  project: default
+  source:
+    repoURL: https://tarballs.opendev.org/openstack/openstack-helm-infra/
+    chart: ceph-adapter-rook
+    targetRevision: "2024.2.7+628a320c"
+    helm:
+      releaseName: ceph-adapter-rook
+      values: |
+        ceph_cluster_namespace: rook-ceph
+        labels:
+          job:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
+        images:
+          tags:
+            ceph_config_helper: "docker.io/openstackhelm/ceph-config-helper:ubuntu_jammy_18.2.2-1-20240312"
+            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
+            image_repo_sync: "docker.io/docker:17.07.0"
+  destination:
+    server: https://172.16.10.10:6443
+    namespace: openstack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

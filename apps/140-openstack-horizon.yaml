@@ -1,0 +1,71 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: openstack-horizon
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "140"
+spec:
+  project: default
+  source:
+    repoURL: https://tarballs.opendev.org/openstack/openstack-helm/
+    chart: horizon
+    targetRevision: "2025.2.10+c665eedfa"
+    helm:
+      releaseName: horizon
+      values: |
+        labels:
+          server:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
+          job:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
+
+        images:
+          tags:
+            horizon_db_sync: "quay.io/airshipit/horizon:2025.1-ubuntu_noble"
+            horizon: "quay.io/airshipit/horizon:2025.1-ubuntu_noble"
+            ks_user: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
+            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
+            image_repo_sync: "docker.io/docker:17.07.0"
+
+        manifests:
+          test: false
+
+        conf:
+          horizon:
+            local_settings:
+              config:
+                allowed_hosts: "'*'"
+                openstack_keystone_url: "http://keystone.openstack.local/v3"
+                openstack_host: "keystone.openstack.local"
+
+        endpoints:
+          identity:
+            hosts:
+              default: keystone-api
+              public: keystone.openstack.local
+            port:
+              api:
+                public: 80
+          oslo_db:
+            auth:
+              admin:
+                password: openstack-changeme
+              horizon:
+                password: openstack-changeme
+
+        service:
+          type: LoadBalancer
+          loadBalancerIP: 172.16.10.211
+  destination:
+    server: https://172.16.10.10:6443
+    namespace: openstack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

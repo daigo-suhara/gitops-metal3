@@ -1,0 +1,26 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: openstack-helm-repo
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/secret-type: repository
+type: Opaque
+stringData:
+  type: helm
+  url: https://tarballs.opendev.org/openstack/openstack-helm/
+  name: openstack-helm
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: openstack-helm-infra-repo
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/secret-type: repository
+type: Opaque
+stringData:
+  type: helm
+  url: https://tarballs.opendev.org/openstack/openstack-helm-infra/
+  name: openstack-helm-infra

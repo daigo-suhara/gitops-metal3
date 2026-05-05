@@ -1,0 +1,144 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: openstack-nova
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "134"
+spec:
+  project: default
+  source:
+    repoURL: https://tarballs.opendev.org/openstack/openstack-helm/
+    chart: nova
+    targetRevision: "2025.2.39+c2adf0f13"
+    helm:
+      releaseName: nova
+      values: |
+        labels:
+          api_metadata:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
+          api_osapi:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
+          conductor:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
+          scheduler:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
+          compute:
+            node_selector_key: openstack-compute-node
+            node_selector_value: enabled
+          compute_ironic:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
+          novncproxy:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
+          job:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
+
+        images:
+          tags:
+            bootstrap: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
+            db_init: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
+            nova_db_sync: "quay.io/airshipit/nova:2025.1-ubuntu_noble"
+            db_drop: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
+            ks_endpoints: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
+            ks_service: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
+            ks_user: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
+            rabbit_init: "docker.io/library/rabbitmq:3.13-management"
+            nova_api: "quay.io/airshipit/nova:2025.1-ubuntu_noble"
+            nova_api_osapi: "quay.io/airshipit/nova:2025.1-ubuntu_noble"
+            nova_api_metadata: "quay.io/airshipit/nova:2025.1-ubuntu_noble"
+            nova_compute: "quay.io/airshipit/nova:2025.1-ubuntu_noble"
+            nova_compute_ssh: "quay.io/airshipit/nova:2025.1-ubuntu_noble"
+            nova_conductor: "quay.io/airshipit/nova:2025.1-ubuntu_noble"
+            nova_novncproxy: "quay.io/airshipit/nova:2025.1-ubuntu_noble"
+            nova_scheduler: "quay.io/airshipit/nova:2025.1-ubuntu_noble"
+            nova_cell_setup: "quay.io/airshipit/nova:2025.1-ubuntu_noble"
+            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
+            image_repo_sync: "docker.io/docker:17.07.0"
+
+        manifests:
+          test: false
+
+        conf:
+          nova:
+            DEFAULT:
+              log_config_append: null
+              vif_plugging_is_fatal: false
+              vif_plugging_timeout: 30
+            libvirt:
+              virt_type: kvm
+              cpu_mode: host-model
+              images_type: rbd
+              images_rbd_pool: nova
+              images_rbd_ceph_conf: /etc/ceph/ceph.conf
+              rbd_user: nova
+              rbd_secret_uuid: 457eb676-33da-42ec-9a8c-9293d545c337
+              disk_cachemodes: "network=writeback"
+            neutron:
+              ovs_bridge: br-int
+            cinder:
+              cross_az_attach: false
+
+        network:
+          backend:
+            - ovn
+          novncproxy:
+            name: nova-novncproxy
+            node_port:
+              enabled: false
+
+        endpoints:
+          identity:
+            auth:
+              admin:
+                password: openstack-changeme
+              nova:
+                password: openstack-changeme
+              neutron:
+                password: openstack-changeme
+              ironic:
+                password: openstack-changeme
+              placement:
+                password: openstack-changeme
+          oslo_db:
+            auth:
+              admin:
+                password: openstack-changeme
+              nova:
+                password: openstack-changeme
+              nova_api:
+                password: openstack-changeme
+              nova_cell0:
+                password: openstack-changeme
+          oslo_messaging:
+            auth:
+              admin:
+                username: admin
+                password: openstack-changeme
+              nova:
+                username: nova
+                password: openstack-changeme
+          compute:
+            hosts:
+              default: nova-api
+              public: nova.openstack.local
+          compute_novnc_proxy:
+            hosts:
+              default: nova-novncproxy
+              public: novnc.openstack.local
+  destination:
+    server: https://172.16.10.10:6443
+    namespace: openstack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

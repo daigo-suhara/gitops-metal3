@@ -1,0 +1,56 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: openstack-ovn
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "128"
+spec:
+  project: default
+  source:
+    repoURL: https://tarballs.opendev.org/openstack/openstack-helm-infra/
+    chart: ovn
+    targetRevision: "2024.2.19+628a320c"
+    helm:
+      releaseName: ovn
+      values: |
+        labels:
+          ovn_ovsdb_nb:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
+          ovn_ovsdb_sb:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
+          ovn_northd:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
+          ovn_controller:
+            node_selector_key: openstack-compute-node
+            node_selector_value: enabled
+          ovn_controller_gw:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
+
+        images:
+          tags:
+            ovn_ovsdb_nb: "docker.io/openstackhelm/ovn:latest-ubuntu_jammy"
+            ovn_ovsdb_sb: "docker.io/openstackhelm/ovn:latest-ubuntu_jammy"
+            ovn_northd: "docker.io/openstackhelm/ovn:latest-ubuntu_jammy"
+            ovn_controller: "docker.io/openstackhelm/ovn:latest-ubuntu_jammy"
+            ovn_controller_gw: "docker.io/openstackhelm/ovn:latest-ubuntu_jammy"
+            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
+            image_repo_sync: "docker.io/docker:17.07.0"
+
+        conf:
+          ovn_bridge_mappings: "external:br-ex"
+          ovn_system_id_compat: false
+  destination:
+    server: https://172.16.10.10:6443
+    namespace: openstack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

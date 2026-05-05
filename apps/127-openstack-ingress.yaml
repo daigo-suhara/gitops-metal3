@@ -1,0 +1,66 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: openstack-ingress
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "127"
+spec:
+  project: default
+  source:
+    repoURL: https://tarballs.opendev.org/openstack/openstack-helm-infra/
+    chart: ingress
+    targetRevision: "0.2.19"
+    helm:
+      releaseName: ingress-openstack
+      values: |
+        labels:
+          server:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
+          error_page:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
+
+        images:
+          tags:
+            ingress: "quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.23.0"
+            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
+            error_pages: "docker.io/openshift/origin-haproxy-router:v3.9.0"
+            image_repo_sync: "docker.io/docker:17.07.0"
+
+        network:
+          host_namespace: true
+
+        deployment:
+          mode: cluster
+          type: DaemonSet
+
+        conf:
+          ingress:
+            annotations:
+              nginx.ingress.kubernetes.io/proxy-body-size: "0"
+
+        endpoints:
+          ingress:
+            hosts:
+              default: ingress
+            port:
+              ingress:
+                default: 80
+              ingress_ssl:
+                default: 443
+
+        service:
+          type: LoadBalancer
+          loadBalancerIP: 172.16.10.210
+  destination:
+    server: https://172.16.10.10:6443
+    namespace: openstack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
