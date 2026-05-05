@@ -29,6 +29,13 @@ spec:
           mode: cluster
           type: DaemonSet
 
+        images:
+          tags:
+            ingress: "registry.k8s.io/ingress-nginx/controller:v1.11.2"
+            error_pages: "docker.io/openstackhelm/error-pages:latest-ubuntu_jammy"
+            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
+            image_repo_sync: "docker.io/docker:17.07.0"
+
         conf:
           ingress:
             annotations:
