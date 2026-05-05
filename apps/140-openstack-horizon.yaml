@@ -8,9 +8,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://tarballs.opendev.org/openstack/openstack-helm/
-    chart: horizon
-    targetRevision: "2025.2.10+c665eedfa"
+    repoURL: https://opendev.org/openstack/openstack-helm.git
+    path: horizon
+    targetRevision: master
     helm:
       releaseName: horizon
       values: |

@@ -8,9 +8,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://tarballs.opendev.org/openstack/openstack-helm-infra/
-    chart: ovn
-    targetRevision: "2024.2.19+628a320c"
+    repoURL: https://opendev.org/openstack/openstack-helm-infra.git
+    path: openvswitch
+    targetRevision: master
     helm:
       releaseName: ovn
       values: |

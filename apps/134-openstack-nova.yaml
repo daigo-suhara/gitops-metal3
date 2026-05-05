@@ -8,9 +8,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://tarballs.opendev.org/openstack/openstack-helm/
-    chart: nova
-    targetRevision: "2025.2.39+c2adf0f13"
+    repoURL: https://opendev.org/openstack/openstack-helm.git
+    path: nova
+    targetRevision: master
     helm:
       releaseName: nova
       values: |

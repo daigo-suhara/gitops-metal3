@@ -8,9 +8,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://tarballs.opendev.org/openstack/openstack-helm/
-    chart: placement
-    targetRevision: "2025.2.16+c665eedfa"
+    repoURL: https://opendev.org/openstack/openstack-helm.git
+    path: placement
+    targetRevision: master
     helm:
       releaseName: placement
       values: |

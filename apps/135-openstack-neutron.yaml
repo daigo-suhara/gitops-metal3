@@ -8,9 +8,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://tarballs.opendev.org/openstack/openstack-helm/
-    chart: neutron
-    targetRevision: "2025.2.32+c2adf0f13"
+    repoURL: https://opendev.org/openstack/openstack-helm.git
+    path: neutron
+    targetRevision: master
     helm:
       releaseName: neutron
       values: |

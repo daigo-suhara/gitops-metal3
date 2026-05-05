@@ -8,9 +8,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://tarballs.opendev.org/openstack/openstack-helm/
-    chart: cinder
-    targetRevision: "2025.2.27+c2adf0f13"
+    repoURL: https://opendev.org/openstack/openstack-helm.git
+    path: cinder
+    targetRevision: master
     helm:
       releaseName: cinder
       values: |

@@ -8,9 +8,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://tarballs.opendev.org/openstack/openstack-helm-infra/
-    chart: mariadb
-    targetRevision: "2024.2.238+628a320c"
+    repoURL: https://opendev.org/openstack/openstack-helm-infra.git
+    path: mariadb
+    targetRevision: master
     helm:
       releaseName: mariadb
       values: |

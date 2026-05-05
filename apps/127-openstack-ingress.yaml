@@ -8,9 +8,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://tarballs.opendev.org/openstack/openstack-helm-infra/
-    chart: ingress
-    targetRevision: "0.2.19"
+    repoURL: https://opendev.org/openstack/openstack-helm-infra.git
+    path: ingress
+    targetRevision: master
     helm:
       releaseName: ingress-openstack
       values: |

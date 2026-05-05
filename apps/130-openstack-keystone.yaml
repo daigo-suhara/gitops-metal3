@@ -8,9 +8,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://tarballs.opendev.org/openstack/openstack-helm/
-    chart: keystone
-    targetRevision: "2025.2.20+1bbff8f95"
+    repoURL: https://opendev.org/openstack/openstack-helm.git
+    path: keystone
+    targetRevision: master
     helm:
       releaseName: keystone
       values: |

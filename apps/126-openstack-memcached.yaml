@@ -8,9 +8,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://tarballs.opendev.org/openstack/openstack-helm-infra/
-    chart: memcached
-    targetRevision: "2024.2.65+628a320c"
+    repoURL: https://opendev.org/openstack/openstack-helm-infra.git
+    path: memcached
+    targetRevision: master
     helm:
       releaseName: memcached
       values: |
