@@ -50,6 +50,11 @@ spec:
             image_repo_sync: "docker.io/library/docker:17.07.0"
 
         manifests:
+          job_db_init: true
+          job_db_sync: true
+          job_ks_user: true
+          job_ks_service: true
+          job_ks_endpoints: true
           test: false
 
         conf:
@@ -101,7 +106,7 @@ spec:
               cinder:
                 secret: cinder-ceph-client-key
   destination:
-    server: https://172.16.10.10:6443
+    server: https://172.16.10.100:6443
     namespace: openstack
   syncPolicy:
     automated:

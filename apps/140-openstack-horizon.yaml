@@ -59,7 +59,7 @@ spec:
           type: LoadBalancer
           loadBalancerIP: 172.16.10.211
   destination:
-    server: https://172.16.10.10:6443
+    server: https://172.16.10.100:6443
     namespace: openstack
   syncPolicy:
     automated:

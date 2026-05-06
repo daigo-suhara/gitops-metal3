@@ -54,6 +54,11 @@ spec:
             image_repo_sync: "docker.io/library/docker:17.07.0"
 
         manifests:
+          job_db_init: true
+          job_db_sync: true
+          job_ks_user: true
+          job_ks_service: true
+          job_ks_endpoints: true
           test: false
           daemonset_dhcp_agent: false
           daemonset_l3_agent: false
@@ -122,7 +127,7 @@ spec:
             hosts:
               default: neutron-server
   destination:
-    server: https://172.16.10.10:6443
+    server: https://172.16.10.100:6443
     namespace: openstack
   syncPolicy:
     automated:

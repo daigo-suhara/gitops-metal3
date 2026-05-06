@@ -41,6 +41,11 @@ spec:
             image_repo_sync: "docker.io/library/docker:17.07.0"
 
         manifests:
+          job_db_init: true
+          job_db_sync: true
+          job_fernet_setup: true
+          job_credential_setup: true
+          job_bootstrap: true
           job_credential_cleanup: false
           test: false
 
@@ -49,7 +54,7 @@ spec:
             DEFAULT:
               log_config_append: null
             cache:
-              backend: oslo_cache.backends.memcache
+              backend: dogpile.cache.memcached
               enabled: true
               memcache_servers: "memcached.openstack.svc.cluster.local:11211"
 
@@ -87,7 +92,7 @@ spec:
             openstack role create --or-show member
             openstack role create --or-show reader
   destination:
-    server: https://172.16.10.10:6443
+    server: https://172.16.10.100:6443
     namespace: openstack
   syncPolicy:
     automated:

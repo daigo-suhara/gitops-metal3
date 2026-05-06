@@ -33,11 +33,11 @@ spec:
 
         images:
           tags:
-            ovn_ovsdb_nb: "quay.io/airshipit/ovn:2025.1-ubuntu_noble"
-            ovn_ovsdb_sb: "quay.io/airshipit/ovn:2025.1-ubuntu_noble"
-            ovn_northd: "quay.io/airshipit/ovn:2025.1-ubuntu_noble"
-            ovn_controller: "quay.io/airshipit/ovn:2025.1-ubuntu_noble"
-            ovn_controller_gw: "quay.io/airshipit/ovn:2025.1-ubuntu_noble"
+            ovn_ovsdb_nb: "quay.io/airshipit/ovn:ubuntu_noble"
+            ovn_ovsdb_sb: "quay.io/airshipit/ovn:ubuntu_noble"
+            ovn_northd: "quay.io/airshipit/ovn:ubuntu_noble"
+            ovn_controller: "quay.io/airshipit/ovn:ubuntu_noble"
+            ovn_controller_gw: "quay.io/airshipit/ovn:ubuntu_noble"
             dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
             image_repo_sync: "docker.io/library/docker:17.07.0"
 
@@ -48,7 +48,7 @@ spec:
           ovn_bridge_mappings: "external:br-ex"
           ovn_system_id_compat: false
   destination:
-    server: https://172.16.10.10:6443
+    server: https://172.16.10.100:6443
     namespace: openstack
   syncPolicy:
     automated:

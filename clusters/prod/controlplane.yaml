@@ -35,7 +35,7 @@ spec:
     clusterConfiguration:
       apiServer:
         certSANs:
-          - 172.16.10.10
+          - 172.16.10.100
       controllerManager:
         extraArgs:
           enable-hostpath-provisioner: "true"
@@ -51,9 +51,9 @@ spec:
           K8S_MINOR=v1.35
           # Ironic dnsmasq does not provide gateway/DNS via DHCP, so set
           # them up before any network call.
-          # Wait for enx00e04c247a98 to be up
-          while ! ip link show enx00e04c247a98 | grep -q "UP,LOWER_UP"; do
-            echo "Waiting for enx00e04c247a98 to be up..."
+          # Wait for eno1 to be up
+          while ! ip link show eno1 | grep -q "UP,LOWER_UP"; do
+            echo "Waiting for eno1 to be up..."
             sleep 2
           done
           ip route replace default via 172.16.0.1
@@ -101,7 +101,7 @@ spec:
               - { name: vip_arp, value: "true" }
               - { name: port, value: "6443" }
               - { name: vip_interface, value: eno1 }
-              - { name: vip_address, value: 172.16.10.10 }
+              - { name: vip_address, value: 172.16.10.100 }
               - { name: cp_enable, value: "true" }
               - { name: cp_namespace, value: kube-system }
               - { name: vip_leaderelection, value: "true" }

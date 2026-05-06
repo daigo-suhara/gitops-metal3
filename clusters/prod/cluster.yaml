@@ -27,6 +27,6 @@ metadata:
   namespace: metal3
 spec:
   controlPlaneEndpoint:
-    host: 172.16.10.10
+    host: 172.16.10.100
     port: 6443
   noCloudProvider: true

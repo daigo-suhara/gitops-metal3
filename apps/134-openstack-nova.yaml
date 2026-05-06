@@ -62,6 +62,16 @@ spec:
             dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
             image_repo_sync: "docker.io/library/docker:17.07.0"
 
+        manifests:
+          job_db_init: true
+          job_db_sync: true
+          job_ks_user: true
+          job_ks_service: true
+          job_ks_endpoints: true
+          job_bootstrap: true
+          job_cell_setup: true
+          test: false
+
         bootstrap:
           wait_for_computes:
             enabled: true
@@ -138,7 +148,7 @@ spec:
               nova:
                 secret: nova-ceph-client-key
   destination:
-    server: https://172.16.10.10:6443
+    server: https://172.16.10.100:6443
     namespace: openstack
   syncPolicy:
     automated:
