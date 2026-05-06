@@ -1,0 +1,84 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ceph-mon
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "100"
+spec:
+  project: default
+  source:
+    repoURL: https://opendev.org/openstack/openstack-helm.git
+    path: ceph-mon
+    targetRevision: master
+    helm:
+      releaseName: ceph-mon
+      values: |
+        labels:
+          mon:
+            node_selector_key: ceph-mon
+            node_selector_value: enabled
+          job:
+            node_selector_key: ceph-mon
+            node_selector_value: enabled
+
+        network:
+          public: 172.16.0.0/16
+          cluster: 172.16.0.0/16
+
+        ceph:
+          fsid: c12792b1-87d4-4a43-98dd-c6374e6ab9e4
+
+        conf:
+          ceph:
+            global:
+              fsid: c12792b1-87d4-4a43-98dd-c6374e6ab9e4
+              public_network: 172.16.0.0/16
+              cluster_network: 172.16.0.0/16
+              auth_cluster_required: cephx
+              auth_service_required: cephx
+              auth_client_required: cephx
+              mon_warn_on_insecure_global_id_reclaim: "false"
+              osd_pool_default_size: 3
+              osd_pool_default_min_size: 2
+
+        endpoints:
+          ceph_mon:
+            namespace: rook-ceph
+
+        pod:
+          replicas:
+            mon: 3
+          tolerations:
+            mon:
+              - key: node-role.kubernetes.io/control-plane
+                operator: Exists
+                effect: NoSchedule
+            bootstrap:
+              - key: node-role.kubernetes.io/control-plane
+                operator: Exists
+                effect: NoSchedule
+
+        images:
+          tags:
+            ceph_mon: "quay.io/airshipit/ceph-daemon:ubuntu_jammy_20.2.1-1-20260407"
+            ceph_bootstrap: "quay.io/airshipit/ceph-daemon:ubuntu_jammy_20.2.1-1-20260407"
+            ceph_mgr: "quay.io/airshipit/ceph-daemon:ubuntu_jammy_20.2.1-1-20260407"
+            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
+            image_repo_sync: "docker.io/library/docker:17.07.0"
+  destination:
+    server: https://172.16.10.100:6443
+    namespace: rook-ceph
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    retry:
+      limit: 5
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

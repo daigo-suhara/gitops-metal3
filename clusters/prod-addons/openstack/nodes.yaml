@@ -9,6 +9,11 @@ metadata:
     openvswitch: enabled
     openstack-network-node: enabled
     l3-agent: enabled
+    ceph-mon: enabled
+    ceph-mgr: enabled
+    ceph-mds: enabled
+    ceph-rgw: enabled
+    ceph-osd: enabled
 spec:
   taints: []
 ---
@@ -22,6 +27,11 @@ metadata:
     openvswitch: enabled
     openstack-network-node: enabled
     l3-agent: enabled
+    ceph-mon: enabled
+    ceph-mgr: enabled
+    ceph-mds: enabled
+    ceph-rgw: enabled
+    ceph-osd: enabled
 spec:
   taints: []
 ---
@@ -35,5 +45,10 @@ metadata:
     openvswitch: enabled
     openstack-network-node: enabled
     l3-agent: enabled
+    ceph-mon: enabled
+    ceph-mgr: enabled
+    ceph-mds: enabled
+    ceph-rgw: enabled
+    ceph-osd: enabled
 spec:
   taints: []

@@ -34,6 +34,8 @@ spec:
             image_repo_sync: "docker.io/docker:17.07.0"
 
         manifests:
+          job_db_init: true
+          job_db_sync: true
           test: false
 
         conf:

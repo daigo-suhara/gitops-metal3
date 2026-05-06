@@ -1,0 +1,73 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ceph-client
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "104"
+spec:
+  project: default
+  source:
+    repoURL: https://opendev.org/openstack/openstack-helm.git
+    path: ceph-client
+    targetRevision: master
+    helm:
+      releaseName: ceph-client
+      values: |
+        labels:
+          job:
+            node_selector_key: ceph-mon
+            node_selector_value: enabled
+
+        network:
+          public: 172.16.0.0/16
+          cluster: 172.16.0.0/16
+
+        conf:
+          ceph:
+            global:
+              fsid: c12792b1-87d4-4a43-98dd-c6374e6ab9e4
+              public_network: 172.16.0.0/16
+              cluster_network: 172.16.0.0/16
+
+        endpoints:
+          ceph_mon:
+            namespace: rook-ceph
+
+        images:
+          tags:
+            ceph_config_helper: "quay.io/airshipit/ceph-config-helper:ubuntu_jammy_20.2.1-1-20260407"
+            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
+            image_repo_sync: "docker.io/library/docker:17.07.0"
+
+        # Distribute Ceph config and keys to openstack namespace
+        namespaces:
+          - openstack
+
+        # Create Ceph users for OpenStack services
+        storageclass:
+          nova:
+            name: nova-pool
+            quota: {}
+          cinder:
+            name: cinder-volumes
+            quota: {}
+          glance:
+            name: glance
+            quota: {}
+  destination:
+    server: https://172.16.10.100:6443
+    namespace: rook-ceph
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    retry:
+      limit: 5
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
