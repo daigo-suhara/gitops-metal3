@@ -39,6 +39,9 @@ spec:
           - name: nova
             keyring_name: nova-ceph-client-key
             rbd_secret_uuid: 457eb676-33da-42ec-9a8c-9293d545c337
+          - name: nova
+            keyring_name: pvc-ceph-client-key
+            rbd_secret_uuid: 457eb676-33da-42ec-9a8c-9293d545c337
   destination:
     server: https://172.16.10.10:6443
     namespace: openstack
