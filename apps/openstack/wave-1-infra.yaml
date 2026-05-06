@@ -240,6 +240,10 @@ spec:
         volume:
           class_name: ceph-rbd
 
+        network:
+          interface:
+            tunnel: eno1
+
         conf:
           ovn_bridge_mappings: "external:br-ex"
           ovn_system_id_compat: false
