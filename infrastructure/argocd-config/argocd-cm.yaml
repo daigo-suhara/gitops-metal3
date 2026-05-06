@@ -13,14 +13,3 @@ data:
   resource.customizations.ignoreDifferences.apps_Deployment: |
     jqPathExpressions:
       - .status.terminatingReplicas
-
-  # Exclude PVCs from ArgoCD management on the workload cluster.
-  # PVCs hold persistent data; automatic deletion by ArgoCD (prune) is
-  # dangerous, and SSA claiming immutable spec fields causes apply errors.
-  resource.exclusions: |
-    - apiGroups:
-        - ""
-      kinds:
-        - PersistentVolumeClaim
-      clusters:
-        - https://172.16.10.10:6443

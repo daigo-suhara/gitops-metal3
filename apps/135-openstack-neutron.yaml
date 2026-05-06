@@ -90,8 +90,8 @@ spec:
               securitygroup:
                 enable_security_group: true
               ovn:
-                ovn_nb_connection: "tcp:127.0.0.1:6641"
-                ovn_sb_connection: "tcp:127.0.0.1:6642"
+                ovn_nb_connection: "tcp:ovn-ovsdb-nb.openstack.svc.cluster.local:6641"
+                ovn_sb_connection: "tcp:ovn-ovsdb-sb.openstack.svc.cluster.local:6642"
                 ovn_l3_scheduler: leastloaded
                 ovn_metadata_enabled: true
 

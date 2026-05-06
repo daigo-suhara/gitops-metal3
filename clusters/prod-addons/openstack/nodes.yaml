@@ -7,6 +7,8 @@ metadata:
     openstack-control-plane: enabled
     openstack-compute-node: enabled
     openvswitch: enabled
+    openstack-network-node: enabled
+    l3-agent: enabled
 spec:
   taints: []
 ---
@@ -18,6 +20,8 @@ metadata:
     openstack-control-plane: enabled
     openstack-compute-node: enabled
     openvswitch: enabled
+    openstack-network-node: enabled
+    l3-agent: enabled
 spec:
   taints: []
 ---
@@ -29,5 +33,7 @@ metadata:
     openstack-control-plane: enabled
     openstack-compute-node: enabled
     openvswitch: enabled
+    openstack-network-node: enabled
+    l3-agent: enabled
 spec:
   taints: []

@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/daigo-suhara/gitops-metal3.git
-    targetRevision: HEAD
+    targetRevision: main
     path: infrastructure/argocd-config
   destination:
     server: https://kubernetes.default.svc

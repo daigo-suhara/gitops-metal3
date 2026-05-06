@@ -51,9 +51,9 @@ spec:
           K8S_MINOR=v1.35
           # Ironic dnsmasq does not provide gateway/DNS via DHCP, so set
           # them up before any network call.
-          # Wait for eno1 to be up
-          while ! ip link show eno1 | grep -q "UP,LOWER_UP"; do
-            echo "Waiting for eno1 to be up..."
+          # Wait for enx00e04c247a98 to be up
+          while ! ip link show enx00e04c247a98 | grep -q "UP,LOWER_UP"; do
+            echo "Waiting for enx00e04c247a98 to be up..."
             sleep 2
           done
           ip route replace default via 172.16.0.1
