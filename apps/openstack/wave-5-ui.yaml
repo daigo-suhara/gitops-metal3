@@ -1,10 +1,12 @@
+---
+# Wave 5: Horizon (dashboard - needs keystone and all other services)
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: openstack-horizon
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "140"
+    argocd.argoproj.io/sync-wave: "5"
 spec:
   project: default
   source:
@@ -23,6 +25,7 @@ spec:
             node_selector_value: enabled
 
         images:
+          pull_policy: "IfNotPresent"
           tags:
             horizon_db_sync: "quay.io/airshipit/horizon:2025.1-ubuntu_noble"
             horizon: "quay.io/airshipit/horizon:2025.1-ubuntu_noble"
@@ -55,9 +58,15 @@ spec:
               horizon:
                 password: openstack-changeme
 
-        service:
-          type: LoadBalancer
-          loadBalancerIP: 172.16.10.211
+        network:
+          dashboard:
+            ingress:
+              public: true
+              classes:
+                namespace: ingress-openstack
+                cluster: ingress-openstack
+          web:
+            loadBalancerIP: 172.16.10.211
   destination:
     server: https://172.16.10.100:6443
     namespace: openstack
@@ -65,6 +74,13 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    retry:
+      limit: 3
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+      - WaitForJobs=true

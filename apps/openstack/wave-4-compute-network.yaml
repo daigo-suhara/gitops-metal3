@@ -1,10 +1,160 @@
+---
+# Wave 4-a: Neutron (networking - needs keystone + mariadb + rabbitmq + OVN)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: openstack-neutron
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+spec:
+  project: default
+  source:
+    repoURL: https://opendev.org/openstack/openstack-helm.git
+    path: neutron
+    targetRevision: master
+    helm:
+      releaseName: neutron
+      values: |
+        labels:
+          agent:
+            dhcp:
+              node_selector_key: openstack-compute-node
+              node_selector_value: enabled
+            l3:
+              node_selector_key: openstack-compute-node
+              node_selector_value: enabled
+            metadata:
+              node_selector_key: openstack-compute-node
+              node_selector_value: enabled
+            ovn:
+              node_selector_key: openstack-compute-node
+              node_selector_value: enabled
+          job:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
+          server:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
+
+        images:
+          pull_policy: "IfNotPresent"
+          tags:
+            bootstrap: "quay.io/airshipit/openstack-client:latest-ubuntu_noble"
+            db_init: "quay.io/airshipit/openstack-client:latest-ubuntu_noble"
+            neutron_db_sync: "quay.io/airshipit/neutron:latest-ubuntu_noble"
+            db_drop: "quay.io/airshipit/openstack-client:latest-ubuntu_noble"
+            ks_endpoints: "quay.io/airshipit/openstack-client:latest-ubuntu_noble"
+            ks_service: "quay.io/airshipit/openstack-client:latest-ubuntu_noble"
+            ks_user: "quay.io/airshipit/openstack-client:latest-ubuntu_noble"
+            rabbit_init: "docker.io/library/rabbitmq:3.13-management"
+            neutron_server: "quay.io/airshipit/neutron:latest-ubuntu_noble"
+            neutron_dhcp: "quay.io/airshipit/neutron:latest-ubuntu_noble"
+            neutron_metadata: "quay.io/airshipit/neutron:latest-ubuntu_noble"
+            neutron_l3: "quay.io/airshipit/neutron:latest-ubuntu_noble"
+            neutron_ovn_vpn_agent: "quay.io/airshipit/neutron:latest-ubuntu_noble"
+            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
+            image_repo_sync: "docker.io/library/docker:17.07.0"
+
+        manifests:
+          job_db_init: true
+          job_db_sync: true
+          job_ks_user: true
+          job_ks_service: true
+          job_ks_endpoints: true
+          test: false
+          daemonset_dhcp_agent: false
+          daemonset_l3_agent: false
+          daemonset_metadata_agent: false
+
+        network:
+          backend:
+            - ovn
+          interface:
+            tunnel: eno1
+
+        conf:
+          neutron:
+            DEFAULT:
+              log_config_append: null
+              core_plugin: ml2
+              service_plugins: router,ovn-router
+              dhcp_agents_per_network: 3
+            agent:
+              root_helper: sudo /usr/bin/neutron-rootwrap /etc/neutron/rootwrap.conf
+          plugins:
+            ml2_conf:
+              ml2:
+                type_drivers: local,flat,vlan,geneve
+                tenant_network_types: geneve
+                mechanism_drivers: ovn
+              ml2_type_geneve:
+                vni_ranges: "1:65536"
+                max_header_size: 38
+              ml2_type_flat:
+                flat_networks: external
+              ml2_type_vlan:
+                network_vlan_ranges: "external:1:4094"
+              securitygroup:
+                enable_security_group: true
+              ovn:
+                ovn_nb_connection: "tcp:ovn-ovsdb-nb.openstack.svc.cluster.local:6641"
+                ovn_sb_connection: "tcp:ovn-ovsdb-sb.openstack.svc.cluster.local:6642"
+                ovn_l3_scheduler: leastloaded
+                ovn_metadata_enabled: true
+
+        endpoints:
+          identity:
+            auth:
+              admin:
+                password: openstack-changeme
+              neutron:
+                password: openstack-changeme
+              nova:
+                password: openstack-changeme
+          oslo_db:
+            auth:
+              admin:
+                password: openstack-changeme
+              neutron:
+                password: openstack-changeme
+          oslo_messaging:
+            auth:
+              admin:
+                username: admin
+                password: openstack-changeme
+              neutron:
+                username: neutron
+                password: openstack-changeme
+          network:
+            hosts:
+              default: neutron-server
+  destination:
+    server: https://172.16.10.100:6443
+    namespace: openstack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 5
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - WaitForJobs=true
+---
+# Wave 4-b: Nova (compute - needs keystone + glance + placement + neutron + libvirt)
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: openstack-nova
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "134"
+    argocd.argoproj.io/sync-wave: "4"
 spec:
   project: default
   source:
@@ -41,6 +191,7 @@ spec:
             node_selector_value: enabled
 
         images:
+          pull_policy: "IfNotPresent"
           tags:
             bootstrap: "quay.io/airshipit/openstack-client:latest-ubuntu_noble"
             db_init: "quay.io/airshipit/openstack-client:latest-ubuntu_noble"
@@ -154,6 +305,13 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    retry:
+      limit: 5
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+      - WaitForJobs=true

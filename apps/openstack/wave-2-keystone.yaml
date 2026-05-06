@@ -1,10 +1,12 @@
+---
+# Wave 2: Keystone (identity service - waits for mariadb + rabbitmq + memcached)
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: openstack-keystone
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "130"
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   project: default
   source:
@@ -23,6 +25,7 @@ spec:
             node_selector_value: enabled
 
         images:
+          pull_policy: "IfNotPresent"
           tags:
             bootstrap: "quay.io/airshipit/openstack-client:latest-ubuntu_noble"
             db_init: "quay.io/airshipit/openstack-client:latest-ubuntu_noble"
@@ -98,6 +101,13 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    retry:
+      limit: 5
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+      - WaitForJobs=true
