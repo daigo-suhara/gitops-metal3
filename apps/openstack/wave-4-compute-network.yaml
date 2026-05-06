@@ -145,7 +145,6 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
-      - WaitForJobs=true
 ---
 # Wave 4-b: Nova (compute - needs keystone + glance + placement + neutron + libvirt)
 apiVersion: argoproj.io/v1alpha1
@@ -314,4 +313,3 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
-      - WaitForJobs=true

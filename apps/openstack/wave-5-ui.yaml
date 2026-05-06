@@ -83,4 +83,3 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
-      - WaitForJobs=true
