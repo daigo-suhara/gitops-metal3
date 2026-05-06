@@ -44,11 +44,11 @@ spec:
             image_repo_sync: "docker.io/library/docker:17.07.0"
 
         manifests:
-          job_db_init: true
-          job_db_sync: true
-          job_fernet_setup: true
-          job_credential_setup: true
-          job_bootstrap: true
+          job_db_init: false
+          job_db_sync: false
+          job_fernet_setup: false
+          job_credential_setup: false
+          job_bootstrap: false
           job_credential_cleanup: false
           test: false
 
