@@ -259,3 +259,49 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+---
+# Wave 1-e: Open vSwitch (required by OVN controller on each compute node)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: openstack-openvswitch
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: default
+  source:
+    repoURL: https://opendev.org/openstack/openstack-helm.git
+    path: openvswitch
+    targetRevision: master
+    helm:
+      releaseName: openvswitch
+      values: |
+        labels:
+          ovs:
+            node_selector_key: openvswitch
+            node_selector_value: enabled
+
+        images:
+          pull_policy: "IfNotPresent"
+          tags:
+            openvswitch_db_server: "quay.io/airshipit/openvswitch:latest-ubuntu_noble"
+            openvswitch_vswitchd: "quay.io/airshipit/openvswitch:latest-ubuntu_noble"
+            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
+            image_repo_sync: "docker.io/library/docker:17.07.0"
+  destination:
+    server: https://172.16.10.100:6443
+    namespace: openstack
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    retry:
+      limit: 3
+      backoff:
+        duration: 15s
+        factor: 2
+        maxDuration: 3m
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
