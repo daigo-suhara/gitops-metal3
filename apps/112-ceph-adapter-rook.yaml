@@ -1,0 +1,57 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ceph-adapter-rook
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "112"
+spec:
+  project: default
+  source:
+    repoURL: https://opendev.org/openstack/openstack-helm.git
+    path: ceph-adapter-rook
+    targetRevision: master
+    helm:
+      releaseName: ceph-adapter-rook
+      values: |
+        ceph_cluster_namespace: rook-ceph
+        labels:
+          job:
+            node_selector_key: openstack-control-plane
+            node_selector_value: enabled
+        images:
+          tags:
+            ceph_config_helper: "docker.io/openstackhelm/ceph-config-helper:ubuntu_jammy_18.2.2-1-20240312"
+            dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
+            image_repo_sync: "docker.io/docker:17.07.0"
+        conf:
+          ceph:
+            global:
+              fsid: 18daea65-b580-438e-ac7d-af2645eaeef3
+        
+        # Define which users to copy from rook-ceph to openstack namespace
+        users:
+          - name: cinder
+            keyring_name: cinder-ceph-client-key
+            rbd_secret_uuid: 457eb676-33da-42ec-9a8c-9293d545c337
+          - name: cinder
+            keyring_name: cinder-volume-rbd-keyring
+            rbd_secret_uuid: 457eb676-33da-42ec-9a8c-9293d545c337
+          - name: glance
+            keyring_name: glance-ceph-client-key
+          - name: nova
+            keyring_name: nova-ceph-client-key
+            rbd_secret_uuid: 457eb676-33da-42ec-9a8c-9293d545c337
+          - name: nova
+            keyring_name: pvc-ceph-client-key
+            rbd_secret_uuid: 457eb676-33da-42ec-9a8c-9293d545c337
+  destination:
+    server: https://172.16.10.100:6443
+    namespace: openstack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
