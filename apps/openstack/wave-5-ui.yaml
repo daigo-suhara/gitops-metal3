@@ -27,9 +27,9 @@ spec:
         images:
           pull_policy: "IfNotPresent"
           tags:
-            horizon_db_sync: "quay.io/airshipit/horizon:2025.1-ubuntu_noble"
-            horizon: "quay.io/airshipit/horizon:2025.1-ubuntu_noble"
-            ks_user: "quay.io/airshipit/openstack-client:2025.1-ubuntu_noble"
+            horizon_db_sync: "quay.io/airshipit/horizon:2026.1-ubuntu_noble"
+            horizon: "quay.io/airshipit/horizon:2026.1-ubuntu_noble"
+            ks_user: "quay.io/airshipit/openstack-client:2026.1-ubuntu_noble"
             dep_check: "quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_noble"
             image_repo_sync: "docker.io/docker:17.07.0"
 
@@ -40,7 +40,8 @@ spec:
           horizon:
             local_settings:
               config:
-                allowed_hosts: "'*'"
+                allowed_hosts:
+                  - '*'
                 openstack_keystone_url: "http://keystone-api.openstack.svc.cluster.local/v3"
                 openstack_host: "keystone-api.openstack.svc.cluster.local"
 
