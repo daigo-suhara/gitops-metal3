@@ -26,12 +26,18 @@ spec:
           public: 172.16.0.0/16
           cluster: 172.16.0.0/16
 
+        deploy:
+          tool: "ceph-volume"
+          osd_force_repair: 1
+
         conf:
           ceph:
             global:
               fsid: c12792b1-87d4-4a43-98dd-c6374e6ab9e4
               public_network: 172.16.0.0/16
               cluster_network: 172.16.0.0/16
+          lvm:
+            global_filter: "[ \"a|/dev/sdb|\", \"r|.*|\" ]"
           storage:
             osd:
               - data:
