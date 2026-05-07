@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/daigo-suhara/gitops-metal3.git
-    targetRevision: main
+    targetRevision: HEAD
     path: apps
     directory:
       recurse: false
