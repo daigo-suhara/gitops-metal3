@@ -4,4 +4,3 @@ resources:
   - ceph-cluster.yaml
   - ceph-block-pool.yaml
   - ceph-filesystem.yaml
-  - ceph-openstack-pools.yaml
