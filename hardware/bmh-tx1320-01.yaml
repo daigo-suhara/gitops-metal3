@@ -1,8 +1,6 @@
 apiVersion: metal3.io/v1alpha1
 kind: BareMetalHost
 metadata:
-  annotations:
-    inspect.metal3.io: disabled
   name: tx1320-01
   namespace: metal3
   labels:
