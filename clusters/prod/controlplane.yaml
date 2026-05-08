@@ -108,22 +108,12 @@ spec:
               - { name: vip_address, value: 172.16.10.100 }
               - { name: cp_enable, value: "true" }
               - { name: cp_namespace, value: kube-system }
-              - { name: vip_leaderelection, value: "true" }
-              - { name: KUBERNETES_SERVICE_HOST, value: "127.0.0.1" }
-              - { name: KUBERNETES_SERVICE_PORT, value: "6443" }
+              - { name: vip_leaderelection, value: "false" }
               image: ghcr.io/kube-vip/kube-vip:v0.8.2
               name: kube-vip
               securityContext:
                 capabilities: { add: [ "NET_ADMIN", "NET_RAW", "SYS_TIME" ] }
-              volumeMounts:
-              - mountPath: /etc/kubernetes/admin.conf
-                name: kubeconfig
             hostNetwork: true
-            volumes:
-            - hostPath:
-                path: /etc/kubernetes/super-admin.conf
-                type: FileOrCreate
-              name: kubeconfig
         path: /etc/kubernetes/manifests/kube-vip.yaml
         permissions: "0644"
     users:
