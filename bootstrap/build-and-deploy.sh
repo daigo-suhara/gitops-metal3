@@ -3,7 +3,6 @@ set -euo pipefail
 
 # どの環境でもリポジトリルートを基準に動作させる
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-cd "$ROOT_DIR"
 
 # 設定
 IMAGE_DIR="/var/www/html/images"
@@ -18,20 +17,22 @@ fi
 
 # 2. ビルドの実行
 cd "$CAPIC_DIR"
-# 最新のAnsible roleを取得
-ansible-galaxy install -r ansible/requirements.yml || true
+# Ansible role のインストール先を指定
+ansible-galaxy install -r ansible/requirements.yml -p ansible/roles/ --force
 
 # ビルド実行
 make build-node-raw-ubuntu-2404 KUBERNETES_VERSION="$K8S_VERSION"
 
 # 3. 配置
-RAW_IMAGE="output/ubuntu-2404/ubuntu-2404-kube-${K8S_VERSION}.raw"
+# 出力パスが変動する場合に備えて find で特定
+RAW_IMAGE=$(find output -name "*.raw" | head -n 1)
+
 if [ -f "$RAW_IMAGE" ]; then
     sha256sum "$RAW_IMAGE" > "${RAW_IMAGE}.sha256"
     sudo mkdir -p "$IMAGE_DIR"
     sudo cp "$RAW_IMAGE" "${RAW_IMAGE}.sha256" "$IMAGE_DIR/"
     echo "Image deployed to $IMAGE_DIR"
 else
-    echo "Build failed: Image not found at $RAW_IMAGE"
+    echo "Build failed: Image not found."
     exit 1
 fi
