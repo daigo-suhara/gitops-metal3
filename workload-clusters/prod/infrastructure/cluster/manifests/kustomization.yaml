@@ -4,4 +4,3 @@ resources:
   - cluster.yaml
   - controlplane.yaml
   - workers.yaml
-  - ../../hardware/manifests/kustomization.yaml
