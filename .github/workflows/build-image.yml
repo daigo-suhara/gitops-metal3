@@ -33,17 +33,24 @@ jobs:
       - name: Clone image-builder
         run: git clone https://github.com/kubernetes-sigs/image-builder.git
 
+      - name: Add swap space
+        run: |
+          sudo fallocate -l 4G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+
       - name: Build Image
         working-directory: image-builder/images/capi
         env:
           PACKER_LOG: 1
-          PACKER_VAR_FILES: "packer/raw/raw-ubuntu-2404.json"
         run: |
           export PATH="$PWD/.local/bin:$PATH"
           make deps-raw
-          # KVMが使えない環境向けに、QEMUの引数を調整する必要がある場合があります
-          # image-builder はデフォルトで KVM を使おうとするため、
-          # もし失敗が続く場合は PACKER_FLAGS="-var 'qemuargs=[[\"-accel\", \"tcg\"]]'" などの検討が必要です。
+          
+          # KVMが使えない環境向けに tcg を強制し、メモリ割り当てを調整
+          export PACKER_FLAGS="-var 'qemu_accelerator=tcg' -var 'memory=4096' -var 'cpus=2'"
+          
           make build-raw-ubuntu-2404 KUBERNETES_VERSION=${{ github.event.inputs.k8s_version || 'v1.35.4' }}
           
           IMAGE_NAME="ubuntu-2404-kube-${{ github.event.inputs.k8s_version || 'v1.35.4' }}.raw"
