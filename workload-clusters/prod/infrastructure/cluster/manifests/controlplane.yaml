@@ -138,7 +138,9 @@ spec:
               - { name: port, value: "6443" }
               - { name: vip_interface, value: eno1 }
               - { name: vip_address, value: 172.16.10.100 }
+              - { name: vip_controlplane, value: "true" }
               - { name: controlplane, value: "true" }
+              - { name: cp_enable, value: "true" }
               - { name: cp_namespace, value: kube-system }
               - { name: vip_leaderelection, value: "true" }
               - { name: vip_lease_duration, value: "5" }
