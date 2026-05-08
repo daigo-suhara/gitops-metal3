@@ -1,0 +1,52 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prod-argocd-bootstrap
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "30" # クラスタができてから入れる
+spec:
+  project: default
+  source:
+    repoURL: https://argoproj.github.io/argo-helm
+    chart: argo-cd
+    targetRevision: 7.3.11
+    helm:
+      releaseName: argocd
+      values: |
+        server:
+          extraArgs:
+            - --insecure
+  destination:
+    server: https://172.16.10.100:6443 # ワークロードクラスタのVIP
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+# さらに、ワークロード側ArgoCDが自分のGit設定を読み込むための定義も流し込む
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prod-argocd-root-config
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "35"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/daigo-suhara/gitops-metal3.git
+    targetRevision: HEAD
+    path: workload-clusters/prod/apps
+    directory:
+      include: 'workload-root.yaml'
+  destination:
+    server: https://172.16.10.100:6443
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
