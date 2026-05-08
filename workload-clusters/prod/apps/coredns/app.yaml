@@ -1,20 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: workload-root
+  name: coredns
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/daigo-suhara/gitops-metal3.git
     targetRevision: HEAD
-    path: workload-clusters/prod/apps
-    directory:
-      recurse: true
-      include: '**/app.yaml' # 各フォルダのapp.yamlだけを読み込む
+    path: workload-clusters/prod/apps/coredns/manifests
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
+    namespace: kube-system
   syncPolicy:
     automated:
       prune: true
