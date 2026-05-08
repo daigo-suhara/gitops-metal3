@@ -5,7 +5,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 # 依存パッケージのインストール
 apt-get update
-apt-get install -y ca-certificates curl git make qemu-utils qemu-system-x86 snapd python3-pip
+apt-get install -y ca-certificates curl git make qemu-utils qemu-system-x86 snapd python3-pip unzip
 snap install packer --classic
 pip3 install ansible --break-system-packages --break-system-packages
 
