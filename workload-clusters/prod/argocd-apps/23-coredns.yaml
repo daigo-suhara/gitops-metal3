@@ -1,19 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: hardware
+  name: coredns
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "10"
+    argocd.argoproj.io/sync-wave: "75"
 spec:
   project: default
   source:
     repoURL: https://github.com/daigo-suhara/gitops-metal3.git
     targetRevision: main
-    path: hardware
+    path: workload-clusters/prod/core-addons/kube-system
   destination:
-    server: https://kubernetes.default.svc
-    namespace: metal3
+    server: https://172.16.10.100:6443
+    namespace: kube-system
   syncPolicy:
     automated:
       prune: true

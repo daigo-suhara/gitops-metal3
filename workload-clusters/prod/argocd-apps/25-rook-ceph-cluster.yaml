@@ -1,19 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: bmo-ironic
+  name: rook-ceph-cluster
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-wave: "110"
 spec:
   project: default
   source:
     repoURL: https://github.com/daigo-suhara/gitops-metal3.git
     targetRevision: main
-    path: infrastructure/bmo-ironic
+    path: workload-clusters/prod/core-addons/rook-ceph
   destination:
-    server: https://kubernetes.default.svc
-    namespace: metal3
+    server: https://172.16.10.100:6443
+    namespace: rook-ceph
   syncPolicy:
     automated:
       prune: true

@@ -1,19 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: argocd-config
+  name: workload-cluster
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-wave: "20"
 spec:
   project: default
   source:
     repoURL: https://github.com/daigo-suhara/gitops-metal3.git
     targetRevision: main
-    path: infrastructure/argocd-config
+    path: workload-clusters/prod/core
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
+    namespace: metal3
   syncPolicy:
     automated:
       prune: true

@@ -10,9 +10,10 @@ spec:
   source:
     repoURL: https://github.com/daigo-suhara/gitops-metal3.git
     targetRevision: HEAD
-    path: apps
+    path: .
     directory:
       recurse: true
+      include: '**/argocd-apps/*.yaml'
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd

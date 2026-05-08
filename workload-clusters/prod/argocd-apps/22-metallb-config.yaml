@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/daigo-suhara/gitops-metal3.git
     targetRevision: main
-    path: clusters/prod-addons/metallb
+    path: workload-clusters/prod/core-addons/metallb
   destination:
     server: https://172.16.10.100:6443
     namespace: metallb-system

@@ -1,19 +1,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: coredns
+  name: capi-providers
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "75"
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   project: default
   source:
     repoURL: https://github.com/daigo-suhara/gitops-metal3.git
     targetRevision: main
-    path: clusters/prod-addons/kube-system
+    path: system/base/capi-providers
+    directory:
+      recurse: true
   destination:
-    server: https://172.16.10.100:6443
-    namespace: kube-system
+    server: https://kubernetes.default.svc
+    namespace: capi-system
   syncPolicy:
     automated:
       prune: true
