@@ -13,18 +13,17 @@
 2.  **Workload ArgoCD (ワークロードクラスタ側)**:
     *   自分自身のクラスタ内のアドオン (Cilium, MetalLB, Ceph) の管理
     *   アプリケーションのデプロイ
-
 ### フォルダ構成
 
 ```text
 .
-├── system/                 # 管理クラスタ自体の基盤
-│   └── apps/               # BMO, Ironic, CAPI 等の自己完結型定義
-├── workload-clusters/      # ワークロードクラスタの定義
-│   └── prod/
-│       ├── management/     # 管理側への指示 (App定義: Cluster作成, Workload-ArgoCD起動)
-│       ├── resources/      # クラスタの実体定義 (BMH, Cluster, Machine)
-│       └── apps/           # ワークロード側自身の指示と材料 (Cilium, MetalLB等)
+├── system/                 # 管理クラスタ自体の基盤 (BMO, Ironic, CAPI等)
+│   └── apps/               # 管理側 ArgoCD が担当する基本コンポーネント
+└── workload-clusters/      # ワークロードクラスタの定義
+    └── prod/
+        ├── infrastructure/ # クラスタのインフラ定義 (Hardware, Cluster, ArgoCD起動)
+        └── apps/           # ワークロード側自身の指示と材料 (Cilium, MetalLB等)
+```
 └── bootstrap/              # 管理ホストのセットアップと root-app の起動
 ```
 
