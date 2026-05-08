@@ -27,7 +27,8 @@ fi
 
 # ビルド実行 (既存のイメージがあればスキップするオプションも検討できるが、明示的なビルドを優先)
 if [ ! -f "output/$IMAGE_NAME" ]; then
-    make build-node-raw-ubuntu-2404 KUBERNETES_VERSION="$K8S_VERSION"
+    make deps-raw
+    make build-raw-ubuntu-2404 KUBERNETES_VERSION="$K8S_VERSION"
     # ビルド後のファイル名を固定化
     GENERATED_IMAGE=$(find output -name "*.raw" | head -n 1)
     mv "$GENERATED_IMAGE" "output/$IMAGE_NAME"
