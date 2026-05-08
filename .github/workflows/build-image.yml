@@ -20,17 +20,30 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y qemu-utils qemu-system-x86 python3-pip unzip
+          sudo apt-get install -y qemu-utils qemu-system-x86 python3-pip unzip cpu-checker
           pip3 install ansible --break-system-packages
+          # KVMの権限を付与（利用可能な場合）
+          sudo usermod -aG kvm $USER
+
+      - name: Check KVM
+        run: |
+          kvm-ok || echo "KVM is not available, performance will be slow"
+          ls -l /dev/kvm || echo "/dev/kvm not found"
 
       - name: Clone image-builder
         run: git clone https://github.com/kubernetes-sigs/image-builder.git
 
       - name: Build Image
         working-directory: image-builder/images/capi
+        env:
+          PACKER_LOG: 1
+          PACKER_VAR_FILES: "packer/raw/raw-ubuntu-2404.json"
         run: |
           export PATH="$PWD/.local/bin:$PATH"
           make deps-raw
+          # KVMが使えない環境向けに、QEMUの引数を調整する必要がある場合があります
+          # image-builder はデフォルトで KVM を使おうとするため、
+          # もし失敗が続く場合は PACKER_FLAGS="-var 'qemuargs=[[\"-accel\", \"tcg\"]]'" などの検討が必要です。
           make build-raw-ubuntu-2404 KUBERNETES_VERSION=${{ github.event.inputs.k8s_version || 'v1.35.4' }}
           
           IMAGE_NAME="ubuntu-2404-kube-${{ github.event.inputs.k8s_version || 'v1.35.4' }}.raw"
