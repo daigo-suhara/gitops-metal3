@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/daigo-suhara/gitops-metal3.git
     targetRevision: main
-    path: workload-clusters/prod/core
+    path: workload-clusters/prod/infrastructure/cluster/manifests
   destination:
     server: https://kubernetes.default.svc
     namespace: metal3
