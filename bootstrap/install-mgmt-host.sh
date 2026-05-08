@@ -16,6 +16,10 @@ ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 # ビルドスクリプトを実行可能に
 chmod +x "$SCRIPT_DIR/build-and-deploy.sh"
 
+# 共有ディレクトリの作成
+sudo mkdir -p /home/ubuntu/ironic-images/html/images
+sudo chmod -R 777 /home/ubuntu/ironic-images
+
 # 最後に自動ビルドを実行
 "$SCRIPT_DIR/build-and-deploy.sh"
 
