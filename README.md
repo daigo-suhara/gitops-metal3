@@ -53,13 +53,5 @@ kind create cluster --config bootstrap/kind-cluster.yaml
 ### 3. GitOps の起動
 管理側の ArgoCD を起動し、全ての自動構築をスタートさせます。
 ```bash
-kubectl apply -f bootstrap/root-app.yaml
+kubectl apply -f bootstrap/root.yaml
 ```
-
----
-
-## 自動化・堅牢化のポイント
-- **全自動 HA 構築**: `kube-vip` を API サーバーへの依存なしに起動させることで、初期構築時の「卵と鶏」問題を解消。
-- **UUID 自動同期**: ノードの `kubeadm join` 時に `metal3.io/uuid` ラベルを自動付与する設定を `KubeadmControlPlane` に統合。
-- **ヘルスチェックの自動化**: `postKubeadmCommands` を用いて、管理クラスタからの監視に必要な RBAC 権限を自動注入。
-- **ベアメタル・ライフサイクル**: Ironic による OS (Ubuntu 24.04) の書き込みから Kubernetes のセットアップまで完全自動化。
