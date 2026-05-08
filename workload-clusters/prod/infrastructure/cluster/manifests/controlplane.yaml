@@ -146,6 +146,7 @@ spec:
             hostNetwork: true
         path: /etc/kubernetes/manifests/kube-vip.yaml
         permissions: "0644"
+    users:
       - name: metal3
         sudo: "ALL=(ALL) NOPASSWD:ALL"
         sshAuthorizedKeys:
