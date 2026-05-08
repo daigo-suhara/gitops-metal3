@@ -89,16 +89,6 @@ patches:
                   curl -L -o $DEST/ironic-python-agent.initramfs $IPA_BASE/ipa-centos9-master.initramfs
                 fi
 
-                # 2. Download Ubuntu 24.04 (Noble) image
-                IMAGE_NAME_RAW="noble-server-cloudimg-amd64.raw"
-                if [ ! -f $DEST/$IMAGE_NAME_RAW ]; then
-                  curl -L -o $DEST/noble.img https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
-                  apk add --no-cache qemu-img
-                  qemu-img convert -f qcow2 -O raw $DEST/noble.img $DEST/$IMAGE_NAME_RAW
-                  rm $DEST/noble.img
-                fi
-                sha256sum $DEST/$IMAGE_NAME_RAW > $DEST/$IMAGE_NAME_RAW.sha256
-                
                 chmod -R 777 /shared
             volumeMounts:
               - name: ironic-data-volume
