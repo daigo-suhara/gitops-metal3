@@ -19,6 +19,9 @@ fi
 # 2. ビルドの実行
 cd "$CAPIC_DIR"
 
+# local bin をパスに通す (packer 等)
+export PATH="$CAPIC_DIR/.local/bin:$PATH"
+
 # requirements.yml の場所を動的に見つけてインストール
 REQ_FILE=$(find . -name "requirements.yml" | head -n 1)
 if [ -n "$REQ_FILE" ]; then
