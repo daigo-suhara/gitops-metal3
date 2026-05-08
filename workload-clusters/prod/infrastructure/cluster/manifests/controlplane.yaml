@@ -45,6 +45,7 @@ spec:
       apiServer:
         certSANs:
           - 172.16.10.100
+          - 127.0.0.1
       controllerManager:
         extraArgs:
           enable-hostpath-provisioner: "true"
@@ -96,11 +97,19 @@ spec:
           mkdir -p /etc/systemd/resolved.conf.d
           printf '[Resolve]\nDNS=8.8.8.8 1.1.1.1\n' >/etc/systemd/resolved.conf.d/99-public.conf
           systemctl restart systemd-resolved
-          # kube-vip's k8s client falls back to https://kubernetes:6443
-          # before kube-apiserver advertises the VIP. Map it to localhost so
-          # kube-vip can authenticate to the local apiserver and claim the
-          # VIP, which unblocks the post-init kubeadm phases.
-          grep -q '^127.0.0.1 kubernetes$' /etc/hosts || echo '127.0.0.1 kubernetes' >>/etc/hosts
+
+          # K8s 1.30+ bootstrap deadlock fix:
+          # Background loop to generate kube-vip specific kubeconfig using super-admin.conf
+          # but pointing to localhost to bypass the missing VIP during init.
+          (
+            while [ ! -f /etc/kubernetes/super-admin.conf ]; do
+              sleep 1
+            done
+            cp /etc/kubernetes/super-admin.conf /etc/kubernetes/kube-vip.conf
+            sed -i 's/172.16.10.100/127.0.0.1/g' /etc/kubernetes/kube-vip.conf
+            echo "Successfully generated /etc/kubernetes/kube-vip.conf"
+          ) &
+
           # disable swap
           swapoff -a || true
           sed -i '/\sswap\s/ s/^/#/' /etc/fstab
@@ -139,24 +148,24 @@ spec:
               - { name: vip_interface, value: eno1 }
               - { name: vip_address, value: 172.16.10.100 }
               - { name: vip_controlplane, value: "true" }
-              - { name: controlplane, value: "true" }
               - { name: cp_enable, value: "true" }
               - { name: cp_namespace, value: kube-system }
               - { name: vip_leaderelection, value: "true" }
               - { name: vip_lease_duration, value: "5" }
               - { name: vip_renew_deadline, value: "3" }
               - { name: vip_retry_period, value: "1" }
+              - { name: vip_kubeconfig, value: "/etc/kubernetes/kube-vip.conf" }
               image: ghcr.io/kube-vip/kube-vip:v0.8.2
               name: kube-vip
               securityContext:
                 capabilities: { add: [ "NET_ADMIN", "NET_RAW", "SYS_TIME" ] }
               volumeMounts:
-              - mountPath: /etc/kubernetes/super-admin.conf
+              - mountPath: /etc/kubernetes/kube-vip.conf
                 name: kubeconfig
             hostNetwork: true
             volumes:
             - hostPath:
-                path: /etc/kubernetes/super-admin.conf
+                path: /etc/kubernetes/kube-vip.conf
               name: kubeconfig
         path: /etc/kubernetes/manifests/kube-vip.yaml
         permissions: "0644"
