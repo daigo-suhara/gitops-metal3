@@ -40,6 +40,7 @@ spec:
       apiServer:
         certSANs:
           - 172.16.10.100
+      controlPlaneEndpoint: 172.16.10.100:6443
       controllerManager:
         extraArgs:
           enable-hostpath-provisioner: "true"
@@ -121,7 +122,7 @@ spec:
             hostNetwork: true
             volumes:
             - hostPath:
-                path: /etc/kubernetes/admin.conf
+                path: /etc/kubernetes/super-admin.conf
                 type: FileOrCreate
               name: kubeconfig
         path: /etc/kubernetes/manifests/kube-vip.yaml
