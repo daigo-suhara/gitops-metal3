@@ -40,7 +40,6 @@ spec:
       apiServer:
         certSANs:
           - 172.16.10.100
-      controlPlaneEndpoint: 172.16.10.100:6443
       controllerManager:
         extraArgs:
           enable-hostpath-provisioner: "true"
