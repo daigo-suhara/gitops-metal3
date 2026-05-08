@@ -5,6 +5,7 @@ namespace: metal3
 resources:
   - 00-namespace.yaml
   - hostclaims-crd.yaml
+  - image-pvc.yaml
   - https://github.com/metal3-io/baremetal-operator//config/default?ref=release-0.9
   - https://github.com/metal3-io/baremetal-operator//ironic-deployment/default?ref=release-0.9
 
@@ -89,7 +90,19 @@ patches:
                   curl -L -o $DEST/ironic-python-agent.initramfs $IPA_BASE/ipa-centos9-master.initramfs
                 fi
 
+                # 2. Download Custom Ubuntu Image from GitHub Releases
+                # Variables are provided via env from ConfigMap
+                if [ ! -f $DEST/$IMAGE_NAME ]; then
+                  curl -L -o $DEST/$IMAGE_NAME $IMAGE_URL
+                  curl -L -o $DEST/$IMAGE_NAME.sha256 $IMAGE_URL.sha256
+                fi
+
                 chmod -R 777 /shared
+            env:
+              - name: IMAGE_NAME
+                value: ubuntu-2404-kube-v1.35.4.raw
+              - name: IMAGE_URL
+                value: https://github.com/daigo-suhara/gitops-metal3/releases/download/v1.35.4/ubuntu-2404-kube-v1.35.4.raw
             volumeMounts:
               - name: ironic-data-volume
                 mountPath: /shared
@@ -139,9 +152,8 @@ patches:
         path: /spec/template/spec/volumes/0
         value:
           name: ironic-data-volume
-          hostPath:
-            path: /home/ubuntu/ironic-images
-            type: DirectoryOrCreate
+          persistentVolumeClaim:
+            claimName: image-pvc
 
 configMapGenerator:
   - name: ironic
