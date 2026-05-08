@@ -8,7 +8,8 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install -y ca-certificates curl git make qemu-utils qemu-system-x86 snapd
 snap install packer --classic
-snap install ansible --classic
+apt-get install -y python3-pip
+pip3 install ansible --break-system-packages
 
 # Image Builder 依存のインストール (Ansible roles)
 ansible-galaxy install -r https://github.com/kubernetes-sigs/image-builder/blob/main/images/capi/ansible/requirements.yml || true
