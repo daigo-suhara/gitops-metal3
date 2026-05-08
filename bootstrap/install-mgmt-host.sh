@@ -11,14 +11,6 @@ snap install packer --classic
 apt-get install -y python3-pip
 pip3 install ansible --break-system-packages
 
-# Image Builder 依存のインストール (Ansible roles)
-ansible-galaxy install -r https://github.com/kubernetes-sigs/image-builder/blob/main/images/capi/ansible/requirements.yml || true
-
-# ビルド自動化スクリプトをパスの通った場所へコピー
-cp /Users/daigo-suhara/src/metal3/scripts/build-and-deploy.sh /usr/local/bin/build-k8s-image
-chmod +x /usr/local/bin/build-k8s-image
- gnupg jq apt-transport-https
-
 # Docker official repo
 install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
@@ -49,14 +41,15 @@ curl -fsSL "https://get.helm.sh/helm-${HELM_VER}-linux-${ARCH}.tar.gz" | tar -xz
 install -m 0755 "/tmp/linux-${ARCH}/helm" /usr/local/bin/helm
 rm -rf "/tmp/linux-${ARCH}"
 
+# 自動ビルド実行
+chmod +x "$(dirname "$0")/build-and-deploy.sh"
+"$(dirname "$0")/build-and-deploy.sh"
+
 echo "=== versions ==="
 docker --version
 kind --version
 kubectl version --client
 helm version --short
-
-# 最後に自動ビルドを実行
-/usr/local/bin/build-k8s-image
 
 echo ""
 echo "=== DONE ==="
