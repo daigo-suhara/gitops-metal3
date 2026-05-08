@@ -50,6 +50,33 @@ spec:
           enable-hostpath-provisioner: "true"
     preKubeadmCommands:
       - /opt/install-k8s.sh
+    postKubeadmCommands:
+      - |
+        # Allow CAPI to perform health checks (API Server -> Kubelet)
+        # This is needed for Machine controller to see nodes as healthy
+        kubectl --kubeconfig /etc/kubernetes/super-admin.conf apply -f - <<EOF
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: ClusterRole
+        metadata:
+          name: system:kube-apiserver-to-kubelet
+        rules:
+          - apiGroups: [""]
+            resources: ["nodes/proxy", "nodes/stats", "nodes/log", "nodes/spec", "nodes/metrics"]
+            verbs: ["*"]
+        ---
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: ClusterRoleBinding
+        metadata:
+          name: system:kube-apiserver-to-kubelet
+        roleRef:
+          apiGroup: rbac.authorization.k8s.io
+          kind: ClusterRole
+          name: system:kube-apiserver-to-kubelet
+        subjects:
+          - apiGroup: rbac.authorization.k8s.io
+            kind: User
+            name: kube-apiserver-kubelet-client
+        EOF
     files:
       - path: /opt/install-k8s.sh
         permissions: "0755"
