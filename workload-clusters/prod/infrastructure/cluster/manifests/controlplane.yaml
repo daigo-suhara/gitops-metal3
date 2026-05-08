@@ -123,7 +123,7 @@ spec:
           apt-get update
           apt-get install -y kubelet kubeadm kubectl
           apt-mark hold kubelet kubeadm kubectl
-          systemctl enable kubelet
+          systemctl enable --now kubelet
       - content: |
           apiVersion: v1
           kind: Pod
