@@ -42,7 +42,7 @@ spec:
     targetRevision: HEAD
     path: workload-clusters/prod/apps
     directory:
-      include: 'workload-root.yaml'
+      include: 'root.yaml'
   destination:
     server: https://172.16.10.100:6443
     namespace: argocd
