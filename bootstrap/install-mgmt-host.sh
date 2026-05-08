@@ -6,7 +6,15 @@ set -euxo pipefail
 export DEBIAN_FRONTEND=noninteractive
 
 apt-get update
-apt-get install -y ca-certificates curl gnupg jq apt-transport-https
+apt-get install -y ca-certificates curl git make packer ansible qemu-utils qemu-system-x86
+
+# Image Builder 依存のインストール (Ansible roles)
+ansible-galaxy install -r https://github.com/kubernetes-sigs/image-builder/blob/main/images/capi/ansible/requirements.yml || true
+
+# ビルド自動化スクリプトをパスの通った場所へコピー
+cp /Users/daigo-suhara/src/metal3/scripts/build-and-deploy.sh /usr/local/bin/build-k8s-image
+chmod +x /usr/local/bin/build-k8s-image
+ gnupg jq apt-transport-https
 
 # Docker official repo
 install -m 0755 -d /etc/apt/keyrings
@@ -43,6 +51,9 @@ docker --version
 kind --version
 kubectl version --client
 helm version --short
+
+# 最後に自動ビルドを実行
+/usr/local/bin/build-k8s-image
 
 echo ""
 echo "=== DONE ==="
