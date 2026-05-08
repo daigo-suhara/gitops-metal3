@@ -138,12 +138,24 @@ spec:
               - { name: port, value: "6443" }
               - { name: vip_interface, value: eno1 }
               - { name: vip_address, value: 172.16.10.100 }
-              - { name: vip_leaderelection, value: "false" }
+              - { name: cp_enable, value: "true" }
+              - { name: cp_namespace, value: kube-system }
+              - { name: vip_leaderelection, value: "true" }
+              - { name: vip_lease_duration, value: "5" }
+              - { name: vip_renew_deadline, value: "3" }
+              - { name: vip_retry_period, value: "1" }
               image: ghcr.io/kube-vip/kube-vip:v0.8.2
               name: kube-vip
               securityContext:
                 capabilities: { add: [ "NET_ADMIN", "NET_RAW", "SYS_TIME" ] }
+              volumeMounts:
+              - mountPath: /etc/kubernetes/super-admin.conf
+                name: kubeconfig
             hostNetwork: true
+            volumes:
+            - hostPath:
+                path: /etc/kubernetes/super-admin.conf
+              name: kubeconfig
         path: /etc/kubernetes/manifests/kube-vip.yaml
         permissions: "0644"
     users:
