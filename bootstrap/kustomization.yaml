@@ -4,3 +4,12 @@ namespace: argocd
 resources:
   - https://raw.githubusercontent.com/argoproj/argo-cd/v2.13.0/manifests/install.yaml
   - argocd-ingress.yaml
+
+patches:
+  - target:
+      kind: Deployment
+      name: argocd-server
+    patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/command/-
+        value: "--insecure"

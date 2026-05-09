@@ -4,7 +4,6 @@ metadata:
   name: argocd-server-ingress
   namespace: argocd
   annotations:
-    # Traefik uses this to know the backend is HTTPS
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
@@ -17,4 +16,4 @@ spec:
           service:
             name: argocd-server
             port:
-              number: 443
+              number: 80
