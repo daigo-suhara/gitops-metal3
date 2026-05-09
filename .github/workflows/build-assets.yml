@@ -1,0 +1,49 @@
+name: Build OS Asset Image
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'system/apps/bmo-ironic/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare Assets
+        run: |
+          mkdir -p assets
+          # Download IPA
+          IPA_BASE="https://images.rdoproject.org/central/ironic/ipa/master/centos9"
+          curl -L -o assets/ironic-python-agent.kernel $IPA_BASE/ipa-centos9-master.kernel
+          curl -L -o assets/ironic-python-agent.initramfs $IPA_BASE/ipa-centos9-master.initramfs
+          
+          # Download OSISM QCOW2
+          IMAGE_URL="https://nbg1.your-objectstorage.com/osism/openstack-k8s-capi-images/ubuntu-2404-kube-v1.35/ubuntu-2404-kube-v1.35.qcow2"
+          curl -L -o assets/ubuntu-2404-kube-v1.35.qcow2 $IMAGE_URL
+
+      - name: Create Dockerfile
+        run: |
+          cat <<EOF > Dockerfile
+          FROM alpine:3.20
+          COPY assets/ /assets/
+          EOF
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/metal3-os-assets:v1.35

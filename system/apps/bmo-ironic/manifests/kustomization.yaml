@@ -159,12 +159,32 @@ patches:
           - configMapRef:
               name: ironic
       - op: replace
-        path: /spec/template/spec/initContainers/0/env
+        path: /spec/template/spec/initContainers/0
         value:
-          - name: CACHEURL
-            value: ""
-          - name: IPA_BASEURI
-            value: https://tarballs.opendev.org/openstack/ironic-python-agent/dib
+          name: image-downloader
+          image: ghcr.io/daigo-suhara/metal3-os-assets:v1.35
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -ex
+              apk add --no-cache qemu-img
+              DEST=/shared/html/images
+              mkdir -p $DEST /shared/tftpboot /shared/ironic /shared/db
+              
+              # Copy IPA from container to volume
+              cp /assets/ironic-python-agent.kernel $DEST/
+              cp /assets/ironic-python-agent.initramfs $DEST/
+              
+              # Convert QCOW2 from container to RAW on volume
+              if [ ! -f $DEST/ubuntu-2404-kube-v1.35.raw ]; then
+                qemu-img convert -f qcow2 -O raw /assets/ubuntu-2404-kube-v1.35.qcow2 $DEST/ubuntu-2404-kube-v1.35.raw
+                sha256sum $DEST/ubuntu-2404-kube-v1.35.raw > $DEST/ubuntu-2404-kube-v1.35.raw.sha256
+              fi
+              
+              chmod -R 777 /shared
+          volumeMounts:
+            - name: ironic-data-volume
+              mountPath: /shared
       - op: replace
         path: /spec/template/spec/volumes/0
         value:
