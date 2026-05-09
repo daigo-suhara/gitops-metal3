@@ -22,13 +22,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y qemu-utils qemu-system-x86 python3-pip unzip cpu-checker
           pip3 install ansible --break-system-packages
-          # KVMの権限を強制付与
-          sudo chmod 666 /dev/kvm || true
 
-      - name: Check KVM
+      - name: Enable KVM
         run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          sudo usermod -a -G kvm $USER
+          sudo chmod 666 /dev/kvm || true
           kvm-ok || echo "KVM is not available"
-          ls -l /dev/kvm || echo "/dev/kvm not found"
 
       - name: Clone image-builder
         run: git clone https://github.com/kubernetes-sigs/image-builder.git
