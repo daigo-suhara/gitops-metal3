@@ -55,16 +55,22 @@ jobs:
           export PATH="$PWD/.local/bin:$PATH"
           make deps-raw
           
-          # KVMが使えない環境向けに tcg を強制し、リソース制限を調整
-          # PACKER_FLAGS を make の引数として明示的に渡します
-          export P_FLAGS="-var 'qemu_accelerator=tcg' -var 'memory=2048' -var 'cpus=1'"
-          
+          # KVMが使えない環境向けに tcg を強制し、リソース制限を最小化
+          # メモリをさらに絞り、SSHの待ち時間を極限まで増やします
+          export P_FLAGS="-var 'qemu_accelerator=tcg' -var 'memory=1024' -var 'cpus=1' -var 'ssh_handshake_attempts=500'"
+
           make build-raw-ubuntu-2404 \
             KUBERNETES_VERSION=${{ github.event.inputs.k8s_version || 'v1.35.4' }} \
             PACKER_FLAGS="$P_FLAGS"
-          
+
           IMAGE_NAME="ubuntu-2404-kube-${{ github.event.inputs.k8s_version || 'v1.35.4' }}.raw"
-          mv $(find output -name "*.raw" | head -n 1) "$IMAGE_NAME"
+          RAW_FILE=$(find output -name "*.raw" | head -n 1)
+          if [ -z "$RAW_FILE" ]; then
+            echo "Error: No .raw file found in output directory"
+            ls -laR output/ || true
+            exit 1
+          fi
+          mv "$RAW_FILE" "$IMAGE_NAME"
           sha256sum "$IMAGE_NAME" > "$IMAGE_NAME.sha256"
           echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
 
