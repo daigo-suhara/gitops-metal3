@@ -99,7 +99,7 @@ patches:
                 fi
                 # Always (re)generate hash to ensure correct format and presence
                 echo "Generating sha256..."
-                sha256sum $DEST/$QCOW2_IMAGE | awk '{print \$1}' > $DEST/$QCOW2_IMAGE.sha256
+                sha256sum $DEST/$QCOW2_IMAGE | cut -d ' ' -f 1 > $DEST/$QCOW2_IMAGE.sha256
 
                 chmod -R 777 /shared
             volumeMounts:
