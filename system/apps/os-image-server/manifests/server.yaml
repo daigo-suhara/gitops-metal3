@@ -37,7 +37,13 @@ spec:
               mkdir -p $DEST
               
               # 1. IPA (Ironic Python Agent)
-              IPA_BASE="https://tarballs.opendev.org/openstack/ironic-python-agent/dib"
+              IPA_BASE="https://tarballs.openstack.org/ironic-python-agent/dib/files"
+              
+              # Cleanup broken 404 files if they exist
+              if [ -f $DEST/ironic-python-agent.kernel ] && grep -q "404 Not Found" $DEST/ironic-python-agent.kernel; then
+                rm -f $DEST/ironic-python-agent.kernel $DEST/ironic-python-agent.initramfs
+              fi
+
               if [ ! -f $DEST/ironic-python-agent.kernel ]; then
                 curl -L -o $DEST/ironic-python-agent.kernel $IPA_BASE/ipa-centos9-master.kernel
                 curl -L -o $DEST/ironic-python-agent.initramfs $IPA_BASE/ipa-centos9-master.initramfs
