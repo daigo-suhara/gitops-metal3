@@ -129,16 +129,7 @@ patches:
           runAsUser: 0
       - op: add
         path: /spec/template/spec/hostNetwork
-        value: true
-      - op: add
-        path: /spec/template/spec/dnsPolicy
-        value: ClusterFirstWithHostNet
-      - op: add
-        path: /spec/template/spec/dnsConfig
-        value:
-          nameservers:
-            - 8.8.8.8
-            - 1.1.1.1
+        value: false
       - op: replace
         path: /spec/template/spec/containers/1/livenessProbe/failureThreshold
         value: 30
