@@ -3,7 +3,7 @@ set -euo pipefail
 
 # 1. 依存パッケージと minikube のインストール
 sudo apt-get update
-sudo apt-get install -y conntrack socat
+sudo apt-get install -y conntrack socat cri-tools
 if ! command -v minikube &> /dev/null; then
     echo "Installing minikube..."
     curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
