@@ -22,9 +22,9 @@ spec:
           args:
             - |
               while true; do
-                if ! ip addr show | grep -q "172.16.10.50"; then
-                  echo "Assigning 172.16.10.50 to eth0..."
-                  ip addr add 172.16.10.50/16 dev eth0 || true
+                if ! ip addr show | grep -q "172.16.0.10"; then
+                  echo "Assigning 172.16.0.10 to eth0..."
+                  ip addr add 172.16.0.10/16 dev eth0 || true
                 fi
                 sleep 60
               done
