@@ -90,14 +90,13 @@ patches:
                   curl -L -o $DEST/ironic-python-agent.initramfs $IPA_BASE/ipa-centos9-master.initramfs
                 fi
 
-                # 2. Download OSISM Image and Convert to RAW
+                # 2. Download OSISM Image (Keep as QCOW2 for lighter deployment)
                 IMAGE_URL="https://nbg1.your-objectstorage.com/osism/openstack-k8s-capi-images/ubuntu-2404-kube-v1.35/ubuntu-2404-kube-v1.35.qcow2"
-                RAW_IMAGE="ubuntu-2404-kube-v1.35.raw"
-                if [ ! -f $DEST/$RAW_IMAGE ]; then
-                  curl -L -o $DEST/tmp.qcow2 $IMAGE_URL
-                  qemu-img convert -f qcow2 -O raw $DEST/tmp.qcow2 $DEST/$RAW_IMAGE
-                  rm $DEST/tmp.qcow2
-                  sha256sum $DEST/$RAW_IMAGE > $DEST/$RAW_IMAGE.sha256
+                QCOW2_IMAGE="ubuntu-2404-kube-v1.35.qcow2"
+                if [ ! -f $DEST/$QCOW2_IMAGE ]; then
+                  echo "Downloading QCOW2 image..."
+                  curl -L -o $DEST/$QCOW2_IMAGE $IMAGE_URL
+                  sha256sum $DEST/$QCOW2_IMAGE > $DEST/$QCOW2_IMAGE.sha256
                 fi
 
                 chmod -R 777 /shared
