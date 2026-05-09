@@ -90,19 +90,30 @@ patches:
                   curl -L -o $DEST/ironic-python-agent.initramfs $IPA_BASE/ipa-centos9-master.initramfs
                 fi
 
-                # 2. Download Custom Ubuntu Image from GitHub Releases
-                # Variables are provided via env from ConfigMap
-                if [ ! -f $DEST/$IMAGE_NAME ]; then
-                  curl -L -o $DEST/$IMAGE_NAME $IMAGE_URL
-                  curl -L -o $DEST/$IMAGE_NAME.sha256 $IMAGE_URL.sha256
+                # 2. Download Pre-built Image and Convert to RAW
+                IMAGE_URL_BASE="https://nbg1.your-objectstorage.com/osism/openstack-k8s-capi-images/ubuntu-2404-kube-v1.35"
+                QCOW2_IMAGE="ubuntu-2404-kube-v1.35.qcow2"
+                RAW_IMAGE="ubuntu-2404-kube-v1.35.raw"
+
+                if [ ! -f $DEST/$RAW_IMAGE ]; then
+                  echo "Downloading $QCOW2_IMAGE..."
+                  curl -L -o $DEST/$QCOW2_IMAGE $IMAGE_URL_BASE/$QCOW2_IMAGE
+                  
+                  echo "Converting QCOW2 to RAW..."
+                  apk add --no-cache qemu-img
+                  qemu-img convert -f qcow2 -O raw $DEST/$QCOW2_IMAGE $DEST/$RAW_IMAGE
+                  
+                  echo "Cleaning up QCOW2..."
+                  rm $DEST/$QCOW2_IMAGE
+                  
+                  echo "Generating checksum..."
+                  sha256sum $DEST/$RAW_IMAGE > $DEST/$RAW_IMAGE.sha256
                 fi
 
                 chmod -R 777 /shared
             env:
               - name: IMAGE_NAME
-                value: ubuntu-2404-kube-v1.35.4.raw
-              - name: IMAGE_URL
-                value: https://github.com/daigo-suhara/gitops-metal3/releases/download/v1.35.4/ubuntu-2404-kube-v1.35.4.raw
+                value: ubuntu-2404-kube-v1.35.raw
             volumeMounts:
               - name: ironic-data-volume
                 mountPath: /shared
