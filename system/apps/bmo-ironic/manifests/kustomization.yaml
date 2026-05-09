@@ -96,9 +96,10 @@ patches:
                 if [ ! -f $DEST/$QCOW2_IMAGE ]; then
                   echo "Downloading QCOW2 image..."
                   curl -L -o $DEST/$QCOW2_IMAGE $IMAGE_URL
-                  # Generate hash only (no filename/path)
-                  sha256sum $DEST/$QCOW2_IMAGE | awk '{print \$1}' > $DEST/$QCOW2_IMAGE.sha256
                 fi
+                # Always (re)generate hash to ensure correct format and presence
+                echo "Generating sha256..."
+                sha256sum $DEST/$QCOW2_IMAGE | awk '{print \$1}' > $DEST/$QCOW2_IMAGE.sha256
 
                 chmod -R 777 /shared
             volumeMounts:
