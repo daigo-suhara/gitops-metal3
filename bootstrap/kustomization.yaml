@@ -11,8 +11,8 @@ patches:
       name: argocd-server
     patch: |
       - op: add
-        path: /spec/template/spec/containers/0/command/-
-        value: "--insecure"
+        path: /spec/template/spec/containers/0/command
+        value: ["argocd-server", "--insecure"]
 
   - target:
       kind: Service
