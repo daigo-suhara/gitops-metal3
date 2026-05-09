@@ -182,7 +182,7 @@ configMapGenerator:
     behavior: merge
     literals:
       - PROVISIONING_INTERFACE=enx00e04c247a98
-      - PROVISIONING_IP=172.16.10.50
+      - PROVISIONING_IP=172.16.0.10
       - PROVISIONING_GATEWAY=172.16.0.1
       - PROVISIONING_DNS=8.8.8.8
       - HTTP_PORT=6180
@@ -197,11 +197,11 @@ configMapGenerator:
       - IRONIC_IPMI_POWER_OFF_TIMEOUT=0
       - IRONIC_INSPECTOR_VLAN_INTERFACES=all
       - IRONIC_PROVISIONING_INTERFACE=enx00e04c247a98
-      - IPA_BASE_URL=http://172.16.10.50:30180
-      - IPA_KERNEL_URL=http://172.16.10.50:30180/ironic-python-agent.kernel
-      - IPA_RAMDISK_URL=http://172.16.10.50:30180/ironic-python-agent.initramfs
-      - DEPLOY_KERNEL_URL=http://172.16.10.50:30180/ironic-python-agent.kernel
-      - DEPLOY_RAMDISK_URL=http://172.16.10.50:30180/ironic-python-agent.initramfs
-      - IRONIC_ENDPOINT=http://172.16.10.50:6385/v1/
-      - IRONIC_BASE_URL=http://172.16.10.50:6385
-      - CACHEURL=http://172.16.10.50:30180
+      - IPA_BASE_URL=http://172.16.0.10:30180
+      - IPA_KERNEL_URL=http://172.16.0.10:30180/ironic-python-agent.kernel
+      - IPA_RAMDISK_URL=http://172.16.0.10:30180/ironic-python-agent.initramfs
+      - DEPLOY_KERNEL_URL=http://172.16.0.10:30180/ironic-python-agent.kernel
+      - DEPLOY_RAMDISK_URL=http://172.16.0.10:30180/ironic-python-agent.initramfs
+      - IRONIC_ENDPOINT=http://172.16.0.10:6385/v1/
+      - IRONIC_BASE_URL=http://172.16.0.10:6385
+      - CACHEURL=http://172.16.0.10:30180
