@@ -22,12 +22,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y qemu-utils qemu-system-x86 python3-pip unzip cpu-checker
           pip3 install ansible --break-system-packages
-          # KVMの権限を付与（利用可能な場合）
-          sudo usermod -aG kvm $USER
+          # KVMの権限を強制付与
+          sudo chmod 666 /dev/kvm || true
 
       - name: Check KVM
         run: |
-          kvm-ok || echo "KVM is not available, performance will be slow"
+          kvm-ok || echo "KVM is not available"
           ls -l /dev/kvm || echo "/dev/kvm not found"
 
       - name: Clone image-builder
@@ -54,8 +54,8 @@ jobs:
           make deps-raw
           
           # KVMが使えない環境向けに tcg を強制し、メモリ割り当てを調整
-          # image-builderのMakefileは PACKER_ARGS を受け取る設計が多いです
-          export PACKER_ARGS="-var qemu_accelerator=tcg -var memory=4096 -var cpus=2"
+          # image-builderのMakefileは PACKER_FLAGS を受け取る設計が多いです
+          export PACKER_FLAGS="-var 'qemu_accelerator=tcg' -var 'memory=4096' -var 'cpus=2'"
           
           make build-raw-ubuntu-2404 KUBERNETES_VERSION=${{ github.event.inputs.k8s_version || 'v1.35.4' }}
           
