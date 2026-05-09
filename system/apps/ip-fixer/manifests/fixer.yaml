@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: ip-fixer
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      app: ip-fixer
+  template:
+    metadata:
+      labels:
+        app: ip-fixer
+    spec:
+      hostNetwork: true
+      containers:
+        - name: fixer
+          image: alpine:3.20
+          securityContext:
+            privileged: true
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              while true; do
+                if ! ip addr show | grep -q "172.16.0.10"; then
+                  echo "Assigning 172.16.0.10 to eth0..."
+                  ip addr add 172.16.0.10/16 dev eth0 || true
+                fi
+                sleep 60
+              done
