@@ -35,10 +35,12 @@ jobs:
 
       - name: Add swap space
         run: |
-          sudo fallocate -l 4G /swapfile
-          sudo chmod 600 /swapfile
-          sudo mkswap /swapfile
-          sudo swapon /swapfile
+          if [ ! -f /swapfile_extra ]; then
+            sudo fallocate -l 4G /swapfile_extra
+            sudo chmod 600 /swapfile_extra
+            sudo mkswap /swapfile_extra
+            sudo swapon /swapfile_extra
+          fi
 
       - name: Build Image
         working-directory: image-builder/images/capi
@@ -49,7 +51,8 @@ jobs:
           make deps-raw
           
           # KVMが使えない環境向けに tcg を強制し、メモリ割り当てを調整
-          export PACKER_FLAGS="-var 'qemu_accelerator=tcg' -var 'memory=4096' -var 'cpus=2'"
+          # image-builderのMakefileは PACKER_ARGS を受け取る設計が多いです
+          export PACKER_ARGS="-var qemu_accelerator=tcg -var memory=4096 -var cpus=2"
           
           make build-raw-ubuntu-2404 KUBERNETES_VERSION=${{ github.event.inputs.k8s_version || 'v1.35.4' }}
           
