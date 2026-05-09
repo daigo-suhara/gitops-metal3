@@ -1,7 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
-# 1. minikube のインストール
+# 1. 依存パッケージと minikube のインストール
+sudo apt-get update
+sudo apt-get install -y conntrack socat
 if ! command -v minikube &> /dev/null; then
     echo "Installing minikube..."
     curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
@@ -10,9 +12,8 @@ if ! command -v minikube &> /dev/null; then
 fi
 
 # 2. クラスターの削除と再構築 (driver=none)
-# noneドライバはホスト上で直接Kubernetesを動かします
 sudo minikube delete || true
-sudo minikube start --driver=none --kubernetes-version=v1.31.0
+sudo minikube start --driver=none --kubernetes-version=v1.35.4
 
 # 3. Argo CDのインストール
 sudo kubectl create namespace argocd || true
