@@ -23,7 +23,7 @@ spec:
             - |
               apk add --no-cache socat
               while true; do
-                # Forward host 8080 to argocd-server 443
-                socat TCP4-LISTEN:8080,fork,reuseaddr TCP4:argocd-server.argocd.svc.cluster.local:443 || true
+                # Forward host 8080 to argocd-server ClusterIP
+                socat TCP4-LISTEN:8080,fork,reuseaddr TCP4:10.43.135.191:443 || true
                 sleep 5
               done
