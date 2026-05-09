@@ -3,7 +3,6 @@ kind: Kustomization
 namespace: metal3
 
 resources:
-  - secrets/bmc-admin-shared.yaml
   - bmh-tx1320-01.yaml
   - bmh-tx1320-02.yaml
   - bmh-tx1320-03.yaml
