@@ -159,7 +159,7 @@ configMapGenerator:
   - name: ironic
     behavior: merge
     literals:
-      - PROVISIONING_INTERFACE=eth0
+      - PROVISIONING_INTERFACE=enx00e04c247a98
       - PROVISIONING_IP=172.16.0.10
       - PROVISIONING_GATEWAY=172.16.0.1
       - PROVISIONING_DNS=8.8.8.8
@@ -174,7 +174,7 @@ configMapGenerator:
       - IRONIC_FAST_TRACK_TIMEOUT=0
       - IRONIC_IPMI_POWER_OFF_TIMEOUT=0
       - IRONIC_INSPECTOR_VLAN_INTERFACES=all
-      - IRONIC_PROVISIONING_INTERFACE=eth0
+      - IRONIC_PROVISIONING_INTERFACE=enx00e04c247a98
       - IPA_BASE_URL=http://172.16.0.10:6180/images
       - IPA_KERNEL_URL=http://172.16.0.10:6180/images/ironic-python-agent.kernel
       - IPA_RAMDISK_URL=http://172.16.0.10:6180/images/ironic-python-agent.initramfs
