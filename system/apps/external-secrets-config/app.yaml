@@ -1,14 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: external-secrets-operator
+  name: external-secrets-config
   namespace: argocd
 spec:
   project: default
   source:
-    repoURL: https://charts.external-secrets.io
-    targetRevision: 0.14.0
-    chart: external-secrets
+    repoURL: https://github.com/daigo-suhara/gitops-metal3.git
+    targetRevision: HEAD
+    path: system/apps/external-secrets-config/manifests
   destination:
     server: https://kubernetes.default.svc
     namespace: external-secrets
