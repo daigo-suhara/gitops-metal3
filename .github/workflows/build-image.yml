@@ -35,11 +35,14 @@ jobs:
 
       - name: Add swap space
         run: |
-          if [ ! -f /swapfile_extra ]; then
-            sudo fallocate -l 4G /swapfile_extra
-            sudo chmod 600 /swapfile_extra
-            sudo mkswap /swapfile_extra
-            sudo swapon /swapfile_extra
+          SWAPFILE="/swapfile_extra"
+          if [ ! -f "$SWAPFILE" ]; then
+            sudo dd if=/dev/zero of="$SWAPFILE" bs=1M count=4096
+            sudo chmod 600 "$SWAPFILE"
+            sudo mkswap "$SWAPFILE"
+            sudo swapon "$SWAPFILE"
+          else
+            echo "Swap file already exists, skipping creation"
           fi
 
       - name: Build Image
