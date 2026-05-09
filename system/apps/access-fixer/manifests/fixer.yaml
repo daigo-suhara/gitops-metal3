@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: access-fixer
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      app: access-fixer
+  template:
+    metadata:
+      labels:
+        app: access-fixer
+    spec:
+      hostNetwork: true
+      containers:
+        - name: fixer
+          image: alpine:3.20
+          securityContext:
+            privileged: true
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              apk add --no-cache socat
+              while true; do
+                # Forward host 8080 to argocd-server 443
+                socat TCP4-LISTEN:8080,fork,reuseaddr TCP4:argocd-server.argocd.svc.cluster.local:443 || true
+                sleep 5
+              done
