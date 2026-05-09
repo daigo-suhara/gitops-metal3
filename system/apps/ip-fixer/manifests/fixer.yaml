@@ -22,9 +22,15 @@ spec:
           args:
             - |
               while true; do
+                # 1. Assign IP for Ironic startup check
                 if ! ip addr show | grep -q "172.16.0.10"; then
                   echo "Assigning 172.16.0.10 to eth0..."
                   ip addr add 172.16.0.10/16 dev eth0 || true
                 fi
+                
+                # 2. Configure routing to physical network via host gateway
+                echo "Setting route for 172.16.0.0/16 via 172.18.0.1..."
+                ip route replace 172.16.0.0/16 via 172.18.0.1 dev eth0 || true
+                
                 sleep 60
               done
