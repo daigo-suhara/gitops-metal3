@@ -18,14 +18,19 @@ jobs:
       - name: Prepare Assets
         run: |
           mkdir -p assets
-          # Download IPA
-          IPA_BASE="https://images.rdoproject.org/central/ironic/ipa/master/centos9"
-          curl -L -o assets/ironic-python-agent.kernel $IPA_BASE/ipa-centos9-master.kernel
-          curl -L -o assets/ironic-python-agent.initramfs $IPA_BASE/ipa-centos9-master.initramfs
+          # Download IPA with retries and from official opendev tarballs
+          IPA_BASE="https://tarballs.opendev.org/openstack/ironic-python-agent/dib"
+          
+          echo "Downloading IPA kernel..."
+          curl --connect-timeout 10 --retry 5 --retry-delay 5 -L -o assets/ironic-python-agent.kernel $IPA_BASE/ipa-centos9-master.kernel
+          
+          echo "Downloading IPA initramfs..."
+          curl --connect-timeout 10 --retry 5 --retry-delay 5 -L -o assets/ironic-python-agent.initramfs $IPA_BASE/ipa-centos9-master.initramfs
           
           # Download OSISM QCOW2
           IMAGE_URL="https://nbg1.your-objectstorage.com/osism/openstack-k8s-capi-images/ubuntu-2404-kube-v1.35/ubuntu-2404-kube-v1.35.qcow2"
-          curl -L -o assets/ubuntu-2404-kube-v1.35.qcow2 $IMAGE_URL
+          echo "Downloading OS image..."
+          curl --connect-timeout 10 --retry 5 --retry-delay 5 -L -o assets/ubuntu-2404-kube-v1.35.qcow2 $IMAGE_URL
 
       - name: Create Dockerfile
         run: |
