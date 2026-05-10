@@ -7,8 +7,8 @@ spec:
   template:
     spec:
       image:
-        url: https://nbg1.your-objectstorage.com/osism/openstack-k8s-capi-images/ubuntu-2404-kube-v1.35/ubuntu-2404-kube-v1.35.qcow2
-        checksum: https://nbg1.your-objectstorage.com/osism/openstack-k8s-capi-images/ubuntu-2404-kube-v1.35/ubuntu-2404-kube-v1.35.qcow2.sha256
+        url: http://172.16.0.10:6180/images/ubuntu-2404-kube-v1.35.qcow2
+        checksum: http://172.16.0.10:6180/images/ubuntu-2404-kube-v1.35.qcow2.sha256
         format: qcow2
       hostSelector:
         matchLabels:
