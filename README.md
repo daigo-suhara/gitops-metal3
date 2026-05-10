@@ -20,8 +20,7 @@
 ├── argocd/                 # app-of-apps と子アプリ定義
 ├── cluster/                # ワークロードクラスタの Cluster / ControlPlane / MachineDeployment
 ├── hardware/               # BareMetalHost 定義
-├── system/                 # 管理クラスタ自体の基盤 (BMO, ArgoCD設定, CAPI等)
-└── bootstrap/              # ArgoCD のインストール設定
+└── system/                 # 管理クラスタ自体の基盤 (BMO, ArgoCD設定, CAPI等)
 ```
 `bootstrap.sh` はローカル起動のまとめスクリプトです。
 
