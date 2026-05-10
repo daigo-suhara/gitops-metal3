@@ -27,7 +27,7 @@
 `bootstrap.sh` はローカル起動のまとめスクリプトです。
 
 ## クラスタ構成
-- **Management Cluster**: Kind (Docker 上で稼働)
+- **Management Cluster**: MicroK8s
 - **Cluster**: Bare-Metal サーバー (Ubuntu 24.04 Noble)
 - **Networking**:
   - **Control Plane VIP**: 172.16.10.100 (kube-vip スタンドアロン ARP モード)
@@ -38,7 +38,7 @@
 
 ## 構築手順 (Step-by-Step)
 
-前提: `kind`, `kubectl`, `docker` が入っていること。
+前提: `microk8s`, `kubectl` が入っていること。
 
 ### 1. 管理クラスタと GitOps の起動
 管理側の ArgoCD とアプリ群を起動します。

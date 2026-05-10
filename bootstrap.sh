@@ -33,6 +33,6 @@ kubectl wait --for=condition=available deployment/argocd-server -n argocd --time
 kubectl patch configmap argocd-cm -n argocd --type merge -p '{"data":{"kustomize.buildOptions":"--enable-helm"}}'
 
 echo "Applying App-of-Apps..."
-kubectl apply -f https://raw.githubusercontent.com/daigo-suhara/gitops-metal3/master/argocd/app-of-apps.yaml
+kubectl apply -f argocd/app-of-apps.yaml
 
 echo "Bootstrap complete!"
