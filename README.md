@@ -4,7 +4,7 @@
 
 ## アーキテクチャ
 
-本構成では、**Hierarchical ArgoCD (階層型ArgoCD)** パターンを採用し、インフラ管理とワークロード管理の責任を明確に分離しています。また、各コンポーネントは「自己完結型アプリフォルダ」形式で整理されています。
+本構成では、**Hierarchical ArgoCD (階層型ArgoCD)** パターンを採用し、インフラ管理とワークロード管理の責任を分離しています。各コンポーネントは、必要最小限のディレクトリに整理しています。
 
 1.  **Management ArgoCD (管理クラスタ側)**:
     *   物理サーバ (BareMetalHost) のプロビジョニング
@@ -21,9 +21,9 @@
 ├── cluster/                # ワークロードクラスタの Cluster / ControlPlane / MachineDeployment
 ├── hardware/               # BareMetalHost 定義
 ├── system/                 # 管理クラスタ自体の基盤 (BMO, ArgoCD設定, CAPI等)
-└── workload-clusters/      # 既存のワークロード向け定義 (移行中の互換レイアウト)
+└── bootstrap/              # ArgoCD のインストール設定
 ```
-`bootstrap/` は管理ホストのセットアップ用スクリプト群、`bootstrap.sh` はローカル起動のまとめスクリプトです。
+`bootstrap.sh` はローカル起動のまとめスクリプトです。
 
 ## クラスタ構成
 - **Management Cluster**: Kind (Docker 上で稼働)
@@ -37,13 +37,10 @@
 
 ## 構築手順 (Step-by-Step)
 
+前提: `kind`, `kubectl`, `docker` が入っていること。
+
 ### 1. 管理クラスタと GitOps の起動
 管理側の ArgoCD とアプリ群を起動します。
 ```bash
 ./bootstrap.sh
-```
-
-### 2. 必要に応じて ArgoCD にアクセス
-```bash
-bash bootstrap/setup-access.sh
 ```
