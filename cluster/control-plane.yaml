@@ -49,12 +49,9 @@ spec:
       controllerManager:
         extraArgs:
           enable-hostpath-provisioner: "true"
-    preKubeadmCommands:
-      - /opt/install-k8s.sh
+    preKubeadmCommands: ["/opt/install-k8s.sh"]
     postKubeadmCommands:
       - |
-        # Allow CAPI to perform health checks (API Server -> Kubelet)
-        # This is needed for Machine controller to see nodes as healthy
         kubectl --kubeconfig /etc/kubernetes/super-admin.conf apply -f - <<EOF
         apiVersion: rbac.authorization.k8s.io/v1
         kind: ClusterRole
@@ -85,9 +82,6 @@ spec:
           #!/bin/bash
           set -euxo pipefail
           export DEBIAN_FRONTEND=noninteractive
-          # Ironic dnsmasq does not provide gateway/DNS via DHCP, so set
-          # them up before any network call.
-          # Wait for eno1 to be up
           while ! ip link show eno1 | grep -q "UP,LOWER_UP"; do
             echo "Waiting for eno1 to be up..."
             sleep 2
@@ -97,9 +91,6 @@ spec:
           printf '[Resolve]\nDNS=8.8.8.8 1.1.1.1\n' >/etc/systemd/resolved.conf.d/99-public.conf
           systemctl restart systemd-resolved
 
-          # K8s 1.30+ bootstrap deadlock fix:
-          # Background loop to generate kube-vip specific kubeconfig using super-admin.conf
-          # but pointing to localhost to bypass the missing VIP during init.
           (
             while [ ! -f /etc/kubernetes/super-admin.conf ]; do
               sleep 1
@@ -109,16 +100,13 @@ spec:
             echo "Successfully generated /etc/kubernetes/kube-vip.conf"
           ) &
 
-          # disable swap
           swapoff -a || true
           sed -i '/\sswap\s/ s/^/#/' /etc/fstab
-          # kernel modules + sysctl (mostly handled by image-builder, but safe to repeat)
           modprobe overlay
           modprobe br_netfilter
           printf 'overlay\nbr_netfilter\n' >/etc/modules-load.d/k8s.conf
           printf 'net.bridge.bridge-nf-call-iptables=1\nnet.bridge.bridge-nf-call-ip6tables=1\nnet.ipv4.ip_forward=1\n' >/etc/sysctl.d/k8s.conf
           sysctl --system
-          # ensure kubelet is enabled
           systemctl enable --now kubelet
       - content: |
           apiVersion: v1
