@@ -8,9 +8,9 @@
 
 1.  **Management ArgoCD (管理クラスタ側)**:
     *   物理サーバ (BareMetalHost) のプロビジョニング
-    *   ワークロードクラスタ (CAPI Cluster) のライフサイクル管理
-    *   ワークロードクラスタへの **Workload ArgoCD** の自動インストール
-2.  **Workload ArgoCD (ワークロードクラスタ側)**:
+    *   クラスタ (CAPI Cluster) のライフサイクル管理
+    *   クラスタへの **Workload ArgoCD** の自動インストール
+2.  **Workload ArgoCD (クラスタ側)**:
     *   自分自身のクラスタ内のアドオン (Cilium, MetalLB, Ceph) の管理
     *   アプリケーションのデプロイ
 ### フォルダ構成
@@ -28,7 +28,7 @@
 
 ## クラスタ構成
 - **Management Cluster**: Kind (Docker 上で稼働)
-- **Workload Cluster**: Bare-Metal サーバー (Ubuntu 24.04 Noble)
+- **Cluster**: Bare-Metal サーバー (Ubuntu 24.04 Noble)
 - **Networking**:
   - **Control Plane VIP**: 172.16.10.100 (kube-vip スタンドアロン ARP モード)
   - **LoadBalancer**: MetalLB (172.16.10.201 - 172.16.10.250)
