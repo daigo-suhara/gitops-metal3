@@ -1,7 +1,6 @@
 #!/bin/bash
 set -eo pipefail
 
-# 1. Install MicroK8s
 if ! command -v microk8s &> /dev/null; then
     echo "Installing MicroK8s..."
     sudo snap install microk8s --classic
@@ -15,30 +14,24 @@ if ! command -v microk8s &> /dev/null; then
     sudo microk8s enable dns storage rbac
 fi
 
-# Alias kubectl
 if ! command -v kubectl &> /dev/null; then
     sudo snap alias microk8s.kubectl kubectl
 fi
 
-# Set KUBECONFIG for MicroK8s
 mkdir -p ~/.kube
 sudo microk8s config > ~/.kube/config
 chmod 600 ~/.kube/config
 export KUBECONFIG=~/.kube/config
 
-# 2. Install ArgoCD
 echo "Installing ArgoCD..."
 kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
 kubectl apply -n argocd --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
-# 3. Wait for ArgoCD to be ready
 echo "Waiting for ArgoCD..."
 kubectl wait --for=condition=available deployment/argocd-server -n argocd --timeout=300s
 
-# 4. Configure ArgoCD (Enable Helm in Kustomize)
 kubectl patch configmap argocd-cm -n argocd --type merge -p '{"data":{"kustomize.buildOptions":"--enable-helm"}}'
 
-# 5. Bootstrap applications
 echo "Applying App-of-Apps..."
 kubectl apply -f https://raw.githubusercontent.com/daigo-suhara/gitops-metal3/master/argocd/app-of-apps.yaml
 
