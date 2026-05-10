@@ -33,22 +33,11 @@ spec:
       namespace: metal3
   kubeadmConfigSpec:
     format: cloud-config
-    initConfiguration:
-      nodeRegistration:
-        kubeletExtraArgs:
-          node-labels: "metal3.io/uuid={{ ds.meta_data.uuid }}"
-    joinConfiguration:
-      nodeRegistration:
-        kubeletExtraArgs:
-          node-labels: "metal3.io/uuid={{ ds.meta_data.uuid }}"
     clusterConfiguration:
       apiServer:
         certSANs:
           - 172.16.10.100
           - 127.0.0.1
-      controllerManager:
-        extraArgs:
-          enable-hostpath-provisioner: "true"
     preKubeadmCommands: ["/opt/install-k8s.sh"]
     postKubeadmCommands:
       - |
@@ -83,23 +72,19 @@ spec:
           set -euxo pipefail
           export DEBIAN_FRONTEND=noninteractive
           while ! ip link show eno1 | grep -q "UP,LOWER_UP"; do
-            echo "Waiting for eno1 to be up..."
             sleep 2
           done
           ip route replace default via 172.16.0.1
           mkdir -p /etc/systemd/resolved.conf.d
           printf '[Resolve]\nDNS=8.8.8.8 1.1.1.1\n' >/etc/systemd/resolved.conf.d/99-public.conf
           systemctl restart systemd-resolved
-
           (
             while [ ! -f /etc/kubernetes/super-admin.conf ]; do
               sleep 1
             done
             cp /etc/kubernetes/super-admin.conf /etc/kubernetes/kube-vip.conf
             sed -i 's/172.16.10.100/127.0.0.1/g' /etc/kubernetes/kube-vip.conf
-            echo "Successfully generated /etc/kubernetes/kube-vip.conf"
           ) &
-
           swapoff -a || true
           sed -i '/\sswap\s/ s/^/#/' /etc/fstab
           modprobe overlay
@@ -144,9 +129,4 @@ spec:
               name: kubeconfig
         path: /etc/kubernetes/manifests/kube-vip.yaml
         permissions: "0644"
-    users:
-      - name: metal3
-        sudo: "ALL=(ALL) NOPASSWD:ALL"
-        sshAuthorizedKeys:
-          - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID+3Q/eAOgoIs0pNtGvQ8ueXK1Gg8CnIdhcU9rwpeMFm suharadaigo"
   version: v1.35.4

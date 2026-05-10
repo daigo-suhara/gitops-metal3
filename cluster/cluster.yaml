@@ -3,8 +3,6 @@ kind: Cluster
 metadata:
   name: prod
   namespace: metal3
-  labels:
-    cni: cilium
 spec:
   clusterNetwork:
     pods:
@@ -27,8 +25,8 @@ kind: Metal3Cluster
 metadata:
   name: prod
   namespace: metal3
-spec:
-  controlPlaneEndpoint:
-    host: 172.16.10.100
-    port: 6443
+  spec:
+    controlPlaneEndpoint:
+      host: 172.16.10.100
+      port: 6443
   noCloudProvider: true
