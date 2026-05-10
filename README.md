@@ -18,9 +18,10 @@
 ```text
 .
 ├── argocd/                 # app-of-apps と子アプリ定義
+├── bmo-ironic/             # Metal3 / Ironic 本体
+├── capi-providers/         # CAPI Provider 定義
 ├── cluster/                # ワークロードクラスタの Cluster / ControlPlane / MachineDeployment
 ├── hardware/               # BareMetalHost 定義
-└── system/                 # 管理クラスタ自体の基盤 (BMO/Ironic, CAPI)
 ```
 `bootstrap.sh` はローカル起動のまとめスクリプトです。
 
