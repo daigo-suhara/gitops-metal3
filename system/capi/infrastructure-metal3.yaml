@@ -1,7 +1,0 @@
-apiVersion: operator.cluster.x-k8s.io/v1alpha2
-kind: InfrastructureProvider
-metadata:
-  name: metal3
-  namespace: capm3-system
-spec:
-  version: v1.8.0
