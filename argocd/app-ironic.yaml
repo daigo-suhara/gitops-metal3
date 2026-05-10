@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: bmo-ironic
+  name: ironic
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "5"
@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/daigo-suhara/gitops-metal3.git
     targetRevision: HEAD
-    path: bmo-ironic
+    path: system/ironic
   destination:
     server: https://kubernetes.default.svc
     namespace: metal3

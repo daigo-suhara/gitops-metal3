@@ -18,8 +18,9 @@
 ```text
 .
 ├── argocd/                 # app-of-apps と子アプリ定義
-├── bmo-ironic/             # Metal3 / Ironic 本体
-├── capi-providers/         # CAPI Provider 定義
+├── system/
+│   ├── capi/               # CAPI Provider 定義
+│   └── ironic/             # Metal3 / Ironic 本体
 ├── cluster/                # ワークロードクラスタの Cluster / ControlPlane / MachineDeployment
 ├── hardware/               # BareMetalHost 定義
 ```
