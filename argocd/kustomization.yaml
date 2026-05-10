@@ -7,4 +7,3 @@ resources:
   - app-cert-manager.yaml
   - app-cluster.yaml
   - app-hardware.yaml
-  - app-sealed-secrets.yaml
