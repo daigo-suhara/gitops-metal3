@@ -3,8 +3,7 @@ kind: Kustomization
 namespace: metal3
 
 resources:
-  - hostclaims-crd.yaml
-  - image-pvc.yaml
+  - ironic-support.yaml
   - https://github.com/metal3-io/baremetal-operator//config/default?ref=release-0.9
   - https://github.com/metal3-io/baremetal-operator//ironic-deployment/default?ref=release-0.9
 
