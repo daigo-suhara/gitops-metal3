@@ -1,16 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: workload-cluster
+  name: bmo-ironic
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "20"
+    argocd.argoproj.io/sync-wave: "5"
 spec:
   project: default
   source:
     repoURL: https://github.com/daigo-suhara/gitops-metal3.git
-    targetRevision: main
-    path: workload-clusters/prod/infrastructure/cluster/manifests
+    targetRevision: HEAD
+    path: system/bmo-ironic
   destination:
     server: https://kubernetes.default.svc
     namespace: metal3

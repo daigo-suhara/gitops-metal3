@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: metal3
+
+resources:
+  - bmc-auth.yaml
+  - tx1320m3-01.yaml
+  - tx1320m3-02.yaml
+  - tx1320m3-03.yaml

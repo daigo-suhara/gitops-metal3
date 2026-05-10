@@ -13,7 +13,7 @@ kubectl create namespace argocd || true
 kubectl apply -k bootstrap/
 
 # 3. Root Appの適用
-kubectl apply -f bootstrap/root-app.yaml
+kubectl apply -f argocd/app-of-apps.yaml
 
 echo "=== k3s setup complete ==="
 echo "Argo CD: https://localhost"

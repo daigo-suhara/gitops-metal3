@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: bmc-admin-shared
+  name: bmc-auth
   namespace: metal3
 type: Opaque
 data:

@@ -9,10 +9,8 @@ spec:
   project: default
   source:
     repoURL: https://github.com/daigo-suhara/gitops-metal3.git
-    targetRevision: main
-    path: system/apps/capi-providers/manifests
-    directory:
-      recurse: true
+    targetRevision: HEAD
+    path: system/capi-providers
   destination:
     server: https://kubernetes.default.svc
     namespace: capi-system

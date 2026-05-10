@@ -1,7 +1,7 @@
 apiVersion: metal3.io/v1alpha1
 kind: BareMetalHost
 metadata:
-  name: tx1320-02
+  name: tx1320m3-02
   namespace: metal3
   labels:
     cluster-role: control-plane
@@ -11,7 +11,7 @@ spec:
   bootMACAddress: "4c:52:62:16:8b:9f"
   bmc:
     address: ipmi://172.16.1.12
-    credentialsName: bmc-admin-shared
+    credentialsName: bmc-auth
     disableCertificateVerification: true
   rootDeviceHints:
     deviceName: "/dev/sda"

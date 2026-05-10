@@ -1,19 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: root
+  name: app-of-apps
   namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
     repoURL: https://github.com/daigo-suhara/gitops-metal3.git
     targetRevision: HEAD
-    path: .
-    directory:
-      recurse: true
-      include: '{system/apps/**/app.yaml,workload-clusters/*/infrastructure/**/app.yaml}'
+    path: argocd
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
@@ -21,6 +16,3 @@ spec:
     automated:
       prune: true
       selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
-      - ServerSideApply=true
