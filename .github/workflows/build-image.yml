@@ -35,6 +35,9 @@ jobs:
       IMAGE_NAME: ubuntu-2404-kube-v1.35.qcow2
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Install host dependencies
         run: |
           sudo apt-get update
