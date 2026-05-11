@@ -6,7 +6,6 @@ metadata:
 spec:
   template:
     spec:
-      version: v1.35.4
       image:
         url: http://172.16.0.10:6180/images/ubuntu-2404-kube-v1.35.qcow2
         checksum: http://172.16.0.10:6180/images/ubuntu-2404-kube-v1.35.qcow2.sha256
