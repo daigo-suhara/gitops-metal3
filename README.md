@@ -47,8 +47,6 @@ GitHub Actions では `GITHUB_TOKEN` を使って `ghcr.io/daigo-suhara/gitops-m
 
 GHCR の package は public にしておく必要があります。Ironic は GHCR から取得し、`http://172.16.0.10:6180/images/` にキャッシュします。
 
-イメージビルド時に DNS、`ubuntu` ユーザー、SSH 鍵、swap 無効化、`overlay` / `br_netfilter`、sysctl を焼き込みます。`cluster/` 側の bootstrap は最小限にしています。
-
 ### 1. 管理クラスタと GitOps の起動
 管理側の ArgoCD とアプリ群を起動します。
 ```bash
