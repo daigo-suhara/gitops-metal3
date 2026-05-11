@@ -56,7 +56,6 @@ spec:
           content: |
             #!/bin/bash
             set -euxo pipefail
-            export DEBIAN_FRONTEND=noninteractive
             while ! ip link show eno1 | grep -q "UP,LOWER_UP"; do
               sleep 2
             done
@@ -64,12 +63,6 @@ spec:
             mkdir -p /etc/systemd/resolved.conf.d
             printf '[Resolve]\nDNS=8.8.8.8 1.1.1.1\n' >/etc/systemd/resolved.conf.d/99-public.conf
             systemctl restart systemd-resolved
-            apt-get update
-            apt-get install -y containerd
-            mkdir -p /etc/containerd
-            containerd config default >/etc/containerd/config.toml
-            sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
-            systemctl enable --now containerd
             id ubuntu >/dev/null 2>&1 || useradd -m -s /bin/bash ubuntu
             install -d -m 0700 -o ubuntu -g ubuntu /home/ubuntu/.ssh
             printf '%s\n' 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID+3Q/eAOgoIs0pNtGvQ8ueXK1Gg8CnIdhcU9rwpeMFm suharadaigo' | install -o ubuntu -g ubuntu -m 0600 /dev/stdin /home/ubuntu/.ssh/authorized_keys
