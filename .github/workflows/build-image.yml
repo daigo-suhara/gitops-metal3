@@ -60,6 +60,7 @@ jobs:
             --var "kubernetes_series=${{ inputs.kubernetes_series }}"
             --var "kubernetes_deb_version=${{ inputs.kubernetes_deb_version }}"
         run: |
+          make deps-qemu
           make deps-raw
           make build-raw-ubuntu-2404
 
