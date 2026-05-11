@@ -33,9 +33,11 @@ spec:
       clusterName: prod
       bootstrap:
         configRef:
+          apiGroup: bootstrap.cluster.x-k8s.io
           kind: KubeadmConfigTemplate
           name: prod-worker
       infrastructureRef:
+        apiGroup: infrastructure.cluster.x-k8s.io
         kind: Metal3MachineTemplate
         name: prod-worker
       version: v1.35.4

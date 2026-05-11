@@ -10,9 +10,11 @@ spec:
     services:
       cidrBlocks: ["10.96.0.0/12"]
   controlPlaneRef:
+    apiGroup: controlplane.cluster.x-k8s.io
     kind: KubeadmControlPlane
     name: prod-control-plane
   infrastructureRef:
+    apiGroup: infrastructure.cluster.x-k8s.io
     kind: Metal3Cluster
     name: prod
 ---

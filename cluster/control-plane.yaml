@@ -27,6 +27,7 @@ spec:
   machineTemplate:
     spec:
       infrastructureRef:
+        apiGroup: infrastructure.cluster.x-k8s.io
         kind: Metal3MachineTemplate
         name: prod-control-plane
   version: v1.35.4
