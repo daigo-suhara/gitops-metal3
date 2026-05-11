@@ -33,7 +33,5 @@ spec:
     format: cloud-config
     clusterConfiguration:
       apiServer:
-        certSANs:
-          - 172.16.10.100
-          - 127.0.0.1
+        certSANs: [172.16.10.100, 127.0.0.1]
   version: v1.35.4
