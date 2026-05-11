@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     env:
-      IMAGE_NAME: ubuntu-2404-kube-v1.35.raw
+      IMAGE_NAME: ubuntu-2404-kube-v1.35.qcow2
 
     steps:
       - name: Install host dependencies
@@ -46,7 +46,7 @@ jobs:
         run: |
           git clone --depth 1 --branch "${{ inputs.image_builder_ref }}" https://github.com/kubernetes-sigs/image-builder.git
 
-      - name: Build raw image
+      - name: Build qcow2 image
         working-directory: image-builder/images/capi
         env:
           PACKER_FLAGS: >-
@@ -54,8 +54,8 @@ jobs:
             --var "kubernetes_series=${{ inputs.kubernetes_series }}"
             --var "kubernetes_deb_version=${{ inputs.kubernetes_deb_version }}"
         run: |
-          make deps-raw
-          make build-raw-ubuntu-2404
+          make deps-qemu
+          make build-qemu-ubuntu-2404
 
       - name: Prepare release assets
         run: |
@@ -70,7 +70,7 @@ jobs:
           )"
           test -n "$image_path"
           qemu-img info "$image_path"
-          cp "$image_path" "dist/$IMAGE_NAME"
+          qemu-img convert -O qcow2 "$image_path" "dist/$IMAGE_NAME"
           sha256sum "dist/$IMAGE_NAME" | cut -d ' ' -f 1 > "dist/$IMAGE_NAME.sha256"
           qemu-img info "dist/$IMAGE_NAME"
 
@@ -83,5 +83,5 @@ jobs:
           else
             gh release create "${{ inputs.release_tag }}" dist/* \
               --title "${{ inputs.release_tag }}" \
-              --notes "CAPI Ubuntu 24.04 raw image for ${{ inputs.kubernetes_version }}"
+              --notes "CAPI Ubuntu 24.04 qcow2 image for ${{ inputs.kubernetes_version }}"
           fi

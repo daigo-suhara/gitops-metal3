@@ -87,8 +87,8 @@ patches:
                   curl -L -o $DEST/ironic-python-agent.initramfs $IPA_BASE/ipa-centos9-master.initramfs
                 fi
 
-                IMAGE_URL="https://github.com/daigo-suhara/gitops-metal3/releases/download/capi-ubuntu-2404-kube-v1.35/ubuntu-2404-kube-v1.35.raw"
-                IMAGE="ubuntu-2404-kube-v1.35.raw"
+                IMAGE_URL="https://github.com/daigo-suhara/gitops-metal3/releases/download/capi-ubuntu-2404-kube-v1.35/ubuntu-2404-kube-v1.35.qcow2"
+                IMAGE="ubuntu-2404-kube-v1.35.qcow2"
                 if [ ! -f $DEST/$IMAGE ]; then
                   echo "Downloading image..."
                   curl -L -o $DEST/$IMAGE $IMAGE_URL
