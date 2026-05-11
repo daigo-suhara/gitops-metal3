@@ -72,9 +72,7 @@ spec:
             systemctl enable --now containerd
             id ubuntu >/dev/null 2>&1 || useradd -m -s /bin/bash ubuntu
             install -d -m 0700 -o ubuntu -g ubuntu /home/ubuntu/.ssh
-            printf '%s\n' 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID+3Q/eAOgoIs0pNtGvQ8ueXK1Gg8CnIdhcU9rwpeMFm suharadaigo' >/home/ubuntu/.ssh/authorized_keys
-            chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
-            chmod 0600 /home/ubuntu/.ssh/authorized_keys
+            printf '%s\n' 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID+3Q/eAOgoIs0pNtGvQ8ueXK1Gg8CnIdhcU9rwpeMFm suharadaigo' | install -o ubuntu -g ubuntu -m 0600 /dev/stdin /home/ubuntu/.ssh/authorized_keys
             grep -q '^127.0.0.1 kubernetes$' /etc/hosts || echo '127.0.0.1 kubernetes' >>/etc/hosts
             swapoff -a || true
             sed -i '/\sswap\s/ s/^/#/' /etc/fstab
