@@ -40,6 +40,11 @@
 
 前提: `microk8s`, `kubectl` が入っていること。
 
+### 0. ノードイメージの作成
+GitHub Actions の `Build CAPI image` を手動実行すると、`image-builder` で `ubuntu-2404-kube-v1.35.qcow2` を作成し、GitHub Releases にアップロードします。
+
+Ironic はその Release asset を起動時に取得し、`http://172.16.0.10:6180/images/` にキャッシュします。
+
 ### 1. 管理クラスタと GitOps の起動
 管理側の ArgoCD とアプリ群を起動します。
 ```bash

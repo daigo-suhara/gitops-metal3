@@ -1,0 +1,79 @@
+name: Build CAPI image
+
+on:
+  workflow_dispatch:
+    inputs:
+      kubernetes_version:
+        description: Kubernetes version to install
+        required: true
+        default: v1.35.4
+      kubernetes_series:
+        description: Kubernetes package series
+        required: true
+        default: v1.35
+      kubernetes_deb_version:
+        description: Kubernetes deb package version
+        required: true
+        default: 1.35.4-1.1
+      image_builder_ref:
+        description: kubernetes-sigs/image-builder ref
+        required: true
+        default: main
+      release_tag:
+        description: GitHub release tag for the image assets
+        required: true
+        default: capi-ubuntu-2404-kube-v1.35
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    env:
+      IMAGE_NAME: ubuntu-2404-kube-v1.35.qcow2
+
+    steps:
+      - name: Install host dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git make qemu-kvm qemu-utils
+          sudo modprobe kvm || true
+          test -e /dev/kvm && sudo chmod 666 /dev/kvm || true
+
+      - name: Checkout image-builder
+        run: |
+          git clone --depth 1 --branch "${{ inputs.image_builder_ref }}" https://github.com/kubernetes-sigs/image-builder.git
+
+      - name: Build qcow2
+        working-directory: image-builder/images/capi
+        env:
+          PACKER_FLAGS: >-
+            --var kubernetes_semver=${{ inputs.kubernetes_version }}
+            --var kubernetes_series=${{ inputs.kubernetes_series }}
+            --var kubernetes_deb_version=${{ inputs.kubernetes_deb_version }}
+        run: |
+          make deps-qemu
+          make build-qemu-ubuntu-2404
+
+      - name: Prepare release assets
+        run: |
+          mkdir -p dist
+          image_path="$(find image-builder/images/capi/output -type f -name '*.qcow2' | head -n 1)"
+          test -n "$image_path"
+          cp "$image_path" "dist/$IMAGE_NAME"
+          sha256sum "dist/$IMAGE_NAME" | cut -d ' ' -f 1 > "dist/$IMAGE_NAME.sha256"
+          qemu-img info "dist/$IMAGE_NAME"
+
+      - name: Upload release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "${{ inputs.release_tag }}" >/dev/null 2>&1; then
+            gh release upload "${{ inputs.release_tag }}" dist/* --clobber
+          else
+            gh release create "${{ inputs.release_tag }}" dist/* \
+              --title "${{ inputs.release_tag }}" \
+              --notes "CAPI Ubuntu 24.04 image for ${{ inputs.kubernetes_version }}"
+          fi

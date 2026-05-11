@@ -87,7 +87,7 @@ patches:
                   curl -L -o $DEST/ironic-python-agent.initramfs $IPA_BASE/ipa-centos9-master.initramfs
                 fi
 
-                IMAGE_URL="https://nbg1.your-objectstorage.com/osism/openstack-k8s-capi-images/ubuntu-2404-kube-v1.35/ubuntu-2404-kube-v1.35.qcow2"
+                IMAGE_URL="https://github.com/daigo-suhara/gitops-metal3/releases/download/capi-ubuntu-2404-kube-v1.35/ubuntu-2404-kube-v1.35.qcow2"
                 QCOW2_IMAGE="ubuntu-2404-kube-v1.35.qcow2"
                 if [ ! -f $DEST/$QCOW2_IMAGE ]; then
                   echo "Downloading QCOW2 image..."
