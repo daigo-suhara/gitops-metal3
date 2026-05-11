@@ -83,9 +83,7 @@ spec:
           sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
           systemctl enable --now containerd
           id ubuntu >/dev/null 2>&1 || useradd -m -s /bin/bash ubuntu
-          mkdir -p /home/ubuntu/.ssh
-          chown ubuntu:ubuntu /home/ubuntu/.ssh
-          chmod 0700 /home/ubuntu/.ssh
+          install -d -m 0700 -o ubuntu -g ubuntu /home/ubuntu/.ssh
           printf '%s\n' 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID+3Q/eAOgoIs0pNtGvQ8ueXK1Gg8CnIdhcU9rwpeMFm suharadaigo' >/home/ubuntu/.ssh/authorized_keys
           chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
           chmod 0600 /home/ubuntu/.ssh/authorized_keys
