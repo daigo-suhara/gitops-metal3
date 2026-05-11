@@ -78,7 +78,8 @@ jobs:
           test -n "$image_path"
           qemu-img info "$image_path"
           cp "$image_path" "dist/$IMAGE_NAME"
-          sha256sum "dist/$IMAGE_NAME" | cut -d ' ' -f 1 > "dist/$IMAGE_NAME.sha256"
+          gzip -9 -c "dist/$IMAGE_NAME" > "dist/$IMAGE_NAME.gz"
+          sha256sum "dist/$IMAGE_NAME.gz" | cut -d ' ' -f 1 > "dist/$IMAGE_NAME.gz.sha256"
           ls -lh dist
 
       - name: Push OCI artifact
@@ -91,4 +92,4 @@ jobs:
             --artifact-type application/vnd.unknown.artifact.v1 \
             --annotation disktype=raw \
             "${{ inputs.image_ref }}" \
-            "dist/$IMAGE_NAME"
+            "dist/$IMAGE_NAME.gz"

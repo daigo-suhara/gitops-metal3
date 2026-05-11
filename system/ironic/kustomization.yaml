@@ -88,12 +88,14 @@ patches:
                 fi
 
                 IMAGE_URL="ghcr.io/daigo-suhara/gitops-metal3/ubuntu-2404-kube-v1.35:latest"
+                IMAGE_ARCHIVE="ubuntu-2404-kube-v1.35.gz"
                 IMAGE="ubuntu-2404-kube-v1.35"
                 echo "Downloading image..."
                 curl -L -o /tmp/oras.tgz https://github.com/oras-project/oras/releases/download/v1.2.3/oras_1.2.3_linux_amd64.tar.gz
                 tar -xzf /tmp/oras.tgz -C /tmp oras
-                rm -f $DEST/$IMAGE $DEST/$IMAGE.sha256
+                rm -f $DEST/$IMAGE_ARCHIVE $DEST/$IMAGE $DEST/$IMAGE.sha256
                 /tmp/oras pull "$IMAGE_URL" --output "$DEST"
+                gzip -dc $DEST/$IMAGE_ARCHIVE > $DEST/$IMAGE
                 echo "Generating sha256..."
                 sha256sum $DEST/$IMAGE | cut -d ' ' -f 1 > $DEST/$IMAGE.sha256
 
