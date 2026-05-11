@@ -76,7 +76,7 @@ patches:
             args:
               - |
                 set -ex
-                apk add --no-cache curl qemu-img grep
+                apk add --no-cache curl gzip qemu-img grep
                 DEST=/shared/html/images
                 mkdir -p $DEST /shared/tftpboot /shared/ironic /shared/db
                 chmod -R 777 /shared
@@ -87,11 +87,12 @@ patches:
                   curl -L -o $DEST/ironic-python-agent.initramfs $IPA_BASE/ipa-centos9-master.initramfs
                 fi
 
-                IMAGE_URL="https://github.com/daigo-suhara/gitops-metal3/releases/download/capi-ubuntu-2404-kube-v1.35/ubuntu-2404-kube-v1.35.qcow2"
+                IMAGE_URL="https://github.com/daigo-suhara/gitops-metal3/releases/download/capi-ubuntu-2404-kube-v1.35/ubuntu-2404-kube-v1.35.qcow2.gz"
                 IMAGE="ubuntu-2404-kube-v1.35.qcow2"
                 if [ ! -f $DEST/$IMAGE ]; then
                   echo "Downloading image..."
-                  curl -L -o $DEST/$IMAGE $IMAGE_URL
+                  curl -L -o $DEST/$IMAGE.gz $IMAGE_URL
+                  gunzip -f $DEST/$IMAGE.gz
                 fi
                 echo "Generating sha256..."
                 sha256sum $DEST/$IMAGE | cut -d ' ' -f 1 > $DEST/$IMAGE.sha256

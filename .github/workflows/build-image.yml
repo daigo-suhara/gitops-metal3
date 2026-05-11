@@ -74,8 +74,9 @@ jobs:
           test -n "$image_path"
           qemu-img info "$image_path"
           qemu-img convert -O qcow2 "$image_path" "dist/$IMAGE_NAME"
-          sha256sum "dist/$IMAGE_NAME" | cut -d ' ' -f 1 > "dist/$IMAGE_NAME.sha256"
           qemu-img info "dist/$IMAGE_NAME"
+          gzip -9 "dist/$IMAGE_NAME"
+          ls -lh dist
 
       - name: Upload release assets
         env:
