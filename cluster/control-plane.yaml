@@ -7,9 +7,9 @@ spec:
   template:
     spec:
       image:
-        url: http://172.16.0.10:6180/images/ubuntu-2404-kube-v1.35.qcow2
-        checksum: http://172.16.0.10:6180/images/ubuntu-2404-kube-v1.35.qcow2.sha256
-        format: qcow2
+        url: http://172.16.0.10:6180/images/ubuntu-2404-kube-v1.35.raw
+        checksum: http://172.16.0.10:6180/images/ubuntu-2404-kube-v1.35.raw.sha256
+        format: raw
       hostSelector:
         matchLabels:
           cluster-role: control-plane

@@ -87,14 +87,14 @@ patches:
                   curl -L -o $DEST/ironic-python-agent.initramfs $IPA_BASE/ipa-centos9-master.initramfs
                 fi
 
-                IMAGE_URL="https://github.com/daigo-suhara/gitops-metal3/releases/download/capi-ubuntu-2404-kube-v1.35/ubuntu-2404-kube-v1.35.qcow2"
-                QCOW2_IMAGE="ubuntu-2404-kube-v1.35.qcow2"
-                if [ ! -f $DEST/$QCOW2_IMAGE ]; then
-                  echo "Downloading QCOW2 image..."
-                  curl -L -o $DEST/$QCOW2_IMAGE $IMAGE_URL
+                IMAGE_URL="https://github.com/daigo-suhara/gitops-metal3/releases/download/capi-ubuntu-2404-kube-v1.35/ubuntu-2404-kube-v1.35.raw"
+                IMAGE="ubuntu-2404-kube-v1.35.raw"
+                if [ ! -f $DEST/$IMAGE ]; then
+                  echo "Downloading image..."
+                  curl -L -o $DEST/$IMAGE $IMAGE_URL
                 fi
                 echo "Generating sha256..."
-                sha256sum $DEST/$QCOW2_IMAGE | cut -d ' ' -f 1 > $DEST/$QCOW2_IMAGE.sha256
+                sha256sum $DEST/$IMAGE | cut -d ' ' -f 1 > $DEST/$IMAGE.sha256
 
                 chmod -R 777 /shared
             volumeMounts:

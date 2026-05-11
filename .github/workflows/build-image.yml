@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     env:
-      IMAGE_NAME: ubuntu-2404-kube-v1.35.qcow2
+      IMAGE_NAME: ubuntu-2404-kube-v1.35.raw
 
     steps:
       - name: Install host dependencies
@@ -46,22 +46,30 @@ jobs:
         run: |
           git clone --depth 1 --branch "${{ inputs.image_builder_ref }}" https://github.com/kubernetes-sigs/image-builder.git
 
-      - name: Build qcow2
+      - name: Build raw image
         working-directory: image-builder/images/capi
         env:
           PACKER_FLAGS: >-
-            --var kubernetes_semver=${{ inputs.kubernetes_version }}
-            --var kubernetes_series=${{ inputs.kubernetes_series }}
-            --var kubernetes_deb_version=${{ inputs.kubernetes_deb_version }}
+            --var "kubernetes_semver=${{ inputs.kubernetes_version }}"
+            --var "kubernetes_series=${{ inputs.kubernetes_series }}"
+            --var "kubernetes_deb_version=${{ inputs.kubernetes_deb_version }}"
         run: |
-          make deps-qemu
-          make build-qemu-ubuntu-2404
+          make deps-raw
+          make build-raw-ubuntu-2404
 
       - name: Prepare release assets
         run: |
           mkdir -p dist
-          image_path="$(find image-builder/images/capi/output -type f -name '*.qcow2' | head -n 1)"
+          image_path="$(
+            find image-builder/images/capi/output -type f \
+              ! -name '*.gz' \
+              ! -name '*.sha*' \
+              ! -name '*.log' \
+              | sort \
+              | head -n 1
+          )"
           test -n "$image_path"
+          qemu-img info "$image_path"
           cp "$image_path" "dist/$IMAGE_NAME"
           sha256sum "dist/$IMAGE_NAME" | cut -d ' ' -f 1 > "dist/$IMAGE_NAME.sha256"
           qemu-img info "dist/$IMAGE_NAME"
@@ -75,5 +83,5 @@ jobs:
           else
             gh release create "${{ inputs.release_tag }}" dist/* \
               --title "${{ inputs.release_tag }}" \
-              --notes "CAPI Ubuntu 24.04 image for ${{ inputs.kubernetes_version }}"
+              --notes "CAPI Ubuntu 24.04 raw image for ${{ inputs.kubernetes_version }}"
           fi
