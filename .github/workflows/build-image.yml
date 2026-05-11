@@ -117,6 +117,5 @@ jobs:
           oras push \
             --artifact-type application/vnd.unknown.artifact.v1 \
             --annotation disktype=qcow2 \
-            --artifact-platform linux/amd64 \
             "${{ inputs.image_ref }}" \
             "dist/$IMAGE_NAME"
