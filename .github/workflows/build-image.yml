@@ -79,7 +79,7 @@ jobs:
           test -n "$image_path"
           qemu-img info "$image_path"
           cp "$image_path" "dist/$IMAGE_NAME"
-          zstd -19 --rm -q "dist/$IMAGE_NAME" -o "dist/$IMAGE_NAME.zst"
+          zstd -3 -T0 --rm -q "dist/$IMAGE_NAME" -o "dist/$IMAGE_NAME.zst"
           ls -lh dist
 
       - name: Push OCI artifact
