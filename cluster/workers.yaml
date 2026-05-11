@@ -6,6 +6,7 @@ metadata:
 spec:
   template:
     spec:
+      version: v1.35.4
       image:
         url: http://172.16.0.10:6180/images/ubuntu-2404-kube-v1.35.qcow2
         checksum: http://172.16.0.10:6180/images/ubuntu-2404-kube-v1.35.qcow2.sha256
@@ -31,7 +32,6 @@ spec:
         cluster.x-k8s.io/cluster-name: prod
     spec:
       clusterName: prod
-      version: v1.35.4
       bootstrap:
         configRef:
           kind: KubeadmConfigTemplate
@@ -39,6 +39,7 @@ spec:
       infrastructureRef:
         kind: Metal3MachineTemplate
         name: prod-worker
+      version: v1.35.4
 ---
 apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
 kind: KubeadmConfigTemplate

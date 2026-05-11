@@ -6,6 +6,7 @@ metadata:
 spec:
   template:
     spec:
+      version: v1.35.4
       image:
         url: http://172.16.0.10:6180/images/ubuntu-2404-kube-v1.35.qcow2
         checksum: http://172.16.0.10:6180/images/ubuntu-2404-kube-v1.35.qcow2.sha256
@@ -29,9 +30,9 @@ spec:
       infrastructureRef:
         kind: Metal3MachineTemplate
         name: prod-control-plane
+  version: v1.35.4
   kubeadmConfigSpec:
     format: cloud-config
     clusterConfiguration:
       apiServer:
         certSANs: [172.16.10.100, 127.0.0.1]
-  version: v1.35.4
