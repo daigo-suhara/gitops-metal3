@@ -14,7 +14,7 @@ spec:
         matchLabels:
           cluster-role: worker
 ---
-apiVersion: cluster.x-k8s.io/v1beta1
+apiVersion: cluster.x-k8s.io/v1beta2
 kind: MachineDeployment
 metadata:
   name: prod-worker
@@ -34,7 +34,7 @@ spec:
       version: v1.35.4
       bootstrap:
         configRef:
-          apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+          apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
           kind: KubeadmConfigTemplate
           name: prod-worker
       infrastructureRef:
@@ -42,7 +42,7 @@ spec:
         kind: Metal3MachineTemplate
         name: prod-worker
 ---
-apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
 kind: KubeadmConfigTemplate
 metadata:
   name: prod-worker
