@@ -7,7 +7,7 @@ metadata:
     cluster-role: control-plane
 spec:
   online: true
-  bootMode: UFEI
+  bootMode: UEFI
   bootMACAddress: "4c:52:62:16:33:8d"
   bmc:
     address: ipmi://172.16.1.11
