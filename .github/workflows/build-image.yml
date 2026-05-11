@@ -42,7 +42,7 @@ jobs:
       - name: Install host dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y git make qemu-kvm qemu-utils
+          sudo apt-get install -y git make qemu-kvm qemu-utils zstd
           sudo modprobe kvm || true
           test -e /dev/kvm && sudo chmod 666 /dev/kvm || true
           go install oras.land/oras/cmd/oras@v1.2.0
@@ -69,6 +69,7 @@ jobs:
           mkdir -p dist
           image_path="$(
             find image-builder/images/capi/output -type f \
+              ! -name '*.zst' \
               ! -name '*.gz' \
               ! -name '*.sha*' \
               ! -name '*.log' \
@@ -78,8 +79,7 @@ jobs:
           test -n "$image_path"
           qemu-img info "$image_path"
           cp "$image_path" "dist/$IMAGE_NAME"
-          gzip -9 -c "dist/$IMAGE_NAME" > "dist/$IMAGE_NAME.gz"
-          sha256sum "dist/$IMAGE_NAME.gz" | cut -d ' ' -f 1 > "dist/$IMAGE_NAME.gz.sha256"
+          zstd -19 --rm -q "dist/$IMAGE_NAME" -o "dist/$IMAGE_NAME.zst"
           ls -lh dist
 
       - name: Push OCI artifact
@@ -92,4 +92,4 @@ jobs:
             --artifact-type application/vnd.unknown.artifact.v1 \
             --annotation disktype=raw \
             "${{ inputs.image_ref }}" \
-            "dist/$IMAGE_NAME.gz"
+            "dist/$IMAGE_NAME.zst:application/zstd"

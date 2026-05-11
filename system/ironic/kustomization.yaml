@@ -76,7 +76,7 @@ patches:
             args:
               - |
                 set -ex
-                apk add --no-cache curl qemu-img grep tar
+                apk add --no-cache curl grep tar
                 DEST=/shared/html/images
                 mkdir -p $DEST /shared/tftpboot /shared/ironic /shared/db
                 chmod -R 777 /shared
@@ -86,18 +86,6 @@ patches:
                   curl -L -o $DEST/ironic-python-agent.kernel $IPA_BASE/ipa-centos9-master.kernel
                   curl -L -o $DEST/ironic-python-agent.initramfs $IPA_BASE/ipa-centos9-master.initramfs
                 fi
-
-                IMAGE_URL="ghcr.io/daigo-suhara/gitops-metal3/ubuntu-2404-kube-v1.35:latest"
-                IMAGE_ARCHIVE="ubuntu-2404-kube-v1.35.gz"
-                IMAGE="ubuntu-2404-kube-v1.35"
-                echo "Downloading image..."
-                curl -L -o /tmp/oras.tgz https://github.com/oras-project/oras/releases/download/v1.2.3/oras_1.2.3_linux_amd64.tar.gz
-                tar -xzf /tmp/oras.tgz -C /tmp oras
-                rm -f $DEST/$IMAGE_ARCHIVE $DEST/$IMAGE $DEST/$IMAGE.sha256
-                /tmp/oras pull "$IMAGE_URL" --output "$DEST"
-                gzip -dc $DEST/$IMAGE_ARCHIVE > $DEST/$IMAGE
-                echo "Generating sha256..."
-                sha256sum $DEST/$IMAGE | cut -d ' ' -f 1 > $DEST/$IMAGE.sha256
 
                 chmod -R 777 /shared
             volumeMounts:
