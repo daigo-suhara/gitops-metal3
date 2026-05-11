@@ -51,14 +51,13 @@ spec:
   template:
     spec:
       format: cloud-config
-      users:
-        - name: ubuntu
-          sudo: ALL=(ALL) NOPASSWD:ALL
-          shell: /bin/bash
-          ssh_authorized_keys:
-            - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID+3Q/eAOgoIs0pNtGvQ8ueXK1Gg8CnIdhcU9rwpeMFm suharadaigo
       preKubeadmCommands: ["/opt/install-k8s.sh"]
       files:
+        - path: /home/ubuntu/.ssh/authorized_keys
+          owner: ubuntu:ubuntu
+          permissions: "0600"
+          content: |
+            ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID+3Q/eAOgoIs0pNtGvQ8ueXK1Gg8CnIdhcU9rwpeMFm suharadaigo
         - path: /opt/install-k8s.sh
           permissions: "0755"
           content: |
