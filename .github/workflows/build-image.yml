@@ -19,13 +19,14 @@ on:
         description: kubernetes-sigs/image-builder ref
         required: true
         default: main
-      release_tag:
-        description: GitHub release tag for the image assets
+      image_ref:
+        description: ghcr reference for the OCI artifact
         required: true
-        default: capi-ubuntu-2404-kube-v1.35
+        default: ghcr.io/daigo-suhara/gitops-metal3/ubuntu-2404-kube-v1.35:latest
 
 permissions:
-  contents: write
+  contents: read
+  packages: write
 
 jobs:
   build:
@@ -44,6 +45,8 @@ jobs:
           sudo apt-get install -y git make qemu-kvm qemu-utils
           sudo modprobe kvm || true
           test -e /dev/kvm && sudo chmod 666 /dev/kvm || true
+          go install oras.land/oras/cmd/oras@v1.2.0
+          echo "$HOME/go/bin" >> "$GITHUB_PATH"
 
       - name: Checkout image-builder
         run: |
@@ -60,7 +63,7 @@ jobs:
           make deps-qemu
           make build-qemu-ubuntu-2404
 
-      - name: Prepare release assets
+      - name: Prepare image assets
         run: |
           mkdir -p dist
           image_path="$(
@@ -74,18 +77,19 @@ jobs:
           test -n "$image_path"
           qemu-img info "$image_path"
           qemu-img convert -O qcow2 "$image_path" "dist/$IMAGE_NAME"
+          sha256sum "dist/$IMAGE_NAME" | cut -d ' ' -f 1 > "dist/$IMAGE_NAME.sha256"
           qemu-img info "dist/$IMAGE_NAME"
-          gzip -9 "dist/$IMAGE_NAME"
           ls -lh dist
 
-      - name: Upload release assets
+      - name: Push OCI artifact
         env:
-          GH_TOKEN: ${{ github.token }}
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if gh release view "${{ inputs.release_tag }}" >/dev/null 2>&1; then
-            gh release upload "${{ inputs.release_tag }}" dist/* --clobber
-          else
-            gh release create "${{ inputs.release_tag }}" dist/* \
-              --title "${{ inputs.release_tag }}" \
-              --notes "CAPI Ubuntu 24.04 qcow2 image for ${{ inputs.kubernetes_version }}"
-          fi
+          printf '%s' "$GHCR_TOKEN" | oras login ghcr.io -u "$GHCR_USER" --password-stdin
+          oras push \
+            --artifact-type application/vnd.unknown.artifact.v1 \
+            --annotation disktype=qcow2 \
+            --artifact-platform linux/amd64 \
+            "${{ inputs.image_ref }}" \
+            "dist/$IMAGE_NAME"

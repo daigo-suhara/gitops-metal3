@@ -41,9 +41,11 @@
 前提: `microk8s`, `kubectl` が入っていること。
 
 ### 0. ノードイメージの作成
-GitHub Actions の `Build CAPI image` を手動実行すると、`image-builder` で `ubuntu-2404-kube-v1.35.qcow2` を作成し、GitHub Releases にアップロードします。
+GitHub Actions の `Build CAPI image` を手動実行すると、`image-builder` で `ubuntu-2404-kube-v1.35.qcow2` を作成し、GHCR に OCI artifact としてアップロードします。
 
-Release には `ubuntu-2404-kube-v1.35.qcow2.gz` として保存し、Ironic は起動時に展開して `http://172.16.0.10:6180/images/` にキャッシュします。
+GitHub Actions では `GITHUB_TOKEN` を使って `ghcr.io/daigo-suhara/gitops-metal3/ubuntu-2404-kube-v1.35:latest` に push します。
+
+GHCR の package は public にしておく必要があります。Ironic は GHCR から取得し、`http://172.16.0.10:6180/images/` にキャッシュします。
 
 ### 1. 管理クラスタと GitOps の起動
 管理側の ArgoCD とアプリ群を起動します。
