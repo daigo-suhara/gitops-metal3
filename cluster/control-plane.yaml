@@ -27,10 +27,8 @@ spec:
       maxSurge: 0
   machineTemplate:
     infrastructureRef:
-      apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
       kind: Metal3MachineTemplate
       name: prod-control-plane
-      namespace: metal3
   kubeadmConfigSpec:
     format: cloud-config
     clusterConfiguration:
