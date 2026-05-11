@@ -33,12 +33,6 @@ spec:
       namespace: metal3
   kubeadmConfigSpec:
     format: cloud-config
-    users:
-      - name: ubuntu
-        sudo: ALL=(ALL) NOPASSWD:ALL
-        shell: /bin/bash
-        sshAuthorizedKeys:
-          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID+3Q/eAOgoIs0pNtGvQ8ueXK1Gg8CnIdhcU9rwpeMFm suharadaigo
     clusterConfiguration:
       apiServer:
         certSANs:
@@ -90,6 +84,10 @@ spec:
           containerd config default >/etc/containerd/config.toml
           sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
           systemctl enable --now containerd
+          install -d -m 0700 -o ubuntu -g ubuntu /home/ubuntu/.ssh
+          printf '%s\n' 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID+3Q/eAOgoIs0pNtGvQ8ueXK1Gg8CnIdhcU9rwpeMFm suharadaigo' >/home/ubuntu/.ssh/authorized_keys
+          chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
+          chmod 0600 /home/ubuntu/.ssh/authorized_keys
           (
             while [ ! -f /etc/kubernetes/super-admin.conf ]; do
               sleep 1
