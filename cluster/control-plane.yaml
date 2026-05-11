@@ -21,14 +21,14 @@ metadata:
   namespace: metal3
 spec:
   replicas: 3
-  rolloutStrategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 0
+  rollout:
+    strategy:
+      type: RollingUpdate
   machineTemplate:
-    infrastructureRef:
-      kind: Metal3MachineTemplate
-      name: prod-control-plane
+    spec:
+      infrastructureRef:
+        kind: Metal3MachineTemplate
+        name: prod-control-plane
   kubeadmConfigSpec:
     format: cloud-config
     clusterConfiguration:
