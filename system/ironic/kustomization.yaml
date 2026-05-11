@@ -88,7 +88,7 @@ patches:
                 fi
 
                 IMAGE_URL="ghcr.io/daigo-suhara/gitops-metal3/ubuntu-2404-kube-v1.35:latest"
-                IMAGE="ubuntu-2404-kube-v1.35.qcow2"
+                IMAGE="ubuntu-2404-kube-v1.35"
                 echo "Downloading image..."
                 curl -L -o /tmp/oras.tgz https://github.com/oras-project/oras/releases/download/v1.2.3/oras_1.2.3_linux_amd64.tar.gz
                 tar -xzf /tmp/oras.tgz -C /tmp oras
