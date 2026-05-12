@@ -78,7 +78,7 @@ patches:
             args:
               - |
                 set -ex
-                apk add --no-cache curl qemu-img tar
+                apk add --no-cache curl tar zstd
                 DEST=/shared/html/images
                 mkdir -p $DEST /shared/tftpboot /shared/ironic /shared/db
 
@@ -89,17 +89,21 @@ patches:
                 fi
 
                 IMAGE_URL="ghcr.io/daigo-suhara/gitops-metal3/ubuntu-2404-kube-v1.35:latest"
-                IMAGE="ubuntu-2404-kube-v1.35.qcow2"
                 RAW_IMAGE="ubuntu-2404-kube-v1.35"
                 echo "Downloading image..."
                 curl -L -o /tmp/oras.tgz https://github.com/oras-project/oras/releases/download/v1.2.3/oras_1.2.3_linux_amd64.tar.gz
                 tar -xzf /tmp/oras.tgz -C /tmp oras
-                rm -f $DEST/$IMAGE $DEST/$IMAGE.sha256
+                rm -f $DEST/$RAW_IMAGE $DEST/$RAW_IMAGE.sha256
                 /tmp/oras pull "$IMAGE_URL" --output "$DEST"
-                qemu-img convert -O raw "$DEST/$IMAGE" "$DEST/$RAW_IMAGE"
+                SOURCE_IMAGE="$(find "$DEST" -name '*.zst' | sort | head -n 1)"
+                if [ -z "$SOURCE_IMAGE" ]; then
+                  echo "No pulled image artifact found"
+                  exit 1
+                fi
+                zstd -dc "$SOURCE_IMAGE" > "$DEST/$RAW_IMAGE"
                 echo "Generating sha256..."
                 sha256sum $DEST/$RAW_IMAGE | cut -d ' ' -f 1 > $DEST/$RAW_IMAGE.sha256
-                rm -f $DEST/$IMAGE
+                rm -f $SOURCE_IMAGE
 
                 chmod -R 777 /shared
             volumeMounts:
