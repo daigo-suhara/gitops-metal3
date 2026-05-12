@@ -7,7 +7,7 @@ spec:
   template:
     spec:
       image:
-        url: oci://ghcr.io/daigo-suhara/gitops-metal3/ubuntu-2404-kube-v1.35:latest
+        url: oci://ghcr.io/daigo-suhara/gitops-metal3/ubuntu-2404-kube-v1.35@sha256:8e9d4dc6c7e27203f9658aeb1467ab219b3c9fa7d3571329896bc6486e2c85f9
         format: raw
       hostSelector:
         matchLabels:
