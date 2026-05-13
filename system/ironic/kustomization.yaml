@@ -4,8 +4,8 @@ namespace: metal3
 
 resources:
   - ironic-support.yaml
-  - https://github.com/metal3-io/baremetal-operator//config/default?ref=release-0.13
-  - https://github.com/metal3-io/baremetal-operator//ironic-deployment/default?ref=release-0.13
+  - https://github.com/metal3-io/baremetal-operator//config/default?ref=release-0.13.0
+  - https://github.com/metal3-io/baremetal-operator//ironic-deployment/default?ref=release-0.13.0
 
 generatorOptions:
   disableNameSuffixHash: true
