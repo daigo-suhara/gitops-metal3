@@ -8,7 +8,6 @@ spec:
     spec:
       image:
         url: oci://ghcr.io/daigo-suhara/gitops-metal3/ubuntu-2404-kube-v1.35:latest
-        format: qcow2
       hostSelector:
         matchLabels:
           cluster-role: control-plane
