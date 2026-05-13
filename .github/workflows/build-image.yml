@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     env:
-      IMAGE_NAME: ubuntu-2404-kube-v1.35.raw
+      IMAGE_NAME: ubuntu-2404-kube-v1.35.gz
 
     steps:
       - name: Checkout repository
@@ -67,9 +67,7 @@ jobs:
       - name: Prepare image assets
         run: |
           mkdir -p dist
-          image_path="$(find image-builder/images/capi/output -type f -name '*.raw' | head -n 1)"
-          test -n "$image_path"
-          mv "$image_path" "dist/$IMAGE_NAME"
+          cp image-builder/images/capi/output/ubuntu-2404-kube-${{ inputs.kubernetes_version }}.gz "dist/$IMAGE_NAME"
           sha256sum "dist/$IMAGE_NAME" | cut -d ' ' -f 1 > "dist/$IMAGE_NAME.sha256"
           ls -lh dist
 
