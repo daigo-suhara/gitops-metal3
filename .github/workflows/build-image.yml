@@ -1,5 +1,5 @@
 name: Build and Push Kubernetes Node Image
-run-name: Build k8s ${{ inputs.kubernetesVersion || 'v1.35.4' }} (arm64)
+run-name: Build k8s ${{ inputs.kubernetesVersion || 'v1.35.4' }} (amd64)
 
 on:
   workflow_dispatch:
@@ -17,7 +17,7 @@ env:
   REGISTRY: ghcr.io
   KUBERNETES_VERSION: ${{ inputs.kubernetesVersion || 'v1.35.4' }}
   UBUNTU_VERSION: "24.04"
-  ARCH: arm64
+  ARCH: amd64
 
 permissions:
   contents: read
@@ -25,8 +25,8 @@ permissions:
 
 jobs:
   build:
-    name: Build arm64
-    runs-on: ubuntu-24.04-arm
+    name: Build amd64
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -34,7 +34,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y git make qemu-utils qemu-system-arm
+          sudo apt-get install -y git make qemu-utils qemu-system-x86 qemu-kvm
           sudo modprobe kvm || true
           test -e /dev/kvm && sudo chmod 666 /dev/kvm || true
 
@@ -45,9 +45,7 @@ jobs:
       - name: Build Raw Image
         working-directory: image-builder/images/capi
         env:
-          PACKER_FLAGS: >-
-            --var kubernetes_semver=${{ env.KUBERNETES_VERSION }}
-            --var qemu_binary=qemu-system-aarch64
+          PACKER_FLAGS: "--var kubernetes_semver=${{ env.KUBERNETES_VERSION }}"
         run: |
           make deps-qemu
           make build-raw-ubuntu-2404 ARCH=${{ env.ARCH }}
@@ -63,19 +61,19 @@ jobs:
       - name: Upload Image
         uses: actions/upload-artifact@v4
         with:
-          name: node-image-arm64
+          name: node-image-amd64
           path: dist/
           retention-days: 1
 
   push:
-    name: Push arm64
+    name: Push amd64
     needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: node-image-arm64
+          name: node-image-amd64
           path: dist/
 
       - name: Setup ORAS
