@@ -22,7 +22,7 @@ on:
       image_ref:
         description: ghcr reference for the OCI artifact
         required: true
-        default: ghcr.io/daigo-suhara/gitops-metal3/ubuntu-2404-kube-v1.35:latest
+        default: ghcr.io/daigo-suhara/gitops-metal3/ubuntu:2404-v1.35.4-arm64.gz
 
 permissions:
   contents: read
@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     env:
-      IMAGE_NAME: ubuntu-2404-kube-v1.35.gz
+      IMAGE_NAME: ubuntu-2404-${{ inputs.kubernetes_version }}-arm64.gz
 
     steps:
       - name: Checkout repository
