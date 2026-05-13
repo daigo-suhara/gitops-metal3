@@ -83,10 +83,9 @@ patches:
                 mkdir -p $DEST /shared/tftpboot /shared/ironic /shared/db
 
                 IPA_BASE="https://tarballs.openstack.org/ironic-python-agent/dib/files"
-                if [ ! -f $DEST/ironic-python-agent.kernel ]; then
-                  curl -L -o $DEST/ironic-python-agent.kernel $IPA_BASE/ipa-centos9-master.kernel
-                  curl -L -o $DEST/ironic-python-agent.initramfs $IPA_BASE/ipa-centos9-master.initramfs
-                fi
+                # Always re-download to ensure we have the correct files
+                curl -L -o $DEST/ironic-python-agent.kernel $IPA_BASE/ipa-ubuntu-master.kernel
+                curl -L -o $DEST/ironic-python-agent.initramfs $IPA_BASE/ipa-ubuntu-master.initramfs
 
                 chmod -R 777 /shared
             volumeMounts:
