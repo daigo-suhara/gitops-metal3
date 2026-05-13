@@ -1,5 +1,5 @@
 name: Build and Push Kubernetes Node Image
-run-name: Build k8s ${{ inputs.kubernetesVersion || 'v1.35.4' }}
+run-name: Build k8s ${{ inputs.kubernetesVersion || 'v1.35.4' }} (arm64)
 
 on:
   workflow_dispatch:
@@ -17,6 +17,7 @@ env:
   REGISTRY: ghcr.io
   KUBERNETES_VERSION: ${{ inputs.kubernetesVersion || 'v1.35.4' }}
   UBUNTU_VERSION: "24.04"
+  ARCH: arm64
 
 permissions:
   contents: read
@@ -24,16 +25,8 @@ permissions:
 
 jobs:
   build:
-    name: Build ${{ matrix.arch }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - arch: amd64
-            runner: ubuntu-24.04
-          - arch: arm64
-            runner: ubuntu-24.04-arm
-    runs-on: ${{ matrix.runner }}
+    name: Build arm64
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -41,12 +34,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y git make qemu-utils
-          if [ "${{ matrix.arch }}" = "amd64" ]; then
-            sudo apt-get install -y qemu-system-x86 qemu-kvm
-          else
-            sudo apt-get install -y qemu-system-arm
-          fi
+          sudo apt-get install -y git make qemu-utils qemu-system-arm
           sudo modprobe kvm || true
           test -e /dev/kvm && sudo chmod 666 /dev/kvm || true
 
@@ -59,38 +47,35 @@ jobs:
         env:
           PACKER_FLAGS: >-
             --var kubernetes_semver=${{ env.KUBERNETES_VERSION }}
-            ${{ matrix.arch == 'arm64' && '--var qemu_binary=qemu-system-aarch64' || '' }}
+            --var qemu_binary=qemu-system-aarch64
         run: |
           make deps-qemu
-          make build-raw-ubuntu-2404 ARCH=${{ matrix.arch }}
+          make build-raw-ubuntu-2404 ARCH=${{ env.ARCH }}
 
       - name: Prepare Artifacts
         run: |
           mkdir -p dist
           SOURCE="image-builder/images/capi/output/ubuntu-2404-kube-${{ env.KUBERNETES_VERSION }}.gz"
-          FILENAME="ubuntu-${{ env.UBUNTU_VERSION }}-k8s-${{ env.KUBERNETES_VERSION }}-${{ matrix.arch }}.gz"
+          FILENAME="ubuntu-${{ env.UBUNTU_VERSION }}-k8s-${{ env.KUBERNETES_VERSION }}-${{ env.ARCH }}.gz"
           cp "$SOURCE" "dist/$FILENAME"
           sha256sum "dist/$FILENAME" | cut -d ' ' -f 1 > "dist/$FILENAME.sha256"
 
       - name: Upload Image
         uses: actions/upload-artifact@v4
         with:
-          name: node-image-${{ matrix.arch }}
+          name: node-image-arm64
           path: dist/
           retention-days: 1
 
   push:
-    name: Push ${{ matrix.arch }}
+    name: Push arm64
     needs: build
-    strategy:
-      matrix:
-        arch: [amd64, arm64]
     runs-on: ubuntu-latest
     steps:
       - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: node-image-${{ matrix.arch }}
+          name: node-image-arm64
           path: dist/
 
       - name: Setup ORAS
@@ -105,8 +90,8 @@ jobs:
 
       - name: Push to OCI Registry
         run: |
-          IMAGE_FILE="ubuntu-${{ env.UBUNTU_VERSION }}-k8s-${{ env.KUBERNETES_VERSION }}-${{ matrix.arch }}.gz"
-          TAG="${{ env.UBUNTU_VERSION }}-${{ env.KUBERNETES_VERSION }}-${{ matrix.arch }}.gz"
+          IMAGE_FILE="ubuntu-${{ env.UBUNTU_VERSION }}-k8s-${{ env.KUBERNETES_VERSION }}-${{ env.ARCH }}.gz"
+          TAG="${{ env.UBUNTU_VERSION }}-${{ env.KUBERNETES_VERSION }}-${{ env.ARCH }}.gz"
           REPO="${{ env.REGISTRY }}/${{ github.repository_owner }}/gitops-metal3/ubuntu"
           
           oras push \
