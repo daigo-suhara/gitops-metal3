@@ -8,8 +8,6 @@ spec:
     spec:
       image:
         url: oci://ghcr.io/daigo-suhara/gitops-metal3/ubuntu:2404-v1.35.4-amd64.gz
-        checksum: sha256:9e6893ec03673254f1f2deae097b20b938fe5c2c2933bfaf15038a60e6b67c22
-        checksumType: sha256
       hostSelector:
         matchLabels:
           cluster-role: control-plane
