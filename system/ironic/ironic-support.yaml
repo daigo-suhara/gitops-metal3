@@ -31,6 +31,7 @@ metadata:
   name: image-pvc
   namespace: metal3
 spec:
+  storageClassName: microk8s-hostpath
   accessModes:
     - ReadWriteOnce
   resources:
