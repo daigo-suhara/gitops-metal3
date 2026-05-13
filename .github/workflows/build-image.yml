@@ -1,5 +1,5 @@
 name: Build and Push Kubernetes Node Image
-run-name: Build k8s ${{ inputs.kubernetesVersion || 'v1.35.4' }} (${{ matrix.arch }})
+run-name: Build k8s ${{ inputs.kubernetesVersion || 'v1.35.4' }}
 
 on:
   workflow_dispatch:
