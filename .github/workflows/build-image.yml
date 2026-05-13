@@ -8,6 +8,10 @@ on:
         description: "Kubernetes version (e.g., v1.35.4)"
         required: true
         default: "v1.35.4"
+      image_builder_ref:
+        description: "kubernetes-sigs/image-builder ref"
+        required: true
+        default: "main"
 
 env:
   REGISTRY: ghcr.io
@@ -30,42 +34,41 @@ jobs:
             runner: ubuntu-24.04-arm
     runs-on: ${{ matrix.runner }}
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Clone Tinkerbell Image Builder
+      - name: Install host dependencies
         run: |
-          git clone --depth 1 https://github.com/tinkerbell/cluster-api-provider-tinkerbell.git capt
+          sudo apt-get update
+          sudo apt-get install -y git make qemu-kvm qemu-utils
+          sudo modprobe kvm || true
+          test -e /dev/kvm && sudo chmod 666 /dev/kvm || true
 
-      - name: setup-mkosi
-        uses: systemd/mkosi@v26
-
-      - name: Install mkosi Python dependencies
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends python3-pefile mtools
+      - name: Checkout image-builder
+        run: |
+          git clone --depth 1 --branch "${{ inputs.image_builder_ref }}" https://github.com/kubernetes-sigs/image-builder.git
 
       - name: Build image
-        working-directory: capt/image-builder
+        working-directory: image-builder/images/capi
+        env:
+          PACKER_FLAGS: "--var kubernetes_semver=${{ env.KUBERNETES_VERSION }}"
         run: |
-          make build \
-            ARCH=${{ matrix.arch }} \
-            KUBERNETES_VERSION=${{ env.KUBERNETES_VERSION }} \
-            UBUNTU_VERSION=${{ env.UBUNTU_VERSION }}
+          make deps-qemu
+          make build-raw-ubuntu-2404
 
-      - name: Validate image
-        working-directory: capt/image-builder
+      - name: Prepare image assets
         run: |
-          make validate \
-            ARCH=${{ matrix.arch }} \
-            UBUNTU_VERSION=${{ env.UBUNTU_VERSION }} \
-            KUBERNETES_VERSION=${{ env.KUBERNETES_VERSION }}
+          mkdir -p dist
+          SOURCE_IMAGE="image-builder/images/capi/output/ubuntu-2404-kube-${{ env.KUBERNETES_VERSION }}.gz"
+          DEST_IMAGE="ubuntu-${{ env.UBUNTU_VERSION }}-k8s-${{ env.KUBERNETES_VERSION }}-${{ matrix.arch }}.gz"
+          cp "$SOURCE_IMAGE" "dist/$DEST_IMAGE"
+          sha256sum "dist/$DEST_IMAGE" | cut -d ' ' -f 1 > "dist/$DEST_IMAGE.sha256"
 
       - name: Upload image artifact
         uses: actions/upload-artifact@v7
         with:
           name: ubuntu-${{ env.UBUNTU_VERSION }}-k8s-${{ env.KUBERNETES_VERSION }}-${{ matrix.arch }}
-          path: |
-            capt/image-builder/mkosi.output/${{ env.UBUNTU_VERSION }}/${{ env.KUBERNETES_VERSION }}/${{ matrix.arch }}/*.raw.gz
-            capt/image-builder/mkosi.output/${{ env.UBUNTU_VERSION }}/${{ env.KUBERNETES_VERSION }}/${{ matrix.arch }}/*.sha256
+          path: dist/
           retention-days: 2
 
   push:
@@ -76,20 +79,13 @@ jobs:
         arch: [amd64, arm64]
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Clone Tinkerbell Image Builder
-        run: |
-          git clone --depth 1 https://github.com/tinkerbell/cluster-api-provider-tinkerbell.git capt
-
       - name: Download image artifact
         uses: actions/download-artifact@v8
         with:
           name: ubuntu-${{ env.UBUNTU_VERSION }}-k8s-${{ env.KUBERNETES_VERSION }}-${{ matrix.arch }}
-          path: capt/image-builder/mkosi.output/${{ env.UBUNTU_VERSION }}/${{ env.KUBERNETES_VERSION }}/${{ matrix.arch }}/
+          path: dist/
 
-      - name: Install oras
+      - name: Setup ORAS
         uses: oras-project/setup-oras@v2
 
       - name: Log in to container registry
@@ -103,10 +99,12 @@ jobs:
         run: echo "OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_ENV"
 
       - name: Push image to OCI registry
-        working-directory: capt/image-builder
         run: |
-          make push \
-            ARCH=${{ matrix.arch }} \
-            KUBERNETES_VERSION=${{ env.KUBERNETES_VERSION }} \
-            OCI_REGISTRY=${{ env.REGISTRY }} \
-            OCI_REPOSITORY=${OWNER_LC}/gitops-metal3/ubuntu
+          IMAGE_FILE="ubuntu-${{ env.UBUNTU_VERSION }}-k8s-${{ env.KUBERNETES_VERSION }}-${{ matrix.arch }}.gz"
+          TAG="${{ env.UBUNTU_VERSION }}-${{ env.KUBERNETES_VERSION }}-${{ matrix.arch }}.gz"
+          
+          oras push \
+            --artifact-type application/vnd.unknown.artifact.v1 \
+            --annotation disktype=raw \
+            "${{ env.REGISTRY }}/${{ env.OWNER_LC }}/gitops-metal3/ubuntu:${TAG}" \
+            "dist/${IMAGE_FILE}"
