@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: metal3
 
 resources:
+  - ironic-support.yaml
   - https://github.com/metal3-io/baremetal-operator//config/default?ref=v0.13.0
   - https://github.com/metal3-io/baremetal-operator//ironic-deployment/default?ref=v0.13.0
 
@@ -23,7 +24,8 @@ patches:
         path: /spec/template/spec/volumes
         value:
           - name: ironic-data-volume
-            emptyDir: {}
+            persistentVolumeClaim:
+              claimName: image-pvc
 
   # BMO Role enhancements
   - target:
