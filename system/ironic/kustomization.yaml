@@ -83,7 +83,8 @@ patches:
                 mkdir -p $DEST /shared/tftpboot /shared/ironic /shared/db
 
                 IPA_BASE="https://tarballs.openstack.org/ironic-python-agent/dib/files"
-                # Always re-download to ensure we have the correct files
+                # Remove old files to force fresh download of the new image type
+                rm -f $DEST/ironic-python-agent.kernel $DEST/ironic-python-agent.initramfs
                 curl -L -o $DEST/ironic-python-agent.kernel $IPA_BASE/ipa-ubuntu-master.kernel
                 curl -L -o $DEST/ironic-python-agent.initramfs $IPA_BASE/ipa-ubuntu-master.initramfs
 
