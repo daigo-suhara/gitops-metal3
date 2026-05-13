@@ -1,0 +1,5 @@
+- op: remove
+  path: /webhooks/0
+- op: replace
+  path: /metadata/annotations/cert-manager.io~1inject-ca-from
+  value: metal3/baremetal-operator-serving-cert
