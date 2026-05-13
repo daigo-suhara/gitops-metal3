@@ -74,5 +74,4 @@ spec:
             failureThreshold: 30
       volumes:
         - name: ironic-data-volume
-          persistentVolumeClaim:
-            claimName: image-pvc
+          emptyDir: {}
