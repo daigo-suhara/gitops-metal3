@@ -62,14 +62,14 @@ jobs:
             --var "kubernetes_deb_version=${{ inputs.kubernetes_deb_version }}"
         run: |
           make deps-qemu
-          make build-qemu-ubuntu-2404
+          make build-raw-ubuntu-2404
 
       - name: Prepare image assets
         run: |
           mkdir -p dist
-          image_path="$(find image-builder/images/capi/output -type f -name '*.qcow2' | head -n 1)"
+          image_path="$(find image-builder/images/capi/output -type f -name '*.raw' | head -n 1)"
           test -n "$image_path"
-          qemu-img convert -O raw "$image_path" "dist/$IMAGE_NAME"
+          mv "$image_path" "dist/$IMAGE_NAME"
           sha256sum "dist/$IMAGE_NAME" | cut -d ' ' -f 1 > "dist/$IMAGE_NAME.sha256"
           ls -lh dist
 
