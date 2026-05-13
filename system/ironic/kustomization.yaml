@@ -108,8 +108,7 @@ patches:
         path: /spec/template/spec/volumes/0
         value:
           name: ironic-data-volume
-          persistentVolumeClaim:
-            claimName: image-pvc
+          emptyDir: {}
 
 configMapGenerator:
   - name: ironic
