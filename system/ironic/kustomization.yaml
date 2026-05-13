@@ -11,128 +11,20 @@ generatorOptions:
   disableNameSuffixHash: true
 
 patches:
+  # Ironic Pod configurations
+  - path: ironic-deployment.yaml
+    target:
+      kind: Deployment
+      name: baremetal-operator-ironic
+
+  # BMO Role enhancements
   - target:
       kind: ClusterRole
       name: baremetal-operator-manager-role
-    patch: |
-      - op: add
-        path: /rules/-
-        value:
-          apiGroups:
-            - metal3.io
-          resources:
-            - hostclaims
-          verbs:
-            - get
-            - list
-            - watch
-            - create
-            - update
-            - patch
-            - delete
+    path: bmo-privileges.yaml
 
-  - target:
-      kind: CustomResourceDefinition
-      name: (.*).metal3.io
-    patch: |
-      - op: replace
-        path: /metadata/annotations/cert-manager.io~1inject-ca-from
-        value: metal3/baremetal-operator-serving-cert
-
-  - target:
-      kind: ValidatingWebhookConfiguration
-      name: baremetal-operator-validating-webhook-configuration
-    patch: |
-      - op: remove
-        path: /webhooks/0
-      - op: replace
-        path: /metadata/annotations/cert-manager.io~1inject-ca-from
-        value: metal3/baremetal-operator-serving-cert
-
-  - target:
-      kind: Certificate
-      name: baremetal-operator-serving-cert
-    patch: |
-      - op: replace
-        path: /spec/dnsNames/0
-        value: baremetal-operator-webhook-service.metal3.svc
-      - op: replace
-        path: /spec/dnsNames/1
-        value: baremetal-operator-webhook-service.metal3.svc.cluster.local
-
-  - target:
-      kind: Deployment
-      name: baremetal-operator-ironic
-    patch: |
-      - op: replace
-        path: /spec/template/spec/securityContext/runAsNonRoot
-        value: false
-      - op: replace
-        path: /spec/template/spec/initContainers
-        value:
-          - name: image-downloader
-            image: alpine:3.20
-            securityContext:
-              runAsUser: 0
-            command: ["sh", "-c"]
-            args:
-              - |
-                set -ex
-                apk add --no-cache curl
-                DEST=/shared/html/images
-                mkdir -p $DEST /shared/tftpboot /shared/ironic /shared/db
-
-                IPA_BASE="https://tarballs.openstack.org/ironic-python-agent/dib/files"
-                if [ ! -f $DEST/ironic-python-agent.kernel ]; then
-                  curl -L -o $DEST/ironic-python-agent.kernel $IPA_BASE/ipa-debian-master.kernel
-                  curl -L -o $DEST/ironic-python-agent.initramfs $IPA_BASE/ipa-debian-master.initramfs
-                fi
-
-                chmod -R 777 /shared
-            volumeMounts:
-              - name: ironic-data-volume
-                mountPath: /shared
-      - op: replace
-        path: /spec/template/spec/containers/3/securityContext
-        value:
-          runAsUser: 0
-      - op: add
-        path: /spec/template/spec/hostNetwork
-        value: true
-      - op: replace
-        path: /spec/template/spec/containers/1/livenessProbe/failureThreshold
-        value: 30
-      - op: replace
-        path: /spec/template/spec/containers/1/readinessProbe/failureThreshold
-        value: 30
-      - op: replace
-        path: /spec/template/spec/containers/3/livenessProbe/failureThreshold
-        value: 30
-      - op: replace
-        path: /spec/template/spec/containers/3/readinessProbe/failureThreshold
-        value: 30
-      - op: replace
-        path: /spec/template/spec/containers/0/envFrom/0/configMapRef/name
-        value: ironic
-      - op: replace
-        path: /spec/template/spec/containers/1/envFrom/0/configMapRef/name
-        value: ironic
-      - op: add
-        path: /spec/template/spec/containers/2/envFrom
-        value:
-          - configMapRef:
-              name: ironic
-      - op: add
-        path: /spec/template/spec/containers/3/envFrom
-        value:
-          - configMapRef:
-              name: ironic
-      - op: replace
-        path: /spec/template/spec/volumes/0
-        value:
-          name: ironic-data-volume
-          persistentVolumeClaim:
-            claimName: image-pvc
+  # Cert-Manager and Webhook integrations
+  - path: webhook-certs.yaml
 
 configMapGenerator:
   - name: ironic

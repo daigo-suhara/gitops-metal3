@@ -1,0 +1,31 @@
+# CRD annotations for Cert-Manager
+- target:
+    kind: CustomResourceDefinition
+    name: (.*).metal3.io
+  patch: |
+    - op: replace
+      path: /metadata/annotations/cert-manager.io~1inject-ca-from
+      value: metal3/baremetal-operator-serving-cert
+
+# Webhook annotations and removal of redundant webhook
+- target:
+    kind: ValidatingWebhookConfiguration
+    name: baremetal-operator-validating-webhook-configuration
+  patch: |
+    - op: remove
+      path: /webhooks/0
+    - op: replace
+      path: /metadata/annotations/cert-manager.io~1inject-ca-from
+      value: metal3/baremetal-operator-serving-cert
+
+# Certificate DNS names
+- target:
+    kind: Certificate
+    name: baremetal-operator-serving-cert
+  patch: |
+    - op: replace
+      path: /spec/dnsNames/0
+      value: baremetal-operator-webhook-service.metal3.svc
+    - op: replace
+      path: /spec/dnsNames/1
+      value: baremetal-operator-webhook-service.metal3.svc.cluster.local
