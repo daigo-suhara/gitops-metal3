@@ -45,7 +45,7 @@ GitHub Actions の `Build CAPI image` を手動実行すると、`image-builder`
 
 GitHub Actions では `GITHUB_TOKEN` を使って `ghcr.io/daigo-suhara/gitops-metal3/ubuntu-2404-kube-v1.35:latest` に push します。
 
-GHCR の package は public にしておく必要があります。Ironic は GHCR から取得し、`http://172.16.0.10:6180/images/` にキャッシュします。
+GHCR の package は public にしておく必要があります。CAPI の `Metal3MachineTemplate` は `oci://ghcr.io/daigo-suhara/gitops-metal3/ubuntu-2404-kube-v1.35:latest` を直接参照して、Ironic の HTTP キャッシュを使わずに OS イメージを取得します。
 
 ### 1. 管理クラスタと GitOps の起動
 管理側の ArgoCD とアプリ群を起動します。
