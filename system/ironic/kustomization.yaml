@@ -127,3 +127,4 @@ configMapGenerator:
       - DEPLOY_KERNEL_URL=https://tarballs.openstack.org/ironic-python-agent/dib/files/ipa-debian-master.kernel
       - DEPLOY_RAMDISK_URL=https://tarballs.openstack.org/ironic-python-agent/dib/files/ipa-debian-master.initramfs
       - IRONIC_ENDPOINT=http://172.16.0.10:6385/v1/
+      - IRONIC_BASE_URL=http://172.16.0.10:6385
