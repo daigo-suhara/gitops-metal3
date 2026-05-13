@@ -41,7 +41,7 @@
 前提: `microk8s`, `kubectl` が入っていること。
 
 ### 0. ノードイメージの作成
-GitHub Actions の `Build CAPI image` を手動実行すると、`image-builder` で `ubuntu-2404-kube-v1.35.qcow2` を作成し、GHCR に OCI artifact としてアップロードします。
+GitHub Actions の `Build CAPI image` を手動実行すると、`image-builder` で `ubuntu-2404-kube-v1.35.raw` を作成し、GHCR に OCI artifact としてアップロードします。
 
 GitHub Actions では `GITHUB_TOKEN` を使って `ghcr.io/daigo-suhara/gitops-metal3/ubuntu-2404-kube-v1.35:latest` に push します。
 

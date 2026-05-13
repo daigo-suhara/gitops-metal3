@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     env:
-      IMAGE_NAME: ubuntu-2404-kube-v1.35.qcow2
+      IMAGE_NAME: ubuntu-2404-kube-v1.35.raw
 
     steps:
       - name: Checkout repository
@@ -45,14 +45,15 @@ jobs:
           sudo apt-get install -y git make qemu-kvm qemu-utils
           sudo modprobe kvm || true
           test -e /dev/kvm && sudo chmod 666 /dev/kvm || true
-          go install oras.land/oras/cmd/oras@v1.2.0
-          echo "$HOME/go/bin" >> "$GITHUB_PATH"
+
+      - name: Setup ORAS
+        uses: oras-project/setup-oras@v1
 
       - name: Checkout image-builder
         run: |
           git clone --depth 1 --branch "${{ inputs.image_builder_ref }}" https://github.com/kubernetes-sigs/image-builder.git
 
-      - name: Build qcow2 image
+      - name: Build image
         working-directory: image-builder/images/capi
         env:
           PACKER_FLAGS: >-
@@ -66,19 +67,10 @@ jobs:
       - name: Prepare image assets
         run: |
           mkdir -p dist
-          image_path="$(
-            find image-builder/images/capi/output -type f \
-              ! -name '*.gz' \
-              ! -name '*.sha*' \
-              ! -name '*.log' \
-              | sort \
-              | head -n 1
-          )"
+          image_path="$(find image-builder/images/capi/output -type f -name '*.qcow2' | head -n 1)"
           test -n "$image_path"
-          qemu-img info "$image_path"
-          qemu-img convert -O qcow2 "$image_path" "dist/$IMAGE_NAME"
+          qemu-img convert -O raw "$image_path" "dist/$IMAGE_NAME"
           sha256sum "dist/$IMAGE_NAME" | cut -d ' ' -f 1 > "dist/$IMAGE_NAME.sha256"
-          qemu-img info "dist/$IMAGE_NAME"
           ls -lh dist
 
       - name: Push OCI artifact
@@ -86,9 +78,9 @@ jobs:
           GHCR_USER: ${{ github.actor }}
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          printf '%s' "$GHCR_TOKEN" | oras login ghcr.io -u "$GHCR_USER" --password-stdin
+          oras login ghcr.io -u "$GHCR_USER" -p "$GHCR_TOKEN"
           oras push \
             --artifact-type application/vnd.unknown.artifact.v1 \
-            --annotation disktype=qcow2 \
+            --annotation disktype=raw \
             "${{ inputs.image_ref }}" \
             "dist/$IMAGE_NAME"
