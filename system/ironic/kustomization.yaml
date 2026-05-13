@@ -67,8 +67,31 @@ patches:
       - op: replace
         path: /spec/template/spec/securityContext/runAsNonRoot
         value: false
-      - op: remove
+      - op: replace
         path: /spec/template/spec/initContainers
+        value:
+          - name: image-downloader
+            image: alpine:3.20
+            securityContext:
+              runAsUser: 0
+            command: ["sh", "-c"]
+            args:
+              - |
+                set -ex
+                apk add --no-cache curl
+                DEST=/shared/html/images
+                mkdir -p $DEST /shared/tftpboot /shared/ironic /shared/db
+
+                IPA_BASE="https://tarballs.openstack.org/ironic-python-agent/dib/files"
+                if [ ! -f $DEST/ironic-python-agent.kernel ]; then
+                  curl -L -o $DEST/ironic-python-agent.kernel $IPA_BASE/ipa-debian-master.kernel
+                  curl -L -o $DEST/ironic-python-agent.initramfs $IPA_BASE/ipa-debian-master.initramfs
+                fi
+
+                chmod -R 777 /shared
+            volumeMounts:
+              - name: ironic-data-volume
+                mountPath: /shared
       - op: replace
         path: /spec/template/spec/containers/3/securityContext
         value:
@@ -108,7 +131,8 @@ patches:
         path: /spec/template/spec/volumes/0
         value:
           name: ironic-data-volume
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: image-pvc
 
 configMapGenerator:
   - name: ironic
@@ -123,7 +147,7 @@ configMapGenerator:
       - IRONIC_KERNEL_PARAMS=console=tty0 console=ttyS0,115200 nomodeset
       - IRONIC_FAST_TRACK=true
       - IRONIC_PROVISIONING_INTERFACE=enx00e04c247a98
-      - DEPLOY_KERNEL_URL=https://tarballs.openstack.org/ironic-python-agent/dib/files/ipa-debian-master.kernel
-      - DEPLOY_RAMDISK_URL=https://tarballs.openstack.org/ironic-python-agent/dib/files/ipa-debian-master.initramfs
+      - DEPLOY_KERNEL_URL=file:///shared/html/images/ironic-python-agent.kernel
+      - DEPLOY_RAMDISK_URL=file:///shared/html/images/ironic-python-agent.initramfs
       - IRONIC_ENDPOINT=http://172.16.0.10:6385/v1/
       - IRONIC_BASE_URL=http://172.16.0.10:6385

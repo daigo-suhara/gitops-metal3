@@ -24,4 +24,15 @@ spec:
           status:
             type: object
             x-kubernetes-preserve-unknown-fields: true
-
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: image-pvc
+  namespace: metal3
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
