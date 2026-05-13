@@ -16,6 +16,16 @@ patches:
     target:
       kind: Deployment
       name: baremetal-operator-ironic
+  - target:
+      kind: Deployment
+      name: baremetal-operator-ironic
+    patch: |
+      - op: replace
+        path: /spec/template/spec/volumes
+        value:
+          - name: ironic-data-volume
+            persistentVolumeClaim:
+              claimName: image-pvc
 
   # BMO Role enhancements
   - target:

@@ -35,10 +35,16 @@ spec:
               mountPath: /shared
       containers:
         - name: ironic-dnsmasq
+          volumeMounts:
+            - name: ironic-data-volume
+              mountPath: /shared
           envFrom:
             - configMapRef:
                 name: ironic
         - name: ironic
+          volumeMounts:
+            - name: ironic-data-volume
+              mountPath: /shared
           envFrom:
             - configMapRef:
                 name: ironic
@@ -47,10 +53,16 @@ spec:
           readinessProbe:
             failureThreshold: 30
         - name: ironic-log-watch
+          volumeMounts:
+            - name: ironic-data-volume
+              mountPath: /shared
           envFrom:
             - configMapRef:
                 name: ironic
         - name: ironic-httpd
+          volumeMounts:
+            - name: ironic-data-volume
+              mountPath: /shared
           securityContext:
             runAsUser: 0
           envFrom:
