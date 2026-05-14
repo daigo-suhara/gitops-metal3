@@ -92,14 +92,6 @@ spec:
             failureThreshold: 30
           readinessProbe:
             failureThreshold: 30
-      volumes:
-        - name: ironic-data-volume
-          persistentVolumeClaim:
-            claimName: image-pvc
-        - name: ironic-conf-volume
-          emptyDir: {}
-        - name: ironic-data-state-volume
-          emptyDir: {}
 ---
 apiVersion: v1
 kind: ConfigMap
