@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: baremetal-operator-controller-manager
+  namespace: baremetal-operator-system
 spec:
   template:
     spec:
@@ -104,6 +105,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: ironic
+  namespace: baremetal-operator-system
 data:
   PROVISIONING_INTERFACE: enx00e04c247a98
   PROVISIONING_IP: 172.16.0.10
