@@ -7,7 +7,10 @@ spec:
   template:
     spec:
       image:
-        url: oci://ghcr.io/daigo-suhara/gitops-metal3/ubuntu:24.04-v1.35.4-amd64.gz
+        url: http://172.16.0.10:6180/images/ubuntu-24.04-v1.35.4-amd64.gz
+        checksum: e5215660e130786a47c4bff4f8964f0a744080b501912fba19ce775f1875eea2
+        checksumType: sha256
+        format: raw
       hostSelector:
         matchLabels:
           cluster-role: worker
