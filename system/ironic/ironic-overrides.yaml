@@ -46,6 +46,21 @@ spec:
               mountPath: /conf
             - name: ironic-data-state-volume
               mountPath: /data
+        - name: ironic-ipa-downloader
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              set -eu
+
+              headers_file="/shared/html/images/ipa-centos9-master.tar.gz.headers"
+              source_headers="$(readlink -f /shared/html/images/ironic-python-agent.headers 2>/dev/null || true)"
+
+              if [ -n "${source_headers}" ] && [ -f "${source_headers}" ]; then
+                cp "${source_headers}" "${headers_file}"
+              fi
+
+              exec /usr/local/bin/get-resource.sh
       containers:
         - name: ironic-dnsmasq
           volumeMounts:
