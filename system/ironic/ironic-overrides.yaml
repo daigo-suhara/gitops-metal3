@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: baremetal-operator-controller-manager
+  name: baremetal-operator-ironic
   namespace: baremetal-operator-system
 spec:
   template:
