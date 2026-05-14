@@ -38,7 +38,7 @@ spec:
                 curl -L -o "$initramfs_file" "$ipa_base/${ipa_name}.initramfs"
               fi
 
-              chmod -R 777 /shared
+              chmod -R 777 /shared /conf /data
           volumeMounts:
             - name: ironic-data-volume
               mountPath: /shared
