@@ -61,6 +61,9 @@ spec:
               fi
 
               exec /usr/local/bin/get-resource.sh
+          envFrom:
+            - configMapRef:
+                name: ironic
       containers:
         - name: ironic-dnsmasq
           volumeMounts:
@@ -123,6 +126,7 @@ metadata:
   name: ironic
   namespace: baremetal-operator-system
 data:
+  CACHEURL: ""
   PROVISIONING_INTERFACE: enx00e04c247a98
   PROVISIONING_IP: 172.16.0.10
   PROVISIONING_GATEWAY: 172.16.0.1
