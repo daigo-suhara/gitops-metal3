@@ -1,10 +1,6 @@
 #!/bin/bash
 set -eo pipefail
 
-CLUSTERCTL_VERSION="v1.13.1"
-CAPI_VERSION="v1.13.1"
-CAPM3_VERSION="v1.13.0"
-
 if ! command -v microk8s &> /dev/null; then
     echo "Installing MicroK8s..."
     sudo snap install microk8s --classic
@@ -27,57 +23,16 @@ sudo microk8s config > ~/.kube/config
 chmod 600 ~/.kube/config
 export KUBECONFIG=~/.kube/config
 
-ensure_clusterctl() {
-    if command -v clusterctl &> /dev/null; then
-        return
-    fi
+echo "Installing ArgoCD..."
+kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
+kubectl apply -n argocd --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
-    local arch
-    case "$(uname -m)" in
-        x86_64|amd64) arch="amd64" ;;
-        aarch64|arm64) arch="arm64" ;;
-        *)
-            echo "Unsupported architecture for clusterctl: $(uname -m)"
-            exit 1
-            ;;
-    esac
+echo "Waiting for ArgoCD..."
+kubectl wait --for=condition=available deployment/argocd-server -n argocd --timeout=300s
 
-    local tmpdir
-    tmpdir="$(mktemp -d)"
-    curl -fL -o "${tmpdir}/clusterctl" "https://github.com/kubernetes-sigs/cluster-api/releases/download/${CLUSTERCTL_VERSION}/clusterctl-linux-${arch}"
-    sudo install -m 0755 "${tmpdir}/clusterctl" /usr/local/bin/clusterctl
-}
+kubectl patch configmap argocd-cm -n argocd --type merge -p '{"data":{"kustomize.buildOptions":"--enable-helm"}}'
 
-wait_for_deployments() {
-    local namespace="$1"
-    kubectl -n "$namespace" wait --for=condition=Available deployment --all --timeout=600s
-}
-
-echo "Ensuring clusterctl is installed..."
-ensure_clusterctl
-
-export EXP_CLUSTER_RESOURCE_SET=true
-export EXP_KUBEADM_BOOTSTRAP_FORMAT_IGNITION=true
-
-echo "Initializing Cluster API and Metal3..."
-clusterctl init \
-  --core "cluster-api:${CAPI_VERSION}" \
-  --bootstrap "kubeadm:${CAPI_VERSION}" \
-  --control-plane "kubeadm:${CAPI_VERSION}" \
-  --infrastructure "metal3:${CAPM3_VERSION}"
-
-echo "Applying Bare Metal Operator and Ironic..."
-kubectl apply -k system/ironic
-
-echo "Waiting for Cluster API and Metal3 components..."
-wait_for_deployments capi-system
-wait_for_deployments capi-kubeadm-bootstrap-system
-wait_for_deployments capi-kubeadm-control-plane-system
-wait_for_deployments capm3-system
-wait_for_deployments metal3
-
-echo "Applying hardware inventory and cluster resources..."
-kubectl apply -k hardware
-kubectl apply -k cluster
+echo "Applying App-of-Apps..."
+kubectl apply -f argocd/app-of-apps.yaml
 
 echo "Bootstrap complete!"
