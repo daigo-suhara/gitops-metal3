@@ -33,19 +33,11 @@ spec:
           volumeMounts:
             - name: ironic-data-volume
               mountPath: /shared
-            - name: ironic-conf-volume
-              mountPath: /conf
-            - name: ironic-data-state-volume
-              mountPath: /data
       containers:
         - name: ironic-dnsmasq
           volumeMounts:
             - name: ironic-data-volume
               mountPath: /shared
-            - name: ironic-conf-volume
-              mountPath: /conf
-            - name: ironic-data-state-volume
-              mountPath: /data
           envFrom:
             - configMapRef:
                 name: ironic
@@ -53,10 +45,6 @@ spec:
           volumeMounts:
             - name: ironic-data-volume
               mountPath: /shared
-            - name: ironic-conf-volume
-              mountPath: /conf
-            - name: ironic-data-state-volume
-              mountPath: /data
           envFrom:
             - configMapRef:
                 name: ironic
@@ -68,10 +56,6 @@ spec:
           volumeMounts:
             - name: ironic-data-volume
               mountPath: /shared
-            - name: ironic-conf-volume
-              mountPath: /conf
-            - name: ironic-data-state-volume
-              mountPath: /data
           envFrom:
             - configMapRef:
                 name: ironic
@@ -79,10 +63,6 @@ spec:
           volumeMounts:
             - name: ironic-data-volume
               mountPath: /shared
-            - name: ironic-conf-volume
-              mountPath: /conf
-            - name: ironic-data-state-volume
-              mountPath: /data
           securityContext:
             runAsUser: 0
           envFrom:

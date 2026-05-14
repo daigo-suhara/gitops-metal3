@@ -4,7 +4,3 @@
     - name: ironic-data-volume
       persistentVolumeClaim:
         claimName: image-pvc
-    - name: ironic-conf-volume
-      emptyDir: {}
-    - name: ironic-data-state-volume
-      emptyDir: {}
