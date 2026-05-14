@@ -111,6 +111,10 @@ spec:
               mountPath: /data
           securityContext:
             runAsUser: 0
+            privileged: true
+            capabilities:
+              add:
+                - ALL
           envFrom:
             - configMapRef:
                 name: ironic
