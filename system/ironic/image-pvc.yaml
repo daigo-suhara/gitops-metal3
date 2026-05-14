@@ -5,7 +5,7 @@ metadata:
   namespace: metal3
 spec:
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   resources:
     requests:
       storage: 20Gi
