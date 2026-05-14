@@ -10,15 +10,6 @@ spec:
       securityContext:
         runAsNonRoot: false
         fsGroup: 994
-      volumes:
-        - $patch: replace
-        - name: ironic-data-volume
-          persistentVolumeClaim:
-            claimName: image-pvc
-        - name: ironic-conf-volume
-          emptyDir: {}
-        - name: ironic-data-state-volume
-          emptyDir: {}
       initContainers:
         - name: image-downloader
           image: alpine:3.20
