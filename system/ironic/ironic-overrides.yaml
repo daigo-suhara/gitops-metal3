@@ -20,13 +20,22 @@ spec:
             - |
               set -ex
               apk add --no-cache curl
-              DEST=/shared/html/images
-              mkdir -p $DEST /shared/tftpboot /shared/ironic /shared/db
+              dest="/shared/html/images"
+              ipa_base="https://tarballs.opendev.org/openstack/ironic-python-agent/dib"
+              ipa_name="ipa-centos9-master"
+              headers_file="$dest/${ipa_name}.tar.gz.headers"
+              kernel_file="$dest/ironic-python-agent.kernel"
+              initramfs_file="$dest/ironic-python-agent.initramfs"
 
-              IPA_BASE="https://tarballs.openstack.org/ironic-python-agent/dib/files"
-              if [ ! -f $DEST/ironic-python-agent.kernel ]; then
-                curl -L -o $DEST/ironic-python-agent.kernel $IPA_BASE/ipa-centos9-master.kernel
-                curl -L -o $DEST/ironic-python-agent.initramfs $IPA_BASE/ipa-centos9-master.initramfs
+              mkdir -p "$dest" /shared/tftpboot /shared/ironic /shared/db
+
+              if [ ! -f "$headers_file" ]; then
+                curl -L -D "$headers_file" -o /dev/null "$ipa_base/${ipa_name}.tar.gz"
+              fi
+
+              if [ ! -f "$kernel_file" ]; then
+                curl -L -o "$kernel_file" "$ipa_base/${ipa_name}.kernel"
+                curl -L -o "$initramfs_file" "$ipa_base/${ipa_name}.initramfs"
               fi
 
               chmod -R 777 /shared
