@@ -16,21 +16,3 @@ data:
   DEPLOY_RAMDISK_URL: file:///shared/html/images/ironic-python-agent.initramfs
   IRONIC_ENDPOINT: http://172.16.0.10:6385/v1/
   IRONIC_BASE_URL: http://172.16.0.10:6385
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: baremetal-operator-manager-role
-rules:
-  - apiGroups:
-      - metal3.io
-    resources:
-      - hostclaims
-    verbs:
-      - get
-      - list
-      - watch
-      - create
-      - update
-      - patch
-      - delete
