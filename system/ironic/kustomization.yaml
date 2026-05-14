@@ -16,7 +16,7 @@ patchesJson6902:
       version: v1
       kind: Deployment
       name: baremetal-operator-ironic
-      namespace: baremetal-operator-system
+      namespace: metal3
     path: ironic-volume-patch.json
 
 replacements:
