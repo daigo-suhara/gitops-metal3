@@ -8,7 +8,18 @@ resources:
   - https://github.com/metal3-io/baremetal-operator//ironic-deployment/default?ref=v0.13.0
 
 patches:
-  - path: ironic-overrides.yaml
+  - path: ironic-deployment-patch.yaml
+    target:
+      kind: Deployment
+      name: baremetal-operator-ironic
+  - path: ironic-resources-patch.yaml
+    target:
+      kind: ConfigMap
+      name: ironic
+  - path: ironic-resources-patch.yaml
+    target:
+      kind: ClusterRole
+      name: baremetal-operator-manager-role
 
 patchesJson6902:
   - target:
@@ -16,7 +27,6 @@ patchesJson6902:
       version: v1
       kind: Deployment
       name: baremetal-operator-ironic
-      namespace: metal3
     path: ironic-volume-patch.json
 
 replacements:
