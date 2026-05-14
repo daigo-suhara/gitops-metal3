@@ -1,6 +1,0 @@
-- op: replace
-  path: /spec/dnsNames/0
-  value: baremetal-operator-webhook-service.metal3.svc
-- op: replace
-  path: /spec/dnsNames/1
-  value: baremetal-operator-webhook-service.metal3.svc.cluster.local

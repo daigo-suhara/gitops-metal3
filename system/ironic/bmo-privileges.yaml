@@ -1,6 +1,0 @@
-- op: add
-  path: /rules/-
-  value:
-    apiGroups: ["metal3.io"]
-    resources: ["hostclaims"]
-    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]

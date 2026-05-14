@@ -1,26 +1,21 @@
 # GitOps Metal3 Bare-Metal Deployment
 
-このレポジトリは、Metal3、Cluster API (CAPI)、および ArgoCD を使用して、ベアメタル環境に Kubernetes クラスタを自動デプロイするための GitOps 定義です。
+このレポジトリは、Metal3 と Cluster API (CAPI) を使って、ベアメタル環境に Kubernetes クラスタを自動デプロイするための定義です。
 
 ## アーキテクチャ
 
-本構成では、**Hierarchical ArgoCD (階層型ArgoCD)** パターンを採用し、インフラ管理とワークロード管理の責任を分離しています。各コンポーネントは、必要最小限のディレクトリに整理しています。
+`bootstrap.sh` が管理クラスタ上で必要な基盤を順番に入れます。
 
-1.  **Management ArgoCD (管理クラスタ側)**:
-    *   物理サーバ (BareMetalHost) のプロビジョニング
-    *   クラスタ (CAPI Cluster) のライフサイクル管理
-    *   クラスタへの **Workload ArgoCD** の自動インストール
-2.  **Workload ArgoCD (クラスタ側)**:
-    *   自分自身のクラスタ内のアドオン (Cilium, MetalLB, Ceph) の管理
-    *   アプリケーションのデプロイ
+1. `clusterctl init` で CAPI / CAPM3 をインストール
+2. `system/ironic` の最小 overlay で Bare Metal Operator と Ironic を適用
+3. `hardware` と `cluster` を適用してワークロードクラスタを作成
+
 ### フォルダ構成
 
 ```text
 .
-├── argocd/                 # app-of-apps と子アプリ定義
 ├── system/
-│   ├── capi/               # CAPI Provider 定義
-│   └── ironic/             # Metal3 / Ironic 本体
+│   └── ironic/             # Metal3 / Ironic の最小 overlay
 ├── cluster/                # ワークロードクラスタの Cluster / ControlPlane / MachineDeployment
 ├── hardware/               # BareMetalHost 定義
 ```
@@ -47,8 +42,8 @@ GitHub Actions では `GITHUB_TOKEN` を使って `ghcr.io/daigo-suhara/gitops-m
 
 GHCR の package は public にしておく必要があります。CAPI の `Metal3MachineTemplate` は `oci://ghcr.io/daigo-suhara/gitops-metal3/ubuntu-2404-kube-v1.35:latest` を直接参照して、Ironic の HTTP キャッシュを使わずに OS イメージを取得します。
 
-### 1. 管理クラスタと GitOps の起動
-管理側の ArgoCD とアプリ群を起動します。
+### 1. 管理クラスタと Metal3 の起動
+管理クラスタに CAPI / Metal3 を直接インストールします。
 ```bash
 ./bootstrap.sh
 ```
