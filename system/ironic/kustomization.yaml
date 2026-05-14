@@ -9,6 +9,13 @@ resources:
 
 patches:
   - path: ironic-overrides.yaml
+    target:
+      kind: Deployment
+      name: baremetal-operator-ironic
+  - path: ironic-overrides.yaml
+    target:
+      kind: ConfigMap
+      name: ironic
 
 patchesJson6902:
   - target:
