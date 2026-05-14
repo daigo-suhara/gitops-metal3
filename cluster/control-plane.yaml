@@ -7,7 +7,7 @@ spec:
   template:
     spec:
       image:
-        url: oci://ghcr.io/daigo-suhara/gitops-metal3/ubuntu:2404-v1.35.4-amd64.gz
+        url: oci://ghcr.io/daigo-suhara/gitops-metal3/ubuntu:24.04-v1.35.4-amd64.gz
       hostSelector:
         matchLabels:
           cluster-role: control-plane
