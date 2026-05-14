@@ -25,8 +25,8 @@ spec:
 
               IPA_BASE="https://tarballs.openstack.org/ironic-python-agent/dib/files"
               if [ ! -f $DEST/ironic-python-agent.kernel ]; then
-                curl -L -o $DEST/ironic-python-agent.kernel $IPA_BASE/ipa-debian-master.kernel
-                curl -L -o $DEST/ironic-python-agent.initramfs $IPA_BASE/ipa-debian-master.initramfs
+                curl -L -o $DEST/ironic-python-agent.kernel $IPA_BASE/ipa-centos9-master.kernel
+                curl -L -o $DEST/ironic-python-agent.initramfs $IPA_BASE/ipa-centos9-master.initramfs
               fi
 
               chmod -R 777 /shared
