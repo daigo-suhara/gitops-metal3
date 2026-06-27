@@ -7,10 +7,10 @@ spec:
   template:
     spec:
       image:
-        url: http://172.16.0.10:6180/images/ubuntu-24.04-v1.35.4-amd64.gz
-        checksum: e5215660e130786a47c4bff4f8964f0a744080b501912fba19ce775f1875eea2
-        checksumType: sha256
-        format: raw
+        url: https://stable.release.flatcar-linux.net/amd64-usr/4593.2.3/flatcar_production_openstack_image.img
+        checksum: b6b88e9634c6f44b696f0ed5dc6f136d
+        checksumType: md5
+        diskFormat: qcow2
       hostSelector:
         matchLabels:
           cluster-role: worker
