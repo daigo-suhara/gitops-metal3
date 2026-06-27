@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - ironic.yaml
   - capi-operator.yaml
+  - capi-providers.yaml
   - cert-manager.yaml
   - cluster.yaml
   - hardware.yaml
