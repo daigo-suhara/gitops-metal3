@@ -5,7 +5,6 @@ metadata:
   namespace: metal3
 spec:
   storageClassName: microk8s-hostpath
-  volumeName: pvc-04da870a-8a40-4637-96c4-4b6cdd34ebeb
   accessModes:
     - ReadWriteOnce
   resources:
