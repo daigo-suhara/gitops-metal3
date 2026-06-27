@@ -1,9 +1,7 @@
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: baremetal-operator-manager-role
-rules:
-  - apiGroups:
+- op: add
+  path: /rules/-
+  value:
+    apiGroups:
       - metal3.io
     resources:
       - hostclaims

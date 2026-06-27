@@ -16,10 +16,6 @@ patches:
     target:
       kind: ConfigMap
       name: ironic
-  - path: ironic-clusterrole-patch.yaml
-    target:
-      kind: ClusterRole
-      name: baremetal-operator-manager-role
 
 patchesJson6902:
   - target:
@@ -28,6 +24,12 @@ patchesJson6902:
       kind: Deployment
       name: baremetal-operator-ironic
     path: ironic-volume-patch.json
+  - target:
+      group: rbac.authorization.k8s.io
+      version: v1
+      kind: ClusterRole
+      name: baremetal-operator-manager-role
+    path: ironic-clusterrole-patch.yaml
 
 replacements:
   - source:
