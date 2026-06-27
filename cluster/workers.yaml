@@ -1,7 +1,7 @@
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: Metal3MachineTemplate
 metadata:
-  name: prod-worker
+  name: homelab-worker
   namespace: metal3
 spec:
   template:
@@ -18,35 +18,35 @@ spec:
 apiVersion: cluster.x-k8s.io/v1beta2
 kind: MachineDeployment
 metadata:
-  name: prod-worker
+  name: homelab-worker
   namespace: metal3
 spec:
-  clusterName: prod
+  clusterName: homelab
   replicas: 0
   selector:
     matchLabels:
-      cluster.x-k8s.io/cluster-name: prod
+      cluster.x-k8s.io/cluster-name: homelab
   template:
     metadata:
       labels:
-        cluster.x-k8s.io/cluster-name: prod
+        cluster.x-k8s.io/cluster-name: homelab
     spec:
-      clusterName: prod
+      clusterName: homelab
       bootstrap:
         configRef:
           apiGroup: bootstrap.cluster.x-k8s.io
           kind: KubeadmConfigTemplate
-          name: prod-worker
+          name: homelab-worker
       infrastructureRef:
         apiGroup: infrastructure.cluster.x-k8s.io
         kind: Metal3MachineTemplate
-        name: prod-worker
+        name: homelab-worker
       version: v1.35.4
 ---
 apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
 kind: KubeadmConfigTemplate
 metadata:
-  name: prod-worker
+  name: homelab-worker
   namespace: metal3
 spec:
   template:

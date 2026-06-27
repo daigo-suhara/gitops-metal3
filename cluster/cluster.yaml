@@ -1,7 +1,7 @@
 apiVersion: cluster.x-k8s.io/v1beta2
 kind: Cluster
 metadata:
-  name: prod
+  name: homelab
   namespace: metal3
 spec:
   clusterNetwork:
@@ -12,16 +12,16 @@ spec:
   controlPlaneRef:
     apiGroup: controlplane.cluster.x-k8s.io
     kind: KubeadmControlPlane
-    name: prod-control-plane
+    name: homelab-control-plane
   infrastructureRef:
     apiGroup: infrastructure.cluster.x-k8s.io
     kind: Metal3Cluster
-    name: prod
+    name: homelab
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: Metal3Cluster
 metadata:
-  name: prod
+  name: homelab
   namespace: metal3
 spec:
   controlPlaneEndpoint:
