@@ -5,13 +5,16 @@ namespace: metal3
 resources:
   - https://github.com/metal3-io/baremetal-operator//config/default?ref=v0.13.0
   - https://github.com/metal3-io/baremetal-operator//ironic-deployment/default?ref=v0.13.0
-  - ironic-configmap-patch.yaml
 
 patches:
   - path: ironic-deployment-patch.yaml
     target:
       kind: Deployment
       name: baremetal-operator-ironic
+  - path: ironic-configmap-patch.yaml
+    target:
+      kind: ConfigMap
+      name: ironic
 
 patchesJson6902:
   - target:
