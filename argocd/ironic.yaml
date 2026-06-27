@@ -26,6 +26,7 @@ spec:
         maxDuration: 3m
     syncOptions:
       - CreateNamespace=true
+      - RespectIgnoreDifferences=true
   ignoreDifferences:
     - group: ""
       kind: PersistentVolumeClaim
