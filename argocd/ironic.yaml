@@ -26,4 +26,9 @@ spec:
         maxDuration: 3m
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true
+  ignoreDifferences:
+    - group: ""
+      kind: PersistentVolumeClaim
+      name: image-pvc
+      jsonPointers:
+        - /spec/volumeName
