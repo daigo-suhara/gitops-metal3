@@ -5,110 +5,23 @@ metadata:
 spec:
   template:
     spec:
-      hostNetwork: true
-      securityContext:
-        runAsNonRoot: false
-        fsGroup: 994
-      initContainers:
-        - name: image-downloader
-          image: alpine:3.20
-          securityContext:
-            runAsUser: 0
-          command: ["sh", "-c"]
-          args:
-            - |
-              set -ex
-              apk add --no-cache curl
-              dest="/shared/html/images"
-              ipa_base="https://tarballs.opendev.org/openstack/ironic-python-agent/dib"
-              ipa_name="ipa-centos9-master"
-              headers_file="$dest/${ipa_name}.tar.gz.headers"
-              kernel_file="$dest/ironic-python-agent.kernel"
-              initramfs_file="$dest/ironic-python-agent.initramfs"
-
-              mkdir -p "$dest" /shared/tftpboot /shared/ironic /shared/db
-
-              if [ ! -f "$headers_file" ]; then
-                curl -L -D "$headers_file" -o /dev/null "$ipa_base/${ipa_name}.tar.gz"
-              fi
-
-              if [ ! -f "$kernel_file" ]; then
-                curl -L -o "$kernel_file" "$ipa_base/${ipa_name}.kernel"
-                curl -L -o "$initramfs_file" "$ipa_base/${ipa_name}.initramfs"
-              fi
-
-              chmod -R 777 /shared /conf /data
-          volumeMounts:
-            - name: ironic-data-volume
-              mountPath: /shared
-            - name: ironic-conf-volume
-              mountPath: /conf
-            - name: ironic-data-state-volume
-              mountPath: /data
-        - name: ironic-ipa-downloader
-          command:
-            - /bin/sh
-            - -ec
-            - |
-              set -eu
-
-              headers_file="/shared/html/images/ipa-centos9-master.tar.gz.headers"
-              source_headers="$(readlink -f /shared/html/images/ironic-python-agent.headers 2>/dev/null || true)"
-
-              if [ -n "${source_headers}" ] && [ -f "${source_headers}" ]; then
-                cp "${source_headers}" "${headers_file}"
-              fi
-
-              exit 0
-          envFrom:
-            - configMapRef:
-                name: ironic
       containers:
-        - name: ironic-dnsmasq
-          volumeMounts:
-            - name: ironic-data-volume
-              mountPath: /shared
-            - name: ironic-conf-volume
-              mountPath: /conf
-            - name: ironic-data-state-volume
-              mountPath: /data
-          envFrom:
-            - configMapRef:
-                name: ironic
         - name: ironic
-          volumeMounts:
-            - name: ironic-data-volume
-              mountPath: /shared
-            - name: ironic-conf-volume
-              mountPath: /conf
-            - name: ironic-data-state-volume
-              mountPath: /data
           envFrom:
             - configMapRef:
                 name: ironic
-          livenessProbe:
-            failureThreshold: 30
-          readinessProbe:
-            failureThreshold: 30
+        - name: ironic-dnsmasq
+          envFrom:
+            - configMapRef:
+                name: ironic
         - name: ironic-log-watch
-          volumeMounts:
-            - name: ironic-data-volume
-              mountPath: /shared
-            - name: ironic-conf-volume
-              mountPath: /conf
-            - name: ironic-data-state-volume
-              mountPath: /data
           envFrom:
             - configMapRef:
                 name: ironic
         - name: ironic-httpd
-          volumeMounts:
-            - name: ironic-data-volume
-              mountPath: /shared
-            - name: ironic-conf-volume
-              mountPath: /conf
-            - name: ironic-data-state-volume
-              mountPath: /data
+          envFrom:
+            - configMapRef:
+                name: ironic
           securityContext:
             runAsUser: 0
             privileged: true
@@ -116,10 +29,8 @@ spec:
             capabilities:
               add:
                 - ALL
+      initContainers:
+        - name: ironic-ipa-downloader
           envFrom:
             - configMapRef:
                 name: ironic
-          livenessProbe:
-            failureThreshold: 30
-          readinessProbe:
-            failureThreshold: 30
