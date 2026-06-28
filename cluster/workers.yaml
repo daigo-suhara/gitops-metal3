@@ -51,4 +51,4 @@ metadata:
 spec:
   template:
     spec:
-      format: cloud-config
+      format: ignition

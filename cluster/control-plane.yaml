@@ -33,4 +33,7 @@ spec:
         name: homelab-control-plane
   version: v1.35.4
   kubeadmConfigSpec:
-    format: cloud-config
+    format: ignition
+    clusterConfiguration:
+      apiServer:
+        certSANs: [172.16.10.100, 127.0.0.1]
