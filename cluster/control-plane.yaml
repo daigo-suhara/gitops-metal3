@@ -8,7 +8,7 @@ spec:
     spec:
       image:
         url: oci://ghcr.io/daigo-suhara/gitops-metal3/flatcar@sha256:e4f5b1f137d0991d801b58299a9a4664fc040718bc31b3bf8e394a87cf94c044
-        checksum: e4f5b1f137d0991d801b58299a9a4664fc040718bc31b3bf8e394a87cf94c044
+        checksum: ""
         checksumType: sha256
         diskFormat: qcow2
       hostSelector:
