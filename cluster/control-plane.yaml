@@ -10,7 +10,7 @@ spec:
         url: https://stable.release.flatcar-linux.net/amd64-usr/4593.2.3/flatcar_production_openstack_image.img
         checksum: b6b88e9634c6f44b696f0ed5dc6f136d
         checksumType: md5
-        format: qcow2
+        diskFormat: qcow2
       hostSelector:
         matchLabels:
           cluster-role: control-plane
