@@ -62,10 +62,9 @@ jobs:
           mkdir -p dist
           echo "=== image-builder output ==="
           ls -laR image-builder/images/capi/output/ || true
-          SRC=$(find image-builder/images/capi/output -type f \( -name '*.qcow2' -o -name '*.img' -o -name '*.raw' \) | head -1)
+          SRC=$(find image-builder/images/capi/output -mindepth 2 -type f -size +100M | head -1)
           [ -z "$SRC" ] && { echo "ERROR: no image produced"; exit 1; }
-          EXT="${SRC##*.}"
-          DST=dist/${{ env.OS_FLAVOR }}-k8s-${{ env.KUBERNETES_VERSION }}-${{ matrix.arch }}.${EXT}
+          DST=dist/${{ env.OS_FLAVOR }}-k8s-${{ env.KUBERNETES_VERSION }}-${{ matrix.arch }}.qcow2
           cp "$SRC" "$DST"
           md5sum "$DST" | cut -d ' ' -f 1 > "$DST.md5"
 
