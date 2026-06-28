@@ -1,5 +1,5 @@
-name: Build and Push Flatcar Node Image
-run-name: Build Flatcar k8s ${{ inputs.kubernetesVersion || 'v1.35.4' }} (amd64)
+name: Build and Push Kubernetes Node Image
+run-name: Build k8s ${{ inputs.kubernetesVersion || 'v1.35.4' }} (flatcar)
 
 on:
   workflow_dispatch:
@@ -16,8 +16,8 @@ on:
 env:
   REGISTRY: ghcr.io
   KUBERNETES_VERSION: ${{ inputs.kubernetesVersion || 'v1.35.4' }}
+  IMAGE_BUILDER_REF: ${{ inputs.imageBuilderRef || 'main' }}
   OS_FLAVOR: flatcar
-  ARCH: amd64
 
 permissions:
   contents: read
@@ -25,76 +25,96 @@ permissions:
 
 jobs:
   build:
-    name: Build amd64
-    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+    runs-on: ${{ matrix.runner }}
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Install QEMU/KVM
         run: |
           sudo apt-get update
-          sudo apt-get install -y git make qemu-utils qemu-system-x86 qemu-kvm
+          sudo apt-get install -y --no-install-recommends \
+            qemu-utils qemu-system-x86 qemu-kvm
           sudo modprobe kvm || true
           test -e /dev/kvm && sudo chmod 666 /dev/kvm || true
 
       - name: Checkout kubernetes-sigs/image-builder
         run: |
-          git clone --depth 1 --branch "${{ inputs.imageBuilderRef }}" https://github.com/kubernetes-sigs/image-builder.git
+          git clone --depth 1 --branch "${IMAGE_BUILDER_REF}" \
+            https://github.com/kubernetes-sigs/image-builder.git
 
-      - name: Build Flatcar Image
+      - name: Build image
         working-directory: image-builder/images/capi
         env:
           PACKER_FLAGS: "--var kubernetes_semver=${{ env.KUBERNETES_VERSION }}"
         run: |
           make deps-qemu
-          make build-qemu-flatcar
+          make build-qemu-${{ env.OS_FLAVOR }}
 
-      - name: Prepare Artifacts
+      - name: Stage artifact
         run: |
           mkdir -p dist
-          SOURCE=$(ls image-builder/images/capi/output/flatcar-kube-*/*.qcow2 | head -1)
-          FILENAME="flatcar-k8s-${{ env.KUBERNETES_VERSION }}-${{ env.ARCH }}.qcow2"
-          cp "$SOURCE" "dist/$FILENAME"
-          md5sum "dist/$FILENAME" | cut -d ' ' -f 1 > "dist/$FILENAME.md5"
+          echo "=== image-builder output ==="
+          ls -laR image-builder/images/capi/output/ || true
+          SRC=$(find image-builder/images/capi/output -type f \( -name '*.qcow2' -o -name '*.img' -o -name '*.raw' \) | head -1)
+          [ -z "$SRC" ] && { echo "ERROR: no image produced"; exit 1; }
+          EXT="${SRC##*.}"
+          DST=dist/${{ env.OS_FLAVOR }}-k8s-${{ env.KUBERNETES_VERSION }}-${{ matrix.arch }}.${EXT}
+          cp "$SRC" "$DST"
+          md5sum "$DST" | cut -d ' ' -f 1 > "$DST.md5"
 
-      - name: Upload Image
+      - name: Upload image artifact
         uses: actions/upload-artifact@v4
         with:
-          name: node-image-amd64
+          name: ${{ env.OS_FLAVOR }}-k8s-${{ env.KUBERNETES_VERSION }}-${{ matrix.arch }}
           path: dist/
-          retention-days: 1
+          retention-days: 2
 
   push:
-    name: Push amd64
     needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [amd64]
     runs-on: ubuntu-latest
     steps:
-      - name: Download Artifacts
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download image artifact
         uses: actions/download-artifact@v4
         with:
-          name: node-image-amd64
+          name: ${{ env.OS_FLAVOR }}-k8s-${{ env.KUBERNETES_VERSION }}-${{ matrix.arch }}
           path: dist/
 
-      - name: Setup ORAS
+      - name: Install oras
         uses: oras-project/setup-oras@v2
 
-      - name: Log in to GHCR
+      - name: Log in to container registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Push to OCI Registry
+      - name: Compute lowercase repository owner
+        run: echo "OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_ENV"
+
+      - name: Push image to OCI registry
         run: |
-          IMAGE_FILE="flatcar-k8s-${{ env.KUBERNETES_VERSION }}-${{ env.ARCH }}.qcow2"
-          TAG="${{ env.KUBERNETES_VERSION }}-${{ env.ARCH }}"
-          REPO="${{ env.REGISTRY }}/${{ github.repository_owner }}/gitops-metal3/flatcar"
+          IMAGE=dist/${{ env.OS_FLAVOR }}-k8s-${{ env.KUBERNETES_VERSION }}-${{ matrix.arch }}.qcow2
+          REPO=${{ env.REGISTRY }}/${OWNER_LC}/gitops-metal3/${{ env.OS_FLAVOR }}
+          TAG=${{ env.KUBERNETES_VERSION }}-${{ matrix.arch }}
 
           oras push \
             --artifact-type application/vnd.unknown.artifact.v1 \
             --annotation diskformat=qcow2 \
-            "${REPO,,}:${TAG}" \
-            "dist/${IMAGE_FILE}" \
-            "dist/${IMAGE_FILE}.md5"
+            "${REPO}:${TAG}" \
+            "${IMAGE}" \
+            "${IMAGE}.md5"
