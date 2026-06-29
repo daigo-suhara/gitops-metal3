@@ -50,4 +50,6 @@ metadata:
   namespace: metal3
 spec:
   template:
-    spec: {}
+    spec:
+      joinConfiguration:
+        nodeRegistration: {}
