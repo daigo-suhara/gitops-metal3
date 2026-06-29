@@ -7,7 +7,7 @@ spec:
   template:
     spec:
       image:
-        url: oci://ghcr.io/daigo-suhara/gitops-metal3/flatcar@sha256:9eaa8c9f2b4a4a5b0007273ebf249341923a5582731b1f8d7715b917101b0cd4
+        url: oci://registry:5000/daigo-suhara/flatcar:v1.35.4-amd64
         diskFormat: qcow2
       hostSelector:
         matchLabels:

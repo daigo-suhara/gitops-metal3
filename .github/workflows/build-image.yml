@@ -60,13 +60,10 @@ jobs:
       - name: Stage artifact
         run: |
           mkdir -p dist
-          echo "=== image-builder output ==="
-          ls -laR image-builder/images/capi/output/ || true
           SRC=$(find image-builder/images/capi/output -mindepth 2 -type f -size +100M | head -1)
           [ -z "$SRC" ] && { echo "ERROR: no image produced"; exit 1; }
           DST=dist/${{ env.OS_FLAVOR }}-k8s-${{ env.KUBERNETES_VERSION }}-${{ matrix.arch }}.qcow2
           cp "$SRC" "$DST"
-          md5sum "$DST" | cut -d ' ' -f 1 > "$DST.md5"
 
       - name: Upload image artifact
         uses: actions/upload-artifact@v4
@@ -83,9 +80,6 @@ jobs:
         arch: [amd64]
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
       - name: Download image artifact
         uses: actions/download-artifact@v4
         with:
@@ -108,12 +102,11 @@ jobs:
       - name: Push image to OCI registry
         run: |
           IMAGE=dist/${{ env.OS_FLAVOR }}-k8s-${{ env.KUBERNETES_VERSION }}-${{ matrix.arch }}.qcow2
-          REPO=${{ env.REGISTRY }}/${OWNER_LC}/gitops-metal3/${{ env.OS_FLAVOR }}
+          REPO=${{ env.REGISTRY }}/${OWNER_LC}/${{ env.OS_FLAVOR }}
           TAG=${{ env.KUBERNETES_VERSION }}-${{ matrix.arch }}
 
           oras push \
             --artifact-type application/vnd.unknown.artifact.v1 \
             --annotation diskformat=qcow2 \
             "${REPO}:${TAG}" \
-            "${IMAGE}" \
-            "${IMAGE}.md5"
+            "${IMAGE}"
