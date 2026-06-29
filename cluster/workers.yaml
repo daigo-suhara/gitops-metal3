@@ -7,7 +7,9 @@ spec:
   template:
     spec:
       image:
-        url: oci://172.16.0.10:5000/daigo-suhara/flatcar:v1.35.4-amd64
+        url: https://github.com/daigo-suhara/gitops-metal3/releases/download/flatcar-v1.35.4/flatcar-k8s-v1.35.4-amd64.qcow2
+        checksum: https://github.com/daigo-suhara/gitops-metal3/releases/download/flatcar-v1.35.4/flatcar-k8s-v1.35.4-amd64.qcow2.sha256
+        checksumType: sha256
         diskFormat: qcow2
       hostSelector:
         matchLabels:

@@ -7,4 +7,3 @@ resources:
   - cert-manager.yaml
   - cluster.yaml
   - hardware.yaml
-  - registry.yaml

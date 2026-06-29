@@ -5,7 +5,3 @@ metadata:
   namespace: capi-metal3-system
 spec:
   version: v1.13.1
-  deployment:
-    containers:
-      - name: manager
-        imageUrl: ghcr.io/daigo-suhara/cluster-api-provider-metal3-amd64:oci-fix
