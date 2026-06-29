@@ -10,7 +10,7 @@ spec:
         url: http://172.16.0.10:6180/ubuntu-2404-k8s-v1.35.4-amd64.raw.gz
         checksum: http://172.16.0.10:6180/ubuntu-2404-k8s-v1.35.4-amd64.raw.gz.sha256
         checksumType: sha256
-        format: raw
+        diskFormat: raw
       hostSelector:
         matchLabels:
           cluster-role: control-plane
