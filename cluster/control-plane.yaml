@@ -7,7 +7,7 @@ spec:
   template:
     spec:
       image:
-        url: oci://registry:5000/daigo-suhara/flatcar:v1.35.4-amd64
+        url: oci://172.16.0.10:5000/daigo-suhara/flatcar:v1.35.4-amd64
         diskFormat: qcow2
       hostSelector:
         matchLabels:
