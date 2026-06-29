@@ -34,6 +34,10 @@ spec:
   version: v1.35.4
   kubeadmConfigSpec:
     format: ignition
+    users:
+      - name: core
+        sshAuthorizedKeys:
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID+3Q/eAOgoIs0pNtGvQ8ueXK1Gg8CnIdhcU9rwpeMFm suharadaigo
     clusterConfiguration:
       apiServer:
         certSANs: [172.16.10.100, 127.0.0.1]
