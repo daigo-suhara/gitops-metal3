@@ -49,15 +49,15 @@ jobs:
         env:
           PACKER_FLAGS: "--var kubernetes_semver=${{ env.KUBERNETES_VERSION }}"
         run: |
-          make deps-qemu
-          make build-qemu-${{ env.OS_FLAVOR }}
+          make deps-raw
+          make build-raw-${{ env.OS_FLAVOR }}
 
       - name: Stage artifact
         run: |
           mkdir -p dist
-          SRC=$(find image-builder/images/capi/output -mindepth 2 -type f -size +100M | head -1)
-          [ -z "$SRC" ] && { echo "ERROR: no image produced"; exit 1; }
-          DST=dist/${{ env.OS_FLAVOR }}-k8s-${{ env.KUBERNETES_VERSION }}-${{ matrix.arch }}.qcow2
+          SRC=$(find image-builder/images/capi/output -type f -name '*.gz' -size +100M | head -1)
+          [ -z "$SRC" ] && { echo "ERROR: no image produced"; ls -laR image-builder/images/capi/output/; exit 1; }
+          DST=dist/${{ env.OS_FLAVOR }}-k8s-${{ env.KUBERNETES_VERSION }}-${{ matrix.arch }}.raw.gz
           cp "$SRC" "$DST"
           sha256sum "$DST" | awk '{print $1}' > "$DST.sha256"
 
