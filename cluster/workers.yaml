@@ -7,8 +7,8 @@ spec:
   template:
     spec:
       image:
-        url: http://172.16.0.10:6180/flatcar-k8s-v1.35.4-amd64.qcow2
-        checksum: http://172.16.0.10:6180/flatcar-k8s-v1.35.4-amd64.qcow2.sha256
+        url: http://172.16.0.10:6180/ubuntu-2404-k8s-v1.35.4-amd64.qcow2
+        checksum: http://172.16.0.10:6180/ubuntu-2404-k8s-v1.35.4-amd64.qcow2.sha256
         checksumType: sha256
         diskFormat: qcow2
       hostSelector:
@@ -50,5 +50,4 @@ metadata:
   namespace: metal3
 spec:
   template:
-    spec:
-      format: ignition
+    spec: {}

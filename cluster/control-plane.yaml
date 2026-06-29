@@ -7,8 +7,8 @@ spec:
   template:
     spec:
       image:
-        url: http://172.16.0.10:6180/flatcar-k8s-v1.35.4-amd64.qcow2
-        checksum: http://172.16.0.10:6180/flatcar-k8s-v1.35.4-amd64.qcow2.sha256
+        url: http://172.16.0.10:6180/ubuntu-2404-k8s-v1.35.4-amd64.qcow2
+        checksum: http://172.16.0.10:6180/ubuntu-2404-k8s-v1.35.4-amd64.qcow2.sha256
         checksumType: sha256
         diskFormat: qcow2
       hostSelector:
@@ -33,16 +33,15 @@ spec:
         name: homelab-control-plane
   version: v1.35.4
   kubeadmConfigSpec:
-    format: ignition
     users:
-      - name: core
+      - name: ubuntu
         sshAuthorizedKeys:
           - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID+3Q/eAOgoIs0pNtGvQ8ueXK1Gg8CnIdhcU9rwpeMFm suharadaigo
+        sudo: ALL=(ALL) NOPASSWD:ALL
     clusterConfiguration:
       apiServer:
         certSANs: [172.16.10.100, 127.0.0.1]
     preKubeadmCommands:
-      - systemctl enable --now containerd
       - mkdir -p /etc/kubernetes/manifests
       - ctr image pull ghcr.io/kube-vip/kube-vip:v1.0.2
       - ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:v1.0.2 vip /kube-vip manifest pod --interface eno1 --address 172.16.10.100 --controlplane --arp --leaderElection | sed 's#/etc/kubernetes/admin.conf#/etc/kubernetes/super-admin.conf#g' | tee /etc/kubernetes/manifests/kube-vip.yaml
