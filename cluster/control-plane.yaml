@@ -55,6 +55,7 @@ spec:
     initConfiguration:
       nodeRegistration:
         name: '{{ ds.meta_data.name }}'
+        taints: []
         kubeletExtraArgs:
           - name: node-labels
             value: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
@@ -62,6 +63,7 @@ spec:
       controlPlane: {}
       nodeRegistration:
         name: '{{ ds.meta_data.name }}'
+        taints: []
         kubeletExtraArgs:
           - name: node-labels
             value: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
