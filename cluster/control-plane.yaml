@@ -65,5 +65,34 @@ spec:
         kubeletExtraArgs:
           - name: node-labels
             value: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
-    preKubeadmCommands:
-      - /usr/local/bin/kube-vip manifest pod --interface eno1 --address 172.16.10.100 --controlplane --arp --leaderElection --k8sConfigPath /etc/kubernetes/super-admin.conf > /etc/kubernetes/manifests/kube-vip.yaml
+    files:
+      - path: /etc/kubernetes/manifests/kube-vip.yaml
+        permissions: "0600"
+        owner: root:root
+        content: |
+          apiVersion: v1
+          kind: Pod
+          metadata: { name: kube-vip, namespace: kube-system }
+          spec:
+            hostNetwork: true
+            containers:
+              - name: kube-vip
+                image: ghcr.io/kube-vip/kube-vip:v0.8.9
+                args: [manager]
+                env:
+                  - { name: vip_interface,     value: eno1 }
+                  - { name: address,           value: "172.16.10.100" }
+                  - { name: cp_enable,         value: "true" }
+                  - { name: vip_arp,           value: "true" }
+                  - { name: vip_leaderelection,value: "true" }
+                  - { name: vip_leasename,     value: plndr-cp-lock }
+                  - { name: vip_leaseduration, value: "5" }
+                  - { name: vip_renewdeadline, value: "3" }
+                  - { name: vip_retryperiod,   value: "1" }
+                securityContext:
+                  capabilities: { add: [NET_ADMIN, NET_RAW] }
+                volumeMounts:
+                  - { name: kubeconfig, mountPath: /etc/kubernetes/admin.conf, readOnly: true }
+            volumes:
+              - name: kubeconfig
+                hostPath: { path: /etc/kubernetes/super-admin.conf, type: File }
