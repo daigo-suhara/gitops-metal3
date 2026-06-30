@@ -63,9 +63,6 @@ spec:
           [Install]
           WantedBy=multi-user.target
           RequiredBy=systemd-sysext.service
-      - path: /etc/systemd/system/sysext-fetch.service.requires/.keep
-        permissions: "0644"
-        content: ""
     preKubeadmCommands:
       - systemctl daemon-reload
       - systemctl enable --now sysext-fetch.service
