@@ -37,12 +37,14 @@ jobs:
           curl -fL --retry 10 -o dist/ubuntu-k8s.qcow2 \
             "https://artifactory.nordix.org/artifactory/metal3/images/k8s_${K8S_VERSION}/UBUNTU_24.04_NODE_IMAGE_K8S_${K8S_VERSION}.qcow2"
 
-      - name: Stage kube-vip binary
+      - name: Extract kube-vip binary from container image
         run: |
-          curl -fL --retry 10 -o /tmp/kube-vip.tgz \
-            "https://github.com/kube-vip/kube-vip/releases/download/${KUBE_VIP_VERSION}/kube-vip_${KUBE_VIP_VERSION#v}_linux_amd64.tar.gz"
-          mkdir -p /tmp/kubevip && tar -xzf /tmp/kube-vip.tgz -C /tmp/kubevip kube-vip
+          mkdir -p /tmp/kubevip
+          CID=$(docker create "ghcr.io/kube-vip/kube-vip:${KUBE_VIP_VERSION}")
+          docker cp "$CID":/kube-vip /tmp/kubevip/kube-vip
+          docker rm "$CID"
           chmod +x /tmp/kubevip/kube-vip
+          /tmp/kubevip/kube-vip version | head -3
 
       - name: Inject kube-vip into image
         run: |
