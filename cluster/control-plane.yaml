@@ -1,4 +1,12 @@
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+kind: Metal3DataTemplate
+metadata:
+  name: homelab-control-plane
+  namespace: metal3
+spec:
+  clusterName: homelab
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
 kind: Metal3MachineTemplate
 metadata:
   name: homelab-control-plane
@@ -6,9 +14,12 @@ metadata:
 spec:
   template:
     spec:
+      automatedCleaningMode: metadata
+      dataTemplate:
+        name: homelab-control-plane
       image:
-        url: http://172.16.0.10:6180/flatcar.img
-        checksum: http://172.16.0.10:6180/flatcar.img.sha256
+        url: http://172.16.0.10:6180/ubuntu.img
+        checksum: http://172.16.0.10:6180/ubuntu.img.sha256
         checksumType: sha256
         diskFormat: qcow2
       hostSelector:
@@ -33,42 +44,39 @@ spec:
         name: homelab-control-plane
   version: v1.35.4
   kubeadmConfigSpec:
-    format: ignition
     users:
-      - name: core
+      - name: ubuntu
         sshAuthorizedKeys:
           - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID+3Q/eAOgoIs0pNtGvQ8ueXK1Gg8CnIdhcU9rwpeMFm suharadaigo
+        sudo: ALL=(ALL) NOPASSWD:ALL
     clusterConfiguration:
       apiServer:
         certSANs: [172.16.10.100, 127.0.0.1]
-    files:
-      - path: /etc/systemd/system/sysext-fetch.service
-        permissions: "0644"
-        content: |
-          [Unit]
-          Description=Fetch sysext images
-          DefaultDependencies=no
-          After=network-online.target
-          Wants=network-online.target
-          Before=systemd-sysext.service
-          ConditionPathExists=!/etc/extensions/kubernetes.raw
-
-          [Service]
-          Type=oneshot
-          RemainAfterExit=yes
-          ExecStartPre=/usr/bin/mkdir -p /etc/extensions
-          ExecStart=/usr/bin/curl -fL --retry 10 --retry-connrefused -o /etc/extensions/kubernetes.raw http://172.16.0.10:6180/kubernetes.raw
-          ExecStart=/usr/bin/curl -fL --retry 10 --retry-connrefused -o /etc/extensions/containerd.raw http://172.16.0.10:6180/containerd.raw
-
-          [Install]
-          WantedBy=multi-user.target
-          RequiredBy=systemd-sysext.service
+    initConfiguration:
+      nodeRegistration:
+        name: '{{ ds.meta_data.name }}'
+        kubeletExtraArgs:
+          - name: node-labels
+            value: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
+    joinConfiguration:
+      controlPlane: {}
+      nodeRegistration:
+        name: '{{ ds.meta_data.name }}'
+        kubeletExtraArgs:
+          - name: node-labels
+            value: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
     preKubeadmCommands:
-      - systemctl daemon-reload
-      - systemctl enable --now sysext-fetch.service
-      - systemctl restart systemd-sysext
-      - systemd-sysext status
+      - export DEBIAN_FRONTEND=noninteractive
+      - apt-get update
+      - apt-get install -y apt-transport-https ca-certificates curl gpg containerd
+      - mkdir -p /etc/containerd && containerd config default | sed 's/SystemdCgroup = false/SystemdCgroup = true/' > /etc/containerd/config.toml
       - systemctl enable --now containerd
+      - curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.35/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+      - echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.35/deb/ /" > /etc/apt/sources.list.d/kubernetes.list
+      - apt-get update
+      - apt-get install -y kubelet=1.35.4-1.1 kubeadm=1.35.4-1.1 kubectl=1.35.4-1.1
+      - apt-mark hold kubelet kubeadm kubectl
+      - systemctl enable kubelet
       - mkdir -p /etc/kubernetes/manifests
       - ctr image pull ghcr.io/kube-vip/kube-vip:v0.8.9
       - ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:v0.8.9 vip /kube-vip manifest pod --interface eno1 --address 172.16.10.100 --controlplane --arp --leaderElection --k8sConfigPath /etc/kubernetes/super-admin.conf | tee /etc/kubernetes/manifests/kube-vip.yaml
