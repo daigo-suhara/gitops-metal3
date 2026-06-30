@@ -1,75 +1,65 @@
-name: Build and Push Kubernetes Node Image
-run-name: Build k8s ${{ inputs.kubernetesVersion || 'v1.35.4' }} (ubuntu-2404)
+name: Customize Metal3 Ubuntu image with kube-vip
+run-name: Image k8s ${{ inputs.kubernetesVersion || 'v1.35.4' }} + kube-vip ${{ inputs.kubeVipVersion || 'v0.8.9' }}
 
 on:
   workflow_dispatch:
     inputs:
       kubernetesVersion:
-        description: "Kubernetes version (e.g., v1.35.4)"
+        description: "Kubernetes version (matches Nordix path)"
         required: true
         default: "v1.35.4"
-      imageBuilderRef:
-        description: "kubernetes-sigs/image-builder ref"
+      kubeVipVersion:
+        description: "kube-vip release"
         required: true
-        default: "main"
-
-env:
-  KUBERNETES_VERSION: ${{ inputs.kubernetesVersion || 'v1.35.4' }}
-  IMAGE_BUILDER_REF: ${{ inputs.imageBuilderRef || 'main' }}
-  OS_FLAVOR: ubuntu-2404-efi
+        default: "v0.8.9"
 
 permissions:
   contents: write
 
+env:
+  K8S_VERSION: ${{ inputs.kubernetesVersion || 'v1.35.4' }}
+  KUBE_VIP_VERSION: ${{ inputs.kubeVipVersion || 'v0.8.9' }}
+
 jobs:
   build:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - arch: amd64
-            runner: ubuntu-24.04
-    runs-on: ${{ matrix.runner }}
+    runs-on: ubuntu-24.04
     steps:
-      - name: Install QEMU/KVM
+      - name: Install libguestfs and qemu
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            qemu-utils qemu-system-x86 qemu-kvm ovmf
-          sudo mkdir -p /usr/share/qemu
-          OVMF_SRC=$(find /usr/share/OVMF /usr/share/ovmf -maxdepth 2 -iname 'OVMF*.fd' 2>/dev/null | head -1)
-          echo "OVMF source: $OVMF_SRC"
-          sudo cp "$OVMF_SRC" /usr/share/qemu/OVMF.fd
-          ls -la /usr/share/qemu/OVMF.fd
-          sudo modprobe kvm || true
-          test -e /dev/kvm && sudo chmod 666 /dev/kvm || true
+            libguestfs-tools linux-image-generic qemu-utils
+          sudo chmod 0644 /boot/vmlinuz-*
 
-      - name: Checkout kubernetes-sigs/image-builder
-        run: |
-          git clone --depth 1 --branch "${IMAGE_BUILDER_REF}" \
-            https://github.com/kubernetes-sigs/image-builder.git
-
-      - name: Build image
-        working-directory: image-builder/images/capi
-        env:
-          PACKER_FLAGS: "--var kubernetes_semver=${{ env.KUBERNETES_VERSION }}"
-          PACKER_LOG: "1"
-        run: |
-          make deps-raw
-          make build-raw-${{ env.OS_FLAVOR }}
-
-      - name: Stage artifact
+      - name: Stage Nordix base image
         run: |
           mkdir -p dist
-          SRC=$(find image-builder/images/capi/output -type f -name '*.gz' -size +100M | head -1)
-          [ -z "$SRC" ] && { echo "ERROR: no image produced"; ls -laR image-builder/images/capi/output/; exit 1; }
-          DST=dist/${{ env.OS_FLAVOR }}-k8s-${{ env.KUBERNETES_VERSION }}-${{ matrix.arch }}.raw.gz
-          cp "$SRC" "$DST"
-          sha256sum "$DST" | awk '{print $1}' > "$DST.sha256"
+          curl -fL --retry 10 -o dist/ubuntu-k8s.qcow2 \
+            "https://artifactory.nordix.org/artifactory/metal3/images/k8s_${K8S_VERSION}/UBUNTU_24.04_NODE_IMAGE_K8S_${K8S_VERSION}.qcow2"
+
+      - name: Stage kube-vip binary
+        run: |
+          curl -fL --retry 10 -o /tmp/kube-vip.tgz \
+            "https://github.com/kube-vip/kube-vip/releases/download/${KUBE_VIP_VERSION}/kube-vip_${KUBE_VIP_VERSION#v}_linux_amd64.tar.gz"
+          mkdir -p /tmp/kubevip && tar -xzf /tmp/kube-vip.tgz -C /tmp/kubevip kube-vip
+          chmod +x /tmp/kubevip/kube-vip
+
+      - name: Inject kube-vip into image
+        run: |
+          export LIBGUESTFS_BACKEND=direct
+          sudo -E virt-customize -a dist/ubuntu-k8s.qcow2 \
+            --copy-in /tmp/kubevip/kube-vip:/usr/local/bin \
+            --run-command 'chmod 0755 /usr/local/bin/kube-vip' \
+            --run-command 'mkdir -p /etc/kubernetes/manifests'
+
+      - name: Compute checksum
+        run: |
+          sha256sum dist/ubuntu-k8s.qcow2 | awk '{print $1}' > dist/ubuntu-k8s.qcow2.sha256
+          ls -la dist/
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ env.OS_FLAVOR }}-${{ env.KUBERNETES_VERSION }}
-          name: ${{ env.OS_FLAVOR }} ${{ env.KUBERNETES_VERSION }}
+          tag_name: image-${{ env.K8S_VERSION }}-kubevip-${{ env.KUBE_VIP_VERSION }}
+          name: Ubuntu 24.04 + k8s ${{ env.K8S_VERSION }} + kube-vip ${{ env.KUBE_VIP_VERSION }}
           files: dist/*
