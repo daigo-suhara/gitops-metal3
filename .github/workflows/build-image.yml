@@ -49,6 +49,7 @@ jobs:
         working-directory: image-builder/images/capi
         env:
           PACKER_FLAGS: "--var kubernetes_semver=${{ env.KUBERNETES_VERSION }}"
+          PACKER_LOG: "1"
         run: |
           make deps-raw
           make build-raw-${{ env.OS_FLAVOR }}
