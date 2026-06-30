@@ -100,4 +100,4 @@ spec:
                   - { name: kubeconfig, mountPath: /etc/kubernetes/admin.conf, readOnly: true }
             volumes:
               - name: kubeconfig
-                hostPath: { path: /etc/kubernetes/super-admin.conf, type: File }
+                hostPath: { path: /etc/kubernetes/admin.conf, type: File }
