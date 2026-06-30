@@ -75,6 +75,9 @@ spec:
           metadata: { name: kube-vip, namespace: kube-system }
           spec:
             hostNetwork: true
+            hostAliases:
+              - ip: 127.0.0.1
+                hostnames: [kubernetes]
             containers:
               - name: kube-vip
                 image: ghcr.io/kube-vip/kube-vip:v0.8.9
