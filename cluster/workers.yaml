@@ -18,10 +18,10 @@ spec:
       dataTemplate:
         name: homelab-worker
       image:
-        url: http://172.16.0.10:6180/ubuntu-k8s.raw.gz
-        checksum: http://172.16.0.10:6180/ubuntu-k8s.raw.gz.sha256
+        url: http://172.16.0.10:6180/ubuntu-k8s.qcow2
+        checksum: http://172.16.0.10:6180/ubuntu-k8s.qcow2.sha256
         checksumType: sha256
-        diskFormat: raw
+        diskFormat: qcow2
       hostSelector:
         matchLabels:
           cluster-role: worker
