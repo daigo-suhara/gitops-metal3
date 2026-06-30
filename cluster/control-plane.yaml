@@ -71,4 +71,4 @@ spec:
       - systemctl enable --now containerd
       - mkdir -p /etc/kubernetes/manifests
       - ctr image pull ghcr.io/kube-vip/kube-vip:v1.0.2
-      - ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:v1.0.2 vip /kube-vip manifest pod --interface eno1 --address 172.16.10.100 --controlplane --arp --leaderElection | sed 's#/etc/kubernetes/admin.conf#/etc/kubernetes/super-admin.conf#g' | tee /etc/kubernetes/manifests/kube-vip.yaml
+      - ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:v1.0.2 vip /kube-vip manifest pod --interface eno1 --address 172.16.10.100 --controlplane --arp --leaderElection --k8sConfigPath /etc/kubernetes/super-admin.conf | tee /etc/kubernetes/manifests/kube-vip.yaml
