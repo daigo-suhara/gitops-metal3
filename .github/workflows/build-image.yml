@@ -16,7 +16,7 @@ on:
 env:
   KUBERNETES_VERSION: ${{ inputs.kubernetesVersion || 'v1.35.4' }}
   IMAGE_BUILDER_REF: ${{ inputs.imageBuilderRef || 'main' }}
-  OS_FLAVOR: ubuntu-2404
+  OS_FLAVOR: ubuntu-2404-efi
 
 permissions:
   contents: write
