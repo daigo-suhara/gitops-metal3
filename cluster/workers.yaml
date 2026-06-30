@@ -7,10 +7,10 @@ spec:
   template:
     spec:
       image:
-        url: http://172.16.0.10:6180/ubuntu-2404-k8s-v1.35.4-amd64.raw.gz
-        checksum: http://172.16.0.10:6180/ubuntu-2404-k8s-v1.35.4-amd64.raw.gz.sha256
+        url: http://172.16.0.10:6180/flatcar.img
+        checksum: http://172.16.0.10:6180/flatcar.img.sha256
         checksumType: sha256
-        diskFormat: raw
+        diskFormat: qcow2
       hostSelector:
         matchLabels:
           cluster-role: worker
@@ -51,8 +51,35 @@ metadata:
 spec:
   template:
     spec:
+      format: ignition
+      files:
+        - path: /etc/systemd/system/sysext-fetch.service
+          permissions: "0644"
+          content: |
+            [Unit]
+            Description=Fetch sysext images
+            DefaultDependencies=no
+            After=network-online.target
+            Wants=network-online.target
+            Before=systemd-sysext.service
+            ConditionPathExists=!/etc/extensions/kubernetes.raw
+
+            [Service]
+            Type=oneshot
+            RemainAfterExit=yes
+            ExecStartPre=/usr/bin/mkdir -p /etc/extensions
+            ExecStart=/usr/bin/curl -fL --retry 10 --retry-connrefused -o /etc/extensions/kubernetes.raw http://172.16.0.10:6180/kubernetes.raw
+            ExecStart=/usr/bin/curl -fL --retry 10 --retry-connrefused -o /etc/extensions/containerd.raw http://172.16.0.10:6180/containerd.raw
+
+            [Install]
+            WantedBy=multi-user.target
       joinConfiguration:
         nodeRegistration:
           kubeletExtraArgs:
             - name: node-labels
               value: cluster.x-k8s.io/cluster-name=homelab
+      preKubeadmCommands:
+        - systemctl daemon-reload
+        - systemctl enable --now sysext-fetch.service
+        - systemctl restart systemd-sysext
+        - systemctl enable --now containerd

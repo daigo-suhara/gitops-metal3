@@ -7,10 +7,10 @@ spec:
   template:
     spec:
       image:
-        url: http://172.16.0.10:6180/ubuntu-2404-k8s-v1.35.4-amd64.raw.gz
-        checksum: http://172.16.0.10:6180/ubuntu-2404-k8s-v1.35.4-amd64.raw.gz.sha256
+        url: http://172.16.0.10:6180/flatcar.img
+        checksum: http://172.16.0.10:6180/flatcar.img.sha256
         checksumType: sha256
-        diskFormat: raw
+        diskFormat: qcow2
       hostSelector:
         matchLabels:
           cluster-role: control-plane
@@ -33,15 +33,45 @@ spec:
         name: homelab-control-plane
   version: v1.35.4
   kubeadmConfigSpec:
+    format: ignition
     users:
-      - name: ubuntu
+      - name: core
         sshAuthorizedKeys:
           - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID+3Q/eAOgoIs0pNtGvQ8ueXK1Gg8CnIdhcU9rwpeMFm suharadaigo
-        sudo: ALL=(ALL) NOPASSWD:ALL
     clusterConfiguration:
       apiServer:
         certSANs: [172.16.10.100, 127.0.0.1]
+    files:
+      - path: /etc/systemd/system/sysext-fetch.service
+        permissions: "0644"
+        content: |
+          [Unit]
+          Description=Fetch sysext images
+          DefaultDependencies=no
+          After=network-online.target
+          Wants=network-online.target
+          Before=systemd-sysext.service
+          ConditionPathExists=!/etc/extensions/kubernetes.raw
+
+          [Service]
+          Type=oneshot
+          RemainAfterExit=yes
+          ExecStartPre=/usr/bin/mkdir -p /etc/extensions
+          ExecStart=/usr/bin/curl -fL --retry 10 --retry-connrefused -o /etc/extensions/kubernetes.raw http://172.16.0.10:6180/kubernetes.raw
+          ExecStart=/usr/bin/curl -fL --retry 10 --retry-connrefused -o /etc/extensions/containerd.raw http://172.16.0.10:6180/containerd.raw
+
+          [Install]
+          WantedBy=multi-user.target
+          RequiredBy=systemd-sysext.service
+      - path: /etc/systemd/system/sysext-fetch.service.requires/.keep
+        permissions: "0644"
+        content: ""
     preKubeadmCommands:
+      - systemctl daemon-reload
+      - systemctl enable --now sysext-fetch.service
+      - systemctl restart systemd-sysext
+      - systemd-sysext status
+      - systemctl enable --now containerd
       - mkdir -p /etc/kubernetes/manifests
       - ctr image pull ghcr.io/kube-vip/kube-vip:v1.0.2
       - ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:v1.0.2 vip /kube-vip manifest pod --interface eno1 --address 172.16.10.100 --controlplane --arp --leaderElection | sed 's#/etc/kubernetes/admin.conf#/etc/kubernetes/super-admin.conf#g' | tee /etc/kubernetes/manifests/kube-vip.yaml
