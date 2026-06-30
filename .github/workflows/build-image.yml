@@ -35,7 +35,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            qemu-utils qemu-system-x86 qemu-kvm
+            qemu-utils qemu-system-x86 qemu-kvm ovmf
+          sudo ln -sf /usr/share/OVMF/OVMF_CODE.fd /usr/share/qemu/OVMF.fd || true
           sudo modprobe kvm || true
           test -e /dev/kvm && sudo chmod 666 /dev/kvm || true
 
