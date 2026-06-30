@@ -36,7 +36,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             qemu-utils qemu-system-x86 qemu-kvm ovmf
-          sudo ln -sf /usr/share/OVMF/OVMF_CODE.fd /usr/share/qemu/OVMF.fd || true
+          sudo mkdir -p /usr/share/qemu
+          OVMF_SRC=$(find /usr/share/OVMF /usr/share/ovmf -maxdepth 2 -iname 'OVMF*.fd' 2>/dev/null | head -1)
+          echo "OVMF source: $OVMF_SRC"
+          sudo cp "$OVMF_SRC" /usr/share/qemu/OVMF.fd
+          ls -la /usr/share/qemu/OVMF.fd
           sudo modprobe kvm || true
           test -e /dev/kvm && sudo chmod 666 /dev/kvm || true
 
