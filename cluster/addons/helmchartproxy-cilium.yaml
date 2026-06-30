@@ -1,0 +1,35 @@
+apiVersion: addons.cluster.x-k8s.io/v1alpha1
+kind: HelmChartProxy
+metadata:
+  name: cilium
+  namespace: metal3
+spec:
+  clusterSelector:
+    matchLabels:
+      cluster.x-k8s.io/cluster-name: homelab
+  releaseName: cilium
+  repoURL: https://helm.cilium.io/
+  chartName: cilium
+  version: 1.16.5
+  namespace: kube-system
+  options:
+    enableClientCache: false
+    waitForJobs: true
+    wait: true
+    timeout: 10m0s
+    install:
+      createNamespace: true
+    upgrade:
+      maxHistory: 10
+  valuesTemplate: |-
+    ipam:
+      mode: kubernetes
+    kubeProxyReplacement: true
+    k8sServiceHost: 172.16.10.100
+    k8sServicePort: 6443
+    k8s:
+      requireIPv4PodCIDR: true
+    operator:
+      replicas: 1
+    hubble:
+      enabled: false

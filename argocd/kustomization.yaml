@@ -4,8 +4,8 @@ resources:
   - ironic.yaml
   - capi-operator.yaml
   - capi-providers.yaml
+  - caaph.yaml
   - cert-manager.yaml
   - cluster.yaml
   - hardware.yaml
-  - cluster-registration.yaml
-  - cilium.yaml
+  - addons.yaml
