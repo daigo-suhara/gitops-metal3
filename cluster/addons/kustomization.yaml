@@ -4,3 +4,4 @@ resources:
   - cilium.yaml
   - rook-ceph-operator.yaml
   - rook-ceph-cluster.yaml
+  - argocd.yaml
