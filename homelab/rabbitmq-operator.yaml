@@ -1,24 +1,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: mariadb-operator
+  name: rabbitmq-operator
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "10"
 spec:
   project: default
   source:
-    repoURL: https://helm.mariadb.com/mariadb-operator
-    chart: mariadb-operator
-    targetRevision: 26.6.0
+    repoURL: https://charts.bitnami.com/bitnami
+    chart: rabbitmq-cluster-operator
+    targetRevision: 4.4.16
     helm:
-      releaseName: mariadb-operator
-      valuesObject:
-        metrics:
-          enabled: false
+      releaseName: rabbitmq-operator
   destination:
     server: https://kubernetes.default.svc
-    namespace: mariadb-operator
+    namespace: rabbitmq-operator
   syncPolicy:
     automated:
       prune: true
