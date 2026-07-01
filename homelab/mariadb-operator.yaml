@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mariadb-operator
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  project: default
+  source:
+    repoURL: https://helm.mariadb.com/mariadb-operator
+    chart: mariadb-operator
+    targetRevision: 25.10.6
+    helm:
+      releaseName: mariadb-operator
+      valuesObject:
+        metrics:
+          enabled: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: mariadb-operator
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 10
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
