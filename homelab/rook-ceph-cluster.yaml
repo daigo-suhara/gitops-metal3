@@ -1,0 +1,81 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rook-ceph-cluster
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  project: default
+  source:
+    repoURL: https://charts.rook.io/release
+    chart: rook-ceph-cluster
+    targetRevision: 1.19.4
+    helm:
+      releaseName: rook-ceph-cluster
+      valuesObject:
+        operatorNamespace: rook-ceph
+        toolbox:
+          enabled: true
+        cephClusterSpec:
+          cephVersion:
+            image: quay.io/ceph/ceph:v19.2.3
+          cleanupPolicy:
+            wipeDevicesFromOtherClusters: true
+          dataDirHostPath: /var/lib/rook
+          mon:
+            count: 3
+            allowMultiplePerNode: false
+          mgr:
+            count: 2
+          storage:
+            useAllNodes: false
+            useAllDevices: false
+            nodes:
+              - name: tx1320m3-01
+                devices: [{ name: sda }]
+              - name: tx1320m3-02
+                devices: [{ name: sdb }]
+              - name: tx1320m3-03
+                devices: [{ name: sdb }]
+        cephBlockPools:
+          - name: rbd
+            spec:
+              replicated: { size: 3 }
+            storageClass:
+              enabled: true
+              name: general
+              isDefault: true
+              reclaimPolicy: Delete
+              allowVolumeExpansion: true
+              volumeBindingMode: Immediate
+              parameters:
+                imageFeatures: layering
+                csi.storage.k8s.io/fstype: ext4
+                csi.storage.k8s.io/provisioner-secret-name: rook-csi-rbd-provisioner
+                csi.storage.k8s.io/provisioner-secret-namespace: rook-ceph
+                csi.storage.k8s.io/controller-expand-secret-name: rook-csi-rbd-provisioner
+                csi.storage.k8s.io/controller-expand-secret-namespace: rook-ceph
+                csi.storage.k8s.io/node-stage-secret-name: rook-csi-rbd-node
+                csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
+        cephFileSystems: []
+        cephObjectStores: []
+        cephObjectStoreUsers: []
+        cephFileSystemVolumeSnapshotClass: { enabled: false }
+        cephBlockPoolsVolumeSnapshotClass: { enabled: false }
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: rook-ceph
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 10
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m

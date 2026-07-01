@@ -3,4 +3,6 @@ kind: Kustomization
 resources:
   - cert-manager.yaml
   - envoy-gateway.yaml
+  - rook-ceph-operator.yaml
+  - rook-ceph-cluster.yaml
   - openstack-infra.yaml
