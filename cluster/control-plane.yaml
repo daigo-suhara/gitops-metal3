@@ -58,7 +58,7 @@ spec:
         taints: []
         kubeletExtraArgs:
           - name: node-labels
-            value: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
+            value: 'metal3.io/uuid={{ ds.meta_data.uuid }},openstack-control-plane=enabled,openstack-compute-node=enabled,openvswitch=enabled'
     joinConfiguration:
       controlPlane: {}
       nodeRegistration:
@@ -66,7 +66,7 @@ spec:
         taints: []
         kubeletExtraArgs:
           - name: node-labels
-            value: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
+            value: 'metal3.io/uuid={{ ds.meta_data.uuid }},openstack-control-plane=enabled,openstack-compute-node=enabled,openvswitch=enabled'
     files:
       - path: /etc/kubernetes/manifests/kube-vip.yaml
         permissions: "0600"

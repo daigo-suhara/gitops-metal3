@@ -51,7 +51,7 @@ spec:
             size: 3
         storageClass:
           enabled: true
-          name: ceph-block
+          name: general
           isDefault: true
           reclaimPolicy: Delete
           allowVolumeExpansion: true
