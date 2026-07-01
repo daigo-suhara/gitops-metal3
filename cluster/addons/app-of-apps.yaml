@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app-of-apps
+  namespace: metal3
+type: addons.cluster.x-k8s.io/resource-set
+stringData:
+  app-of-apps.yaml: |
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: app-of-apps
+      namespace: argocd
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/daigo-suhara/gitops-metal3.git
+        targetRevision: HEAD
+        path: homelab
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: argocd
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+---
+apiVersion: addons.cluster.x-k8s.io/v1beta1
+kind: ClusterResourceSet
+metadata:
+  name: app-of-apps
+  namespace: metal3
+spec:
+  clusterSelector:
+    matchLabels:
+      cluster.x-k8s.io/cluster-name: homelab
+  strategy: Reconcile
+  resources:
+    - name: app-of-apps
+      kind: Secret

@@ -5,3 +5,4 @@ resources:
   - rook-ceph-operator.yaml
   - rook-ceph-cluster.yaml
   - argocd.yaml
+  - app-of-apps.yaml

@@ -25,29 +25,6 @@ spec:
     configs:
       cm:
         kustomize.buildOptions: --enable-helm
-        resource.customizations: |
-          "*/*":
-            managedFieldsManagers:
-              - kube-controller-manager
     server:
       service:
         type: ClusterIP
-    extraObjects:
-      - apiVersion: argoproj.io/v1alpha1
-        kind: Application
-        metadata:
-          name: app-of-apps
-          namespace: argocd
-        spec:
-          project: default
-          source:
-            repoURL: https://github.com/daigo-suhara/gitops-metal3.git
-            targetRevision: HEAD
-            path: homelab
-          destination:
-            server: https://kubernetes.default.svc
-            namespace: argocd
-          syncPolicy:
-            automated:
-              prune: true
-              selfHeal: true
