@@ -52,8 +52,8 @@ stringData:
       name: default
     spec:
       blocks:
-        - start: 172.16.10.240
-          stop:  172.16.10.250
+        - start: 172.16.100.100
+          stop:  172.16.100.200
     ---
     apiVersion: cilium.io/v2alpha1
     kind: CiliumL2AnnouncementPolicy
