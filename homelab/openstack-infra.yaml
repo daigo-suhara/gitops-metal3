@@ -1,28 +1,64 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: openstack-infra
+  name: mariadb
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "10"
 spec:
   project: default
-  sources:
-    - repoURL: https://tarballs.opendev.org/openstack/openstack-helm-infra
-      chart: rabbitmq
-      targetRevision: 0.1.7
-      helm:
-        releaseName: rabbitmq
-    - repoURL: https://tarballs.opendev.org/openstack/openstack-helm-infra
-      chart: mariadb
-      targetRevision: 0.2.29
-      helm:
-        releaseName: mariadb
-    - repoURL: https://tarballs.opendev.org/openstack/openstack-helm-infra
-      chart: memcached
-      targetRevision: 0.1.13
-      helm:
-        releaseName: memcached
+  source:
+    repoURL: https://tarballs.opendev.org/openstack/openstack-helm-infra
+    chart: mariadb
+    targetRevision: 0.2.67
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openstack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rabbitmq
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  project: default
+  source:
+    repoURL: https://tarballs.opendev.org/openstack/openstack-helm-infra
+    chart: rabbitmq
+    targetRevision: 0.1.45
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openstack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: memcached
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  project: default
+  source:
+    repoURL: https://tarballs.opendev.org/openstack/openstack-helm-infra
+    chart: memcached
+    targetRevision: 0.1.18
   destination:
     server: https://kubernetes.default.svc
     namespace: openstack
