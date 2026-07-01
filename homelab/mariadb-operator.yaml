@@ -1,6 +1,32 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
+  name: mariadb-operator-crds
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: default
+  source:
+    repoURL: https://helm.mariadb.com/mariadb-operator
+    chart: mariadb-operator-crds
+    targetRevision: 26.6.0
+    helm:
+      releaseName: mariadb-operator-crds
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: mariadb-operator
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
   name: mariadb-operator
   namespace: argocd
   annotations:
@@ -14,6 +40,8 @@ spec:
     helm:
       releaseName: mariadb-operator
       valuesObject:
+        crds:
+          enabled: false
         metrics:
           enabled: false
   destination:

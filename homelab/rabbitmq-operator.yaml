@@ -8,14 +8,12 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://charts.bitnami.com/bitnami
-    chart: rabbitmq-cluster-operator
-    targetRevision: 4.4.16
-    helm:
-      releaseName: rabbitmq-operator
+    repoURL: https://github.com/rabbitmq/cluster-operator
+    targetRevision: v2.21.1
+    path: config/default
   destination:
     server: https://kubernetes.default.svc
-    namespace: rabbitmq-operator
+    namespace: rabbitmq-system
   syncPolicy:
     automated:
       prune: true
@@ -23,6 +21,7 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+      - Replace=true
     retry:
       limit: 10
       backoff:
