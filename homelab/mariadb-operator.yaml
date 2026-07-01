@@ -8,11 +8,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://helm.mariadb.com/mariadb-operator
+    repoURL: ghcr.io/mariadb-operator/charts
     chart: mariadb-operator-crds
     targetRevision: 26.6.0
-    helm:
-      releaseName: mariadb-operator-crds
   destination:
     server: https://kubernetes.default.svc
     namespace: mariadb-operator
@@ -34,14 +32,11 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://helm.mariadb.com/mariadb-operator
+    repoURL: ghcr.io/mariadb-operator/charts
     chart: mariadb-operator
     targetRevision: 26.6.0
     helm:
-      releaseName: mariadb-operator
       valuesObject:
-        crds:
-          enabled: false
         metrics:
           enabled: false
   destination:
