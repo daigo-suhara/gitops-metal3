@@ -27,3 +27,12 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+      - RespectIgnoreDifferences=true
+  ignoreDifferences:
+    - group: metal3.io
+      kind: BareMetalHost
+      jsonPointers:
+        - /spec/consumerRef
+        - /spec/image
+        - /spec/userData
+        - /spec/architecture
