@@ -41,6 +41,10 @@ spec:
     repoURL: https://tarballs.opendev.org/openstack/openstack-helm-infra
     chart: rabbitmq
     targetRevision: 0.1.45
+    helm:
+      valuesObject:
+        manifests:
+          ingress_management: false
   destination:
     server: https://kubernetes.default.svc
     namespace: openstack
