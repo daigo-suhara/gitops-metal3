@@ -20,7 +20,13 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
+  ignoreDifferences:
+    - group: ""
+      kind: Service
+      name: mariadb
+      jsonPointers:
+        - /spec/selector/statefulset.kubernetes.io~1pod-name
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -44,7 +50,7 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
