@@ -13,6 +13,9 @@ spec:
     targetRevision: v1.18.11
     helm:
       releaseName: rook-ceph
+      parameters:
+        - name: csi.rookUseCsiOperator
+          value: "false"
   destination:
     server: https://kubernetes.default.svc
     namespace: rook-ceph
