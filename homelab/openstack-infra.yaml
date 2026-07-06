@@ -42,9 +42,9 @@ spec:
     chart: rabbitmq
     targetRevision: 0.1.45
     helm:
-      valuesObject:
-        manifests:
-          ingress_management: false
+      parameters:
+        - name: manifests.ingress_management
+          value: "false"
   destination:
     server: https://kubernetes.default.svc
     namespace: openstack
