@@ -49,6 +49,44 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
+  name: nova
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+spec:
+  project: default
+  source:
+    repoURL: https://tarballs.opendev.org/openstack/openstack-helm
+    chart: nova
+    targetRevision: 2026.1.13+a659ab8a2
+    helm:
+      parameters:
+        - name: manifests.daemonset_compute
+          value: "false"
+        - name: manifests.deployment_novncproxy
+          value: "false"
+        - name: manifests.deployment_serialproxy
+          value: "false"
+        - name: manifests.deployment_spiceproxy
+          value: "false"
+        - name: manifests.pod_rally_test
+          value: "false"
+        - name: manifests.job_image_repo_sync
+          value: "false"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openstack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - RespectIgnoreDifferences=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
   name: glance
   namespace: argocd
   annotations:
