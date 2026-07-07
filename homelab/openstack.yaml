@@ -79,6 +79,8 @@ spec:
           value: "false"
         - name: manifests.job_bootstrap
           value: "false"
+        - name: manifests.job_storage_init
+          value: "false"
   destination:
     server: https://kubernetes.default.svc
     namespace: openstack
