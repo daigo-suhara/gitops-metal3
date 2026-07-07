@@ -77,6 +77,66 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
+  name: openvswitch
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "18"
+spec:
+  project: default
+  source:
+    repoURL: https://tarballs.opendev.org/openstack/openstack-helm
+    chart: openvswitch
+    targetRevision: 2026.1.1+a659ab8a2
+    helm:
+      parameters:
+        - name: manifests.job_image_repo_sync
+          value: "false"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openstack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - RespectIgnoreDifferences=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: neutron
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+spec:
+  project: default
+  source:
+    repoURL: https://tarballs.opendev.org/openstack/openstack-helm
+    chart: neutron
+    targetRevision: 2026.1.15+a659ab8a2
+    helm:
+      parameters:
+        - name: manifests.daemonset_sriov_agent
+          value: "false"
+        - name: manifests.pod_rally_test
+          value: "false"
+        - name: manifests.job_image_repo_sync
+          value: "false"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openstack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - RespectIgnoreDifferences=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
   name: libvirt
   namespace: argocd
   annotations:
