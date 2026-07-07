@@ -133,6 +133,10 @@ spec:
           value: "false"
         - name: pod.use_fqdn.neutron_agent
           value: "false"
+        - name: conf.plugins.openvswitch_agent.ovs.bridge_mappings
+          value: physnet1:br-ex
+        - name: conf.plugins.ml2.ml2_type_flat.flat_networks
+          value: physnet1
   destination:
     server: https://kubernetes.default.svc
     namespace: openstack
