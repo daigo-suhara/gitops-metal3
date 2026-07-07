@@ -73,6 +73,12 @@ spec:
           value: "false"
         - name: manifests.job_image_repo_sync
           value: "false"
+        - name: manifests.job_cell_setup
+          value: "false"
+        - name: manifests.cron_job_cell_setup
+          value: "false"
+        - name: manifests.job_bootstrap
+          value: "false"
   destination:
     server: https://kubernetes.default.svc
     namespace: openstack
