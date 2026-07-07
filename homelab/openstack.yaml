@@ -91,6 +91,8 @@ spec:
       parameters:
         - name: manifests.job_image_repo_sync
           value: "false"
+        - name: conf.ovs_user_name
+          value: ""
   destination:
     server: https://kubernetes.default.svc
     namespace: openstack
