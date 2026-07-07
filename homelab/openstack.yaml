@@ -211,6 +211,46 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
+  name: cinder
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+spec:
+  project: default
+  source:
+    repoURL: https://tarballs.opendev.org/openstack/openstack-helm
+    chart: cinder
+    targetRevision: 2026.1.14+a659ab8a2
+    helm:
+      parameters:
+        - name: manifests.job_image_repo_sync
+          value: "false"
+        - name: manifests.pod_rally_test
+          value: "false"
+        - name: manifests.deployment_backup
+          value: "false"
+        - name: manifests.job_storage_init
+          value: "false"
+        - name: manifests.job_backup_storage_init
+          value: "false"
+        - name: conf.cinder.DEFAULT.enabled_backends
+          value: rbd1
+        - name: conf.backends.rbd1.rbd_pool
+          value: rbd
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openstack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - RespectIgnoreDifferences=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
   name: glance
   namespace: argocd
   annotations:
