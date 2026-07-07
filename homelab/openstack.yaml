@@ -61,10 +61,6 @@ spec:
     targetRevision: 2026.1.13+a659ab8a2
     helm:
       parameters:
-        - name: manifests.daemonset_compute
-          value: "false"
-        - name: manifests.deployment_novncproxy
-          value: "false"
         - name: manifests.deployment_serialproxy
           value: "false"
         - name: manifests.deployment_spiceproxy
@@ -72,14 +68,6 @@ spec:
         - name: manifests.pod_rally_test
           value: "false"
         - name: manifests.job_image_repo_sync
-          value: "false"
-        - name: manifests.job_cell_setup
-          value: "false"
-        - name: manifests.cron_job_cell_setup
-          value: "false"
-        - name: manifests.job_bootstrap
-          value: "false"
-        - name: manifests.job_storage_init
           value: "false"
   destination:
     server: https://kubernetes.default.svc
