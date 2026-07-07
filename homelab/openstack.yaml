@@ -77,6 +77,34 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
+  name: libvirt
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "19"
+spec:
+  project: default
+  source:
+    repoURL: https://tarballs.opendev.org/openstack/openstack-helm
+    chart: libvirt
+    targetRevision: 2026.1.4+a659ab8a2
+    helm:
+      parameters:
+        - name: manifests.job_image_repo_sync
+          value: "false"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openstack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - RespectIgnoreDifferences=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
   name: nova
   namespace: argocd
   annotations:
