@@ -125,7 +125,7 @@ spec:
           value: "false"
         - name: manifests.job_image_repo_sync
           value: "false"
-        - name: conf.use_fqdn.neutron_agent
+        - name: pod.use_fqdn.neutron_agent
           value: "false"
   destination:
     server: https://kubernetes.default.svc
