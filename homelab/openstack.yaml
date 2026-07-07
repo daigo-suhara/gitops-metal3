@@ -73,6 +73,12 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - RespectIgnoreDifferences=true
+  ignoreDifferences:
+    - group: ""
+      kind: ConfigMap
+      name: ceph-etc
+      jsonPointers:
+        - /data
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
