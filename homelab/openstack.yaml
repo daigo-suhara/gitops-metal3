@@ -197,6 +197,8 @@ spec:
           value: "false"
         - name: pod.use_fqdn.compute
           value: "false"
+        - name: conf.nova.vnc.novncproxy_base_url
+          value: http://172.16.100.102:6080/vnc_lite.html
   destination:
     server: https://kubernetes.default.svc
     namespace: openstack
