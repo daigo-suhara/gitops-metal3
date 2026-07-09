@@ -3,5 +3,7 @@ kind: ControlPlaneProvider
 metadata:
   name: kubeadm
   namespace: capi-kubeadm-control-plane-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   version: v1.13.3
