@@ -1,15 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-# Application manifests for OpenStack services. Chart sources with
-# hook-strip patches live under charts/<name>/.
+# Single ApplicationSet generates all openstack service Applications.
+# Chart wrappers (with helmChart + patches) live under charts/<name>/.
 resources:
-  - ceph-adapter-rook.yaml
-  - openvswitch.yaml
-  - libvirt.yaml
-  - neutron.yaml
-  - keystone.yaml
-  - placement.yaml
-  - glance.yaml
-  - nova.yaml
-  - cinder.yaml
-  - horizon.yaml
+  - applicationset.yaml

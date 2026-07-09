@@ -1,0 +1,65 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: openstack
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: [missingkey=error]
+  generators:
+    - list:
+        elements:
+          - name: ceph-adapter-rook
+            wave: "15"
+          - name: openvswitch
+            wave: "18"
+          - name: libvirt
+            wave: "19"
+          - name: keystone
+            wave: "20"
+          - name: neutron
+            wave: "20"
+          - name: glance
+            wave: "21"
+          - name: placement
+            wave: "21"
+          - name: cinder
+            wave: "22"
+          - name: nova
+            wave: "22"
+          - name: horizon
+            wave: "23"
+  template:
+    metadata:
+      name: '{{.name}}'
+      namespace: argocd
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{.wave}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/daigo-suhara/gitops-metal3.git
+        targetRevision: HEAD
+        path: 'homelab/openstack/charts/{{.name}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: openstack
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - RespectIgnoreDifferences=true
+      # ceph-adapter-rook's ceph-etc ConfigMap is patched at runtime by the
+      # namespace-client-ceph-config Job (mon_host discovery). The static chart
+      # template has `mon_host = will be discovered`, so ArgoCD would revert
+      # the Job's patch on every selfHeal. Ignore /data on this specific CM.
+      # (Applied to all generated apps — harmless for others since they don't
+      # own a ConfigMap named ceph-etc.)
+      ignoreDifferences:
+        - group: ""
+          kind: ConfigMap
+          name: ceph-etc
+          jsonPointers:
+            - /data

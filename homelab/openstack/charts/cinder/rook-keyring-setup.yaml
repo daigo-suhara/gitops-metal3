@@ -73,9 +73,10 @@ spec:
           args:
             - |
               set -eu
-              # Wait up to 5 min for a Running rook-ceph-tools pod
-              deadline=$((SECONDS + 300))
-              while [ $SECONDS -lt $deadline ]; do
+              # Wait up to 5 min (60 x 5s) for a Running rook-ceph-tools pod.
+              # (POSIX sh: no $SECONDS.)
+              TOOLS=""
+              for _ in $(seq 1 60); do
                 TOOLS=$(kubectl -n rook-ceph get pod -l app=rook-ceph-tools \
                   --field-selector=status.phase=Running -o name 2>/dev/null | head -1)
                 [ -n "$TOOLS" ] && break
