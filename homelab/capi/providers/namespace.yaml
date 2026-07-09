@@ -6,4 +6,14 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
+  name: capi-kubeadm-bootstrap-system
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: capi-kubeadm-control-plane-system
+---
+apiVersion: v1
+kind: Namespace
+metadata:
   name: capo-system
