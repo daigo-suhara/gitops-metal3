@@ -1,0 +1,35 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: openstack
+helmCharts:
+  - name: keystone
+    repo: https://tarballs.opendev.org/openstack/openstack-helm
+    version: 2026.1.10+a659ab8a2
+    releaseName: keystone
+    namespace: openstack
+    includeCRDs: true
+# Fix openstack-helm PostSync-deadlock:
+# Chart Jobs are annotated `helm.sh/hook: post-install,post-upgrade`, which
+# ArgoCD interprets as PostSync — apply *after* Deployments are Healthy.
+# But keystone-api's init container waits for those Jobs to exist first
+# → deadlock.
+# We add `argocd.argoproj.io/hook: Sync` which ArgoCD honors above helm.sh/hook,
+# making the Jobs regular Sync-phase resources.
+patches:
+  # credential-cleanup is a pre-delete-only hook. During install its SQL runs
+  # against a non-existent table and errors. Drop it entirely.
+  - target:
+      kind: Job
+      name: keystone-credential-cleanup
+    patch: |-
+      $patch: delete
+      apiVersion: batch/v1
+      kind: Job
+      metadata:
+        name: keystone-credential-cleanup
+  - target:
+      kind: Job
+    patch: |-
+      - op: add
+        path: /metadata/annotations/argocd.argoproj.io~1hook
+        value: Sync

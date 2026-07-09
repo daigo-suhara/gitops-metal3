@@ -1,30 +1,6 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: keystone
-  namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "20"
-spec:
-  project: default
-  source:
-    repoURL: https://tarballs.opendev.org/openstack/openstack-helm
-    chart: keystone
-    targetRevision: 2026.1.10+a659ab8a2
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: openstack
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
-      - RespectIgnoreDifferences=true
----
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
   name: placement
   namespace: argocd
   annotations:

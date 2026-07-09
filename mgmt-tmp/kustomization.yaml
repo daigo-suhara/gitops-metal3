@@ -1,0 +1,37 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: openstack
+helmCharts:
+  - name: keystone
+    repo: https://tarballs.opendev.org/openstack/openstack-helm
+    version: 2026.1.10+a659ab8a2
+    releaseName: keystone
+    namespace: openstack
+    includeCRDs: true
+# Strip helm.sh/hook annotations from Jobs so they run as Sync-phase resources
+# instead of ArgoCD PostSync hooks. Otherwise service Deployments (keystone-api)
+# stay in Init waiting for Jobs (db-sync, ks-*, credential-setup, fernet-setup)
+# that ArgoCD only applies *after* the Deployment is Healthy — deadlock.
+patches:
+  - target:
+      kind: Job
+    patch: |-
+      apiVersion: batch/v1
+      kind: Job
+      metadata:
+        name: unused
+        annotations:
+          helm.sh/hook: null
+          helm.sh/hook-weight: null
+          helm.sh/hook-delete-policy: null
+  # credential-cleanup is a pre-delete-only hook. During install its SQL runs
+  # against a non-existent table and errors. Drop it entirely.
+  - target:
+      kind: Job
+      name: keystone-credential-cleanup
+    patch: |-
+      $patch: delete
+      apiVersion: batch/v1
+      kind: Job
+      metadata:
+        name: keystone-credential-cleanup
