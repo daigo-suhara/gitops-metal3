@@ -24,6 +24,13 @@ metadata:
     argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 rules:
+  # `kubectl exec deploy/rook-ceph-tools` resolves the Deployment to a Pod
+  - apiGroups: [apps]
+    resources: [deployments]
+    verbs: [get]
+  - apiGroups: [""]
+    resources: [pods]
+    verbs: [get, list]
   - apiGroups: [""]
     resources: [pods/exec]
     verbs: [create]
