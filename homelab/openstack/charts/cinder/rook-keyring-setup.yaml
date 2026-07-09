@@ -1,10 +1,11 @@
-# Fetch client.cinder keyring from Rook Ceph and populate the
-# cinder-volume-rbd-keyring Secret. This replaces the manual
-# `kubectl create secret ... --from-literal=key=...` step that was
-# needed after fresh install because the chart's job_storage_init
-# (which would create pools + secrets via `ceph osd pool create`)
-# is disabled — Rook manages pools via CephBlockPool CRs, and running
-# storage-init against Rook would conflict.
+# Fetches client.cinder keyring from Rook Ceph and populates the
+# cinder-volume-rbd-keyring Secret that the cinder-volume Pod's
+# ceph-keyring-placement init container mounts. Replaces the manual
+# `kubectl create secret ... --from-literal=key=...` step.
+#
+# Assumes rook-ceph-tools Deployment is Ready by the time this Job's
+# PreSync hook fires (rook-ceph-cluster is at an earlier sync-wave).
+# If not, ArgoCD retries via backoffLimit.
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -23,17 +24,12 @@ metadata:
     argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 rules:
-  # exec into rook-ceph-tools to run `ceph auth get-or-create-key`
-  - apiGroups: [""]
-    resources: [pods]
-    verbs: [get, list]
   - apiGroups: [""]
     resources: [pods/exec]
-    verbs: [create, get]
-  # create the target Secret in openstack namespace
+    verbs: [create]
   - apiGroups: [""]
     resources: [secrets]
-    verbs: [get, list, create, patch, update]
+    verbs: [get, create, patch]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -42,14 +38,8 @@ metadata:
   annotations:
     argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
-subjects:
-  - kind: ServiceAccount
-    name: cinder-rook-keyring-setup
-    namespace: openstack
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cinder-rook-keyring-setup
+subjects: [{kind: ServiceAccount, name: cinder-rook-keyring-setup, namespace: openstack}]
+roleRef: {apiGroup: rbac.authorization.k8s.io, kind: ClusterRole, name: cinder-rook-keyring-setup}
 ---
 apiVersion: batch/v1
 kind: Job
@@ -61,7 +51,7 @@ metadata:
     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 spec:
   ttlSecondsAfterFinished: 300
-  backoffLimit: 4
+  backoffLimit: 20
   template:
     spec:
       serviceAccountName: cinder-rook-keyring-setup
@@ -69,26 +59,10 @@ spec:
       containers:
         - name: setup
           image: alpine/k8s:1.30.13
-          command: [sh, -c]
+          command: [sh, -euc]
           args:
             - |
-              set -eu
-              # Wait up to 5 min (60 x 5s) for a Running rook-ceph-tools pod.
-              # (POSIX sh: no $SECONDS.)
-              TOOLS=""
-              for _ in $(seq 1 60); do
-                TOOLS=$(kubectl -n rook-ceph get pod -l app=rook-ceph-tools \
-                  --field-selector=status.phase=Running -o name 2>/dev/null | head -1)
-                [ -n "$TOOLS" ] && break
-                sleep 5
-              done
-              [ -n "$TOOLS" ] || { echo "rook-ceph-tools not Running after 300s" >&2; exit 1; }
-              echo "Using $TOOLS"
-              CINDER_KEY=$(kubectl -n rook-ceph exec "$TOOLS" -- \
-                ceph auth get-or-create-key client.cinder \
-                  mon 'profile rbd' osd 'profile rbd' 2>/dev/null)
-              [ -n "$CINDER_KEY" ] || { echo "empty key returned" >&2; exit 1; }
+              KEY=$(kubectl -n rook-ceph exec deploy/rook-ceph-tools -- \
+                ceph auth get-or-create-key client.cinder mon 'profile rbd' osd 'profile rbd')
               kubectl -n openstack create secret generic cinder-volume-rbd-keyring \
-                --from-literal=key="$CINDER_KEY" \
-                --dry-run=client -o yaml | kubectl apply -f -
-              echo "cinder-volume-rbd-keyring populated"
+                --from-literal=key="$KEY" --dry-run=client -o yaml | kubectl apply -f -
