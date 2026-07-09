@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: openstack
+helmCharts:
+  - name: ceph-adapter-rook
+    repo: https://tarballs.opendev.org/openstack/openstack-helm
+    version: 2026.1.3+a659ab8a2
+    releaseName: ceph-adapter-rook
+    namespace: openstack
+    includeCRDs: true
+    valuesInline:
+      ceph_cluster_namespace: rook-ceph
+patches:
+  - target:
+      kind: Job
+    patch: |-
+      - op: add
+        path: /metadata/annotations/argocd.argoproj.io~1hook
+        value: Sync

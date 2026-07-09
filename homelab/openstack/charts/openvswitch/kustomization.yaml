@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: openstack
+helmCharts:
+  - name: openvswitch
+    repo: https://tarballs.opendev.org/openstack/openstack-helm
+    version: 2026.1.1+a659ab8a2
+    releaseName: openvswitch
+    namespace: openstack
+    includeCRDs: true
+    valuesInline:
+      manifests:
+        job_image_repo_sync: false
+      conf:
+        # empty user_name: skip `--user=openvswitch:openvswitch` on ovs-vswitchd.
+        # setuid to that user fails inside container due to missing CAP_SETUID.
+        ovs_user_name: ""

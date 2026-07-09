@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: openstack
+helmCharts:
+  - name: libvirt
+    repo: https://tarballs.opendev.org/openstack/openstack-helm
+    version: 2026.1.4+a659ab8a2
+    releaseName: libvirt
+    namespace: openstack
+    includeCRDs: true
+    valuesInline:
+      manifests:
+        job_image_repo_sync: false
+patches:
+  - target:
+      kind: Job
+    patch: |-
+      - op: add
+        path: /metadata/annotations/argocd.argoproj.io~1hook
+        value: Sync

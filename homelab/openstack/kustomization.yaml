@@ -3,4 +3,13 @@ kind: Kustomization
 # Application manifests for OpenStack services. Chart sources with
 # hook-strip patches live under charts/<name>/.
 resources:
+  - ceph-adapter-rook.yaml
+  - openvswitch.yaml
+  - libvirt.yaml
+  - neutron.yaml
   - keystone.yaml
+  - placement.yaml
+  - glance.yaml
+  - nova.yaml
+  - cinder.yaml
+  - horizon.yaml

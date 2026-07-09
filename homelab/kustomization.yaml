@@ -6,5 +6,4 @@ resources:
   - rook-ceph-operator.yaml
   - rook-ceph-cluster.yaml
   - openstack-infra.yaml
-  - openstack.yaml
   - openstack/

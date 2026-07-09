@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: horizon
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "23"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/daigo-suhara/gitops-metal3.git
+    targetRevision: HEAD
+    path: homelab/openstack/charts/horizon
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openstack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - RespectIgnoreDifferences=true
