@@ -1,15 +1,20 @@
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
-# Shared across all openstack-helm chart wrappers under ../: add
-# argocd.argoproj.io/hook=Sync to every Job. ArgoCD then treats them as
-# Sync-phase resources instead of PostSync hooks (helm.sh/hook is honored
-# only when this annotation is absent). This unblocks the deadlock where
-# a service Deployment's init container waits for Jobs (db-sync/ks-*)
-# that ArgoCD would otherwise only apply *after* the Deployment is Healthy.
+# Shared across all openstack-helm chart wrappers under ../:
 #
-# Also assign sync-wave=5 to the Jobs so ServiceAccounts / Roles / RoleBindings
-# (default wave 0) are applied first. Without this the Job pod gets created
-# before its SA exists and Kubernetes fails with "serviceaccount X not found".
+# 1) Rewrite Jobs' helm.sh/hook (post-install) to argocd hook=Sync.
+#    Reason: the api/conductor Deployments have a kubernetes-entrypoint init
+#    container that waits for the db-init/db-sync/ks-*/rabbit-init Jobs to
+#    complete. If those Jobs run as PostSync hooks, ArgoCD waits for the
+#    Deployment to become Healthy first — deadlock. Sync-phase hooks run
+#    alongside regular Sync resources so the Jobs can complete while the init
+#    container is polling for them.
+#
+# 2) Assign sync-wave=-5 to ServiceAccounts. Reason: ArgoCD applies same-wave
+#    resources concurrently; on fresh installs the Job pod would sometimes
+#    be created microseconds before its SA propagated through the informer
+#    cache, producing "serviceaccount X not found" pod-creation errors.
+#    Bumping SAs a wave earlier makes the ordering explicit.
 patches:
   - target:
       kind: Job
@@ -17,6 +22,10 @@ patches:
       - op: add
         path: /metadata/annotations/argocd.argoproj.io~1hook
         value: Sync
+  - target:
+      kind: ServiceAccount
+    patch: |-
       - op: add
-        path: /metadata/annotations/argocd.argoproj.io~1sync-wave
-        value: "5"
+        path: /metadata/annotations
+        value:
+          argocd.argoproj.io/sync-wave: "-5"
