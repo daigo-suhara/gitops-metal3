@@ -16,11 +16,27 @@ helmCharts:
       manifests:
         job_image_repo_sync: false
         pod_rally_test: false
-      # Drop Heat / Barbican from magnum-api's kubernetes-entrypoint
-      # dependency list — we don't deploy those services in this lab.
+      # Drop Heat (orchestration) / Barbican (key_manager) from the api and
+      # conductor kubernetes-entrypoint dependency lists — we don't deploy
+      # those services in this lab. Without this override the init container
+      # spins forever waiting for heat-api and barbican-api endpoints.
       dependencies:
         static:
           api:
+            jobs:
+              - magnum-db-sync
+              - magnum-ks-user
+              - magnum-domain-ks-user
+              - magnum-ks-endpoints
+              - magnum-rabbit-init
+            services:
+              - endpoint: internal
+                service: oslo_db
+              - endpoint: internal
+                service: identity
+              - endpoint: internal
+                service: oslo_messaging
+          conductor:
             jobs:
               - magnum-db-sync
               - magnum-ks-user
