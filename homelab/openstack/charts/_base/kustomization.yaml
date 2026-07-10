@@ -6,6 +6,10 @@ kind: Component
 # only when this annotation is absent). This unblocks the deadlock where
 # a service Deployment's init container waits for Jobs (db-sync/ks-*)
 # that ArgoCD would otherwise only apply *after* the Deployment is Healthy.
+#
+# Also assign sync-wave=5 to the Jobs so ServiceAccounts / Roles / RoleBindings
+# (default wave 0) are applied first. Without this the Job pod gets created
+# before its SA exists and Kubernetes fails with "serviceaccount X not found".
 patches:
   - target:
       kind: Job
@@ -13,3 +17,6 @@ patches:
       - op: add
         path: /metadata/annotations/argocd.argoproj.io~1hook
         value: Sync
+      - op: add
+        path: /metadata/annotations/argocd.argoproj.io~1sync-wave
+        value: "5"

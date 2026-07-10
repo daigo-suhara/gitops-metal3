@@ -1,12 +1,10 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: openstack
-# NOTE: no ../_base here. magnum's Deployment/StatefulSet don't have the
-# kubernetes-entrypoint init container that waits for Jobs, so the classic
-# openstack-helm PostSync deadlock doesn't apply — we can let helm.sh/hook
-# do its thing (Jobs run as PostSync after the Deployment is Healthy).
-# Adding argocd hook=Sync to the Jobs would block ArgoCD Sync from applying
-# ServiceAccounts first, causing "SA not found" pod creation failures.
+components:
+  # Rewrite Jobs to hook=Sync (wave 5) so the api Deployment's
+  # kubernetes-entrypoint init container can find them.
+  - ../_base
 helmCharts:
   - name: magnum
     repo: https://tarballs.opendev.org/openstack/openstack-helm
@@ -18,6 +16,24 @@ helmCharts:
       manifests:
         job_image_repo_sync: false
         pod_rally_test: false
+      # Drop Heat / Barbican from magnum-api's kubernetes-entrypoint
+      # dependency list — we don't deploy those services in this lab.
+      dependencies:
+        static:
+          api:
+            jobs:
+              - magnum-db-sync
+              - magnum-ks-user
+              - magnum-domain-ks-user
+              - magnum-ks-endpoints
+              - magnum-rabbit-init
+            services:
+              - endpoint: internal
+                service: oslo_db
+              - endpoint: internal
+                service: identity
+              - endpoint: internal
+                service: oslo_messaging
       # CAPI driver — magnum-conductor talks to the local (self-hosted) k8s API
       # to create Cluster/OpenStackCluster/KubeadmControlPlane CRs. The chart
       # mounts /etc/magnum/kubeconfig.conf from a Secret it renders from these
