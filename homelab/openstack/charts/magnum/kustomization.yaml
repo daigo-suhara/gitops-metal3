@@ -1,0 +1,68 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: openstack
+components:
+  - ../_base
+helmCharts:
+  - name: magnum
+    repo: https://tarballs.opendev.org/openstack/openstack-helm
+    version: 2026.1.5+a659ab8a2
+    releaseName: magnum
+    namespace: openstack
+    includeCRDs: true
+    valuesInline:
+      manifests:
+        job_image_repo_sync: false
+        pod_rally_test: false
+      # CAPI driver — magnum-conductor talks to the local (self-hosted) k8s API
+      # to create Cluster/OpenStackCluster/KubeadmControlPlane CRs. The chart
+      # mounts /etc/magnum/kubeconfig.conf from a Secret it renders from these
+      # values; we point it at kubernetes.default.svc with insecure-skip-tls
+      # (homelab). Cross-namespace RBAC for the magnum-conductor SA is handled
+      # by the extra ClusterRoleBinding below.
+      conf:
+        capi:
+          enabled: true
+          clusterName: local
+          apiServer: https://kubernetes.default.svc:443
+          # empty CA + kubeconfig template quoting produces
+          # `certificate-authority-data: ""` which is treated as no cert;
+          # combined with insecure-skip-tls-verify (added via patch) it works.
+          certificateAuthorityData: ""
+          contextName: default
+          userName: magnum-conductor
+          clientCertificateData: ""
+          clientKeyData: ""
+resources:
+  # Grant magnum-conductor edit on Cluster CRs (CAPI + CAPO)
+  - rbac-capi.yaml
+patches:
+  # Chart's kubeconfig template lacks insecure-skip-tls-verify and token auth;
+  # rewrite the Secret so kubectl-from-Pod uses the in-cluster SA token.
+  - target:
+      kind: Secret
+      name: magnum-kubeconfig
+    patch: |-
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: magnum-kubeconfig
+      stringData:
+        kubeconfig.conf: |
+          apiVersion: v1
+          kind: Config
+          clusters:
+            - name: local
+              cluster:
+                server: https://kubernetes.default.svc:443
+                insecure-skip-tls-verify: true
+          contexts:
+            - name: default
+              context:
+                cluster: local
+                user: magnum-conductor
+          current-context: default
+          users:
+            - name: magnum-conductor
+              user:
+                tokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token

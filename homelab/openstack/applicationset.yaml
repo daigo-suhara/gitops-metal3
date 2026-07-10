@@ -29,6 +29,8 @@ spec:
             wave: "22"
           - name: horizon
             wave: "23"
+          - name: magnum
+            wave: "24"
   template:
     metadata:
       name: '{{.name}}'

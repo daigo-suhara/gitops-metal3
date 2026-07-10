@@ -1,0 +1,31 @@
+# Grant magnum-conductor the ability to create/manage CAPI cluster CRs.
+# Without this, calling `openstack coe cluster create` would fail at the
+# capi-driver stage because the ServiceAccount can't create Cluster,
+# OpenStackCluster, KubeadmControlPlane, etc.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: magnum-conductor-capi
+rules:
+  - apiGroups: [cluster.x-k8s.io]
+    resources: ["*"]
+    verbs: ["*"]
+  - apiGroups: [infrastructure.cluster.x-k8s.io]
+    resources: ["*"]
+    verbs: ["*"]
+  - apiGroups: [bootstrap.cluster.x-k8s.io]
+    resources: ["*"]
+    verbs: ["*"]
+  - apiGroups: [controlplane.cluster.x-k8s.io]
+    resources: ["*"]
+    verbs: ["*"]
+  - apiGroups: [""]
+    resources: [namespaces, secrets, configmaps]
+    verbs: [get, list, watch, create, update, patch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: magnum-conductor-capi
+subjects: [{kind: ServiceAccount, name: magnum-conductor, namespace: openstack}]
+roleRef: {apiGroup: rbac.authorization.k8s.io, kind: ClusterRole, name: magnum-conductor-capi}
