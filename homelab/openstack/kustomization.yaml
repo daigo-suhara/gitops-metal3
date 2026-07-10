@@ -4,3 +4,4 @@ kind: Kustomization
 # Chart wrappers (with helmChart + patches) live under charts/<name>/.
 resources:
   - applicationset.yaml
+  - runtime.yaml

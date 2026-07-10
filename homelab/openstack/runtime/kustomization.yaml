@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# Runtime OpenStack resources not managed by any chart:
+# - Glance images (Ubuntu 24.04 for kubeadm k8s nodes)
+# - (future: Nova flavors, Neutron networks/security groups, Cinder QoS)
+namespace: openstack
+resources:
+  - ubuntu-2404-image.yaml
