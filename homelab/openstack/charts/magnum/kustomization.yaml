@@ -1,8 +1,12 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: openstack
-components:
-  - ../_base
+# NOTE: no ../_base here. magnum's Deployment/StatefulSet don't have the
+# kubernetes-entrypoint init container that waits for Jobs, so the classic
+# openstack-helm PostSync deadlock doesn't apply — we can let helm.sh/hook
+# do its thing (Jobs run as PostSync after the Deployment is Healthy).
+# Adding argocd hook=Sync to the Jobs would block ArgoCD Sync from applying
+# ServiceAccounts first, causing "SA not found" pod creation failures.
 helmCharts:
   - name: magnum
     repo: https://tarballs.opendev.org/openstack/openstack-helm
@@ -25,9 +29,6 @@ helmCharts:
           enabled: true
           clusterName: local
           apiServer: https://kubernetes.default.svc:443
-          # empty CA + kubeconfig template quoting produces
-          # `certificate-authority-data: ""` which is treated as no cert;
-          # combined with insecure-skip-tls-verify (added via patch) it works.
           certificateAuthorityData: ""
           contextName: default
           userName: magnum-conductor
