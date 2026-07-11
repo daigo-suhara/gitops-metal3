@@ -1,0 +1,60 @@
+# Creates a Magnum cluster template targeting the CAPI helm driver.
+# Idempotent — skips if template with same name already exists.
+#
+# --master-lb-enabled is *NOT* passed; Octavia isn't deployed in this lab,
+# so a single-master cluster with no LB in front of the API is fine.
+#
+# The label 'kube_tag' is what the driver reads to pick a version of the
+# capi-helm-charts chart to install. It should match the image's
+# kube_version property.
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: magnum-cluster-template-capi-v1-33
+  namespace: openstack
+spec:
+  ttlSecondsAfterFinished: 3600
+  backoffLimit: 3
+  template:
+    spec:
+      # Reuses SA/Role/RoleBinding from ubuntu-2404-image.yaml
+      serviceAccountName: openstack-image-upload
+      restartPolicy: OnFailure
+      containers:
+        - name: create-template
+          image: quay.io/airshipit/openstack-client:2026.1-ubuntu_noble
+          env:
+            - {name: OS_AUTH_URL, value: http://keystone-api.openstack.svc.cluster.local:5000/v3}
+            - {name: OS_USERNAME, value: admin}
+            - name: OS_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: keystone-keystone-admin, key: OS_PASSWORD}
+            - {name: OS_PROJECT_NAME, value: admin}
+            - {name: OS_USER_DOMAIN_NAME, value: Default}
+            - {name: OS_PROJECT_DOMAIN_NAME, value: Default}
+            - {name: OS_IDENTITY_API_VERSION, value: "3"}
+            - {name: OS_INTERFACE, value: internal}
+          resources:
+            requests: {cpu: 50m, memory: 128Mi}
+            limits:   {cpu: 500m, memory: 512Mi}
+          command: [sh, -euc]
+          args:
+            - |
+              TPL=capi-v1-33-jammy
+              # Idempotency: skip if template with this name already exists.
+              if openstack coe cluster template show "$TPL" >/dev/null 2>&1; then
+                echo "template $TPL already exists"
+                exit 0
+              fi
+              openstack coe cluster template create "$TPL" \
+                --coe kubernetes \
+                --image ubuntu-jammy-kube-v1.33.13 \
+                --external-network external \
+                --master-flavor m1.medium \
+                --flavor m1.medium \
+                --network-driver calico \
+                --docker-storage-driver overlay2 \
+                --public \
+                --label kube_tag=v1.33.13
+              openstack coe cluster template show "$TPL"
