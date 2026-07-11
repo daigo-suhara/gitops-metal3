@@ -50,22 +50,21 @@ helmCharts:
                 service: identity
               - endpoint: internal
                 service: oslo_messaging
-      # Fix uwsgi startup: the magnum image (2026.1-ubuntu_noble) doesn't ship
-      # /var/lib/openstack/bin/magnum-api-wsgi, so uwsgi's wsgi-file path 404s
-      # and no application loads ("no python application found"). Switch to the
-      # in-tree magnum.wsgi.api module which exposes an `application` callable.
       conf:
+        # Fix uwsgi startup: the magnum image (2026.1-ubuntu_noble) doesn't
+        # ship /var/lib/openstack/bin/magnum-api-wsgi, so uwsgi's wsgi-file
+        # 404s and no application loads. Switch to the in-tree magnum.wsgi.api
+        # module which exposes an `application` callable.
         magnum_api_uwsgi:
           uwsgi:
             wsgi-file: null
             module: magnum.wsgi.api:application
-      # CAPI driver — magnum-conductor talks to the local (self-hosted) k8s API
-      # to create Cluster/OpenStackCluster/KubeadmControlPlane CRs. The chart
-      # mounts /etc/magnum/kubeconfig.conf from a Secret it renders from these
-      # values; we point it at kubernetes.default.svc with insecure-skip-tls
-      # (homelab). Cross-namespace RBAC for the magnum-conductor SA is handled
-      # by the extra ClusterRoleBinding below.
-      conf:
+        # CAPI driver — magnum-conductor talks to the local (self-hosted) k8s
+        # API to create Cluster/OpenStackCluster/KubeadmControlPlane CRs. The
+        # chart mounts /etc/magnum/kubeconfig.conf from a Secret it renders
+        # from these values; we point it at kubernetes.default.svc with
+        # insecure-skip-tls (homelab). Cross-namespace RBAC for the
+        # magnum-conductor SA is handled by the extra ClusterRoleBinding below.
         capi:
           enabled: true
           clusterName: local
