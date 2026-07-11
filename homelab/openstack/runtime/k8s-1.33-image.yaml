@@ -15,7 +15,7 @@ metadata:
   namespace: openstack
 spec:
   ttlSecondsAfterFinished: 3600
-  backoffLimit: 3
+  backoffLimit: 6
   template:
     spec:
       # Reuses SA/Role/RoleBinding defined in ubuntu-2404-image.yaml
