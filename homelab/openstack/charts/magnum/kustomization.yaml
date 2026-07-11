@@ -108,12 +108,15 @@ patches:
         path: /spec/template/spec/initContainers/-
         value:
           name: install-capi-driver
-          image: quay.io/airshipit/magnum:2026.1-ubuntu_noble
+          # magnum:2026.1-ubuntu_noble ships no pip, so use the official
+          # python:3.12-slim image (matches the magnum venv's python 3.12).
+          image: python:3.12-slim
           command: [sh, -euc]
           args:
             - |
-              /var/lib/openstack/bin/pip install --target=/extra/pkgs magnum-capi-helm==1.4.0
+              pip install --no-cache-dir --target=/extra/pkgs magnum-capi-helm==1.4.0
               mkdir -p /extra/bin
+              apt-get update -qq && apt-get install -qq -y curl >/dev/null
               curl -sL https://get.helm.sh/helm-v3.16.3-linux-amd64.tar.gz | tar xz -C /tmp
               mv /tmp/linux-amd64/helm /extra/bin/helm
               chmod +x /extra/bin/helm
@@ -138,12 +141,15 @@ patches:
         path: /spec/template/spec/initContainers/-
         value:
           name: install-capi-driver
-          image: quay.io/airshipit/magnum:2026.1-ubuntu_noble
+          # magnum:2026.1-ubuntu_noble ships no pip, so use the official
+          # python:3.12-slim image (matches the magnum venv's python 3.12).
+          image: python:3.12-slim
           command: [sh, -euc]
           args:
             - |
-              /var/lib/openstack/bin/pip install --target=/extra/pkgs magnum-capi-helm==1.4.0
+              pip install --no-cache-dir --target=/extra/pkgs magnum-capi-helm==1.4.0
               mkdir -p /extra/bin
+              apt-get update -qq && apt-get install -qq -y curl >/dev/null
               curl -sL https://get.helm.sh/helm-v3.16.3-linux-amd64.tar.gz | tar xz -C /tmp
               mv /tmp/linux-amd64/helm /extra/bin/helm
               chmod +x /extra/bin/helm
