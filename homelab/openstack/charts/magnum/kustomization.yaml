@@ -114,7 +114,11 @@ patches:
           command: [sh, -euc]
           args:
             - |
-              pip install --no-cache-dir --target=/extra/pkgs magnum-capi-helm==1.4.0
+              # --no-deps: magnum-capi-helm's requirements.txt lists 'magnum'
+              # which would shadow the image's baked-in magnum from PYTHONPATH
+              # and break request handling. All other deps (pbr, oslo_log,
+              # oslo_utils) are already in the image's venv.
+              pip install --no-cache-dir --no-deps --target=/extra/pkgs magnum-capi-helm==1.4.0
               mkdir -p /extra/bin
               apt-get update -qq && apt-get install -qq -y curl >/dev/null
               curl -sL https://get.helm.sh/helm-v3.16.3-linux-amd64.tar.gz | tar xz -C /tmp
@@ -147,7 +151,11 @@ patches:
           command: [sh, -euc]
           args:
             - |
-              pip install --no-cache-dir --target=/extra/pkgs magnum-capi-helm==1.4.0
+              # --no-deps: magnum-capi-helm's requirements.txt lists 'magnum'
+              # which would shadow the image's baked-in magnum from PYTHONPATH
+              # and break request handling. All other deps (pbr, oslo_log,
+              # oslo_utils) are already in the image's venv.
+              pip install --no-cache-dir --no-deps --target=/extra/pkgs magnum-capi-helm==1.4.0
               mkdir -p /extra/bin
               apt-get update -qq && apt-get install -qq -y curl >/dev/null
               curl -sL https://get.helm.sh/helm-v3.16.3-linux-amd64.tar.gz | tar xz -C /tmp
