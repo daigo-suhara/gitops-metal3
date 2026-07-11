@@ -49,6 +49,19 @@ helmCharts:
               - endpoint: internal
                 service: oslo_messaging
       conf:
+        # Force magnum's internal service clients to use the "internal"
+        # keystone endpoint. Chart's default publicURL resolves to
+        # http://glance.openstack.svc.cluster.local (no matching Service)
+        # so cluster template creation errors with 500 Name resolution.
+        magnum:
+          glance_client: {endpoint_type: internalURL}
+          nova_client:   {endpoint_type: internalURL}
+          heat_client:   {endpoint_type: internalURL}
+          cinder_client: {endpoint_type: internalURL}
+          # magnum-capi-helm driver reads [capi_helm] (underscore) — the chart
+          # otherwise renders [capi-helm] which configparser treats as different.
+          capi_helm:
+            kubeconfig_file: /etc/magnum/kubeconfig.conf
         # magnum-api uwsgi: image ships no magnum-api-wsgi script → point uwsgi
         # at the in-tree magnum.wsgi.api:application module callable instead.
         magnum_api_uwsgi:
@@ -60,14 +73,6 @@ helmCharts:
         paste:
           pipeline:main:
             pipeline: cors request_id authtoken api_v1
-        # The chart renders [capi-helm] with a dash, but the magnum-capi-helm
-        # driver reads oslo.config group name "capi_helm" (underscore) — those
-        # are literal to configparser. Add the underscore section too so the
-        # driver can find its kubeconfig_file setting.
-        # https://opendev.org/openstack/magnum-capi-helm/src/branch/master/magnum_capi_helm/conf.py
-        magnum:
-          capi_helm:
-            kubeconfig_file: /etc/magnum/kubeconfig.conf
         # CAPI driver — magnum-conductor talks to the local (self-hosted) k8s
         # API to create Cluster/OpenStackCluster/KubeadmControlPlane CRs. The
         # chart mounts /etc/magnum/kubeconfig.conf from a Secret it renders
