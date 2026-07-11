@@ -61,6 +61,14 @@ helmCharts:
           cinder_client:   {endpoint_type: internalURL}
           barbican_client: {endpoint_type: internalURL}
           octavia_client:  {endpoint_type: internalURL}
+          # magnum's keystone client (for trustee/trust creation) picks the
+          # interface from [trust].interface. Default is 'public' — same
+          # non-existent hostname issue as the service clients.
+          trust:
+            interface: internal
+          # magnum-api's own openstacksdk-based Connection uses this too.
+          keystone_authtoken:
+            interface: internal
           # magnum-capi-helm driver reads [capi_helm] (underscore) — the chart
           # otherwise renders [capi-helm] which configparser treats as different.
           capi_helm:
