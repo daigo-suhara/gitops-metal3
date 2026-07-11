@@ -1,0 +1,118 @@
+# openstack-helm's keystone catalog puts the *public* interface at
+# http://<service>.openstack.svc.cluster.local:80 (chart value
+# endpoints.identity.hosts.default=keystone / port.api.default=80), but the
+# actual Kubernetes Services expose only the internal name+port
+# (keystone-api:5000, glance-api:9292, etc).
+#
+# Anything using the openstacksdk / keystone client without an explicit
+# interface=internal argument (like magnum's domain_admin_client used during
+# 'openstack coe cluster create') hits the *public* URL and errors with
+# NameResolutionError.
+#
+# Create Service aliases at the public names so those URLs resolve to the
+# real backend. Ports forwarded 80 → real internal port.
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keystone
+  namespace: openstack
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: 5000
+  selector:
+    application: keystone
+    component: api
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: glance
+  namespace: openstack
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: 9292
+  selector:
+    application: glance
+    component: api
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nova
+  namespace: openstack
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8774
+  selector:
+    application: nova
+    component: os-api
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: neutron
+  namespace: openstack
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: 9696
+  selector:
+    application: neutron
+    component: server
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: placement
+  namespace: openstack
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8778
+  selector:
+    application: placement
+    component: api
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cinder
+  namespace: openstack
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8776
+  selector:
+    application: cinder
+    component: api
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: magnum
+  namespace: openstack
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: 9511
+  selector:
+    application: magnum
+    component: api
