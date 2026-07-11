@@ -37,10 +37,18 @@ spec:
             - {name: OS_INTERFACE, value: internal}
           resources:
             requests: {cpu: 200m, memory: 512Mi}
-            # openstack image create buffers the upload — needs > file size for
-            # the 3.5GB qcow2. 4Gi was hitting weird "Operation not permitted"
-            # (kernel dropping sockets) mid-upload, so pad generously.
-            limits: {cpu: 2, memory: 6Gi}
+            # openstack image create buffers, but the curl+HTTP PUT path (used
+            # below) streams properly — 1Gi is plenty. Keep requests low so
+            # scheduler places on any control-plane node.
+            limits: {cpu: 2, memory: 1Gi}
+          # Avoid the 16GB node (tx1320m3-03) — it's already 120% overcommitted,
+          # so a burstable Job gets evicted before finishing a 5-minute upload.
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                      - {key: kubernetes.io/hostname, operator: NotIn, values: [tx1320m3-03]}
           volumeMounts:
             - {name: cache, mountPath: /tmp}
           command: [sh, -euc]
@@ -54,16 +62,32 @@ spec:
                 echo "$IMG already active"
                 exit 0
               fi
-              apt-get -qq update
-              apt-get -qq install -y curl
-              curl -fsSL -o /tmp/k8s.qcow2 "$URL"
-              echo "$SHA  /tmp/k8s.qcow2" | sha256sum -c -
+              apt-get -qq update && apt-get -qq install -y curl
+              # Delete any half-uploaded stale image with the same name.
+              openstack image delete "$IMG" 2>/dev/null || true
+              # Create empty image record so we get an ID + auth token.
               openstack image create --disk-format qcow2 --container-format bare \
-                --file /tmp/k8s.qcow2 --public \
+                --public \
                 --property os_distro=ubuntu --property os_version=22.04 \
                 --property architecture=x86_64 \
                 --property kube_version=v1.33.13 \
                 "$IMG"
+              IMG_ID=$(openstack image show "$IMG" -f value -c id)
+              TOKEN=$(openstack token issue -f value -c id)
+              # Stream the qcow2 straight from source to Glance via curl.
+              # Skip the 'openstack image create --file' path which python-glanceclient
+              # buffers into memory (3.5GB → pod eviction). curl --upload-file streams.
+              echo "streaming $URL → glance image $IMG_ID"
+              curl -fsSL "$URL" -o - | \
+                curl -f -X PUT -H "X-Auth-Token: $TOKEN" \
+                  -H "Content-Type: application/octet-stream" \
+                  --data-binary @- \
+                  "http://glance-api.openstack.svc.cluster.local:9292/v2/images/$IMG_ID/file"
+              # Verify checksum reported by Glance matches upstream.
+              GOT=$(openstack image show "$IMG" -f value -c checksum || true)
+              echo "uploaded checksum: $GOT"
+              openstack image show "$IMG" -c status -c size -c properties
       volumes:
         - name: cache
-          emptyDir: {sizeLimit: 6Gi}
+          # Streaming path (curl | curl) doesn't touch disk. Keep small.
+          emptyDir: {sizeLimit: 128Mi}
