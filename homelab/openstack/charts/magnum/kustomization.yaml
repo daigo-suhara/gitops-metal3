@@ -59,6 +59,13 @@ helmCharts:
           uwsgi:
             wsgi-file: null
             module: magnum.wsgi.api:application
+        # Chart's api-paste.ini declares Healthcheck as a filter, but
+        # oslo_middleware 7.x removed that mode — its filter factory now
+        # raises NotImplementedError forcing app-mode deployment. Drop
+        # healthcheck from the paste pipeline (we don't need it in a lab).
+        paste:
+          pipeline:main:
+            pipeline: cors request_id authtoken api_v1
         # CAPI driver — magnum-conductor talks to the local (self-hosted) k8s
         # API to create Cluster/OpenStackCluster/KubeadmControlPlane CRs. The
         # chart mounts /etc/magnum/kubeconfig.conf from a Secret it renders
