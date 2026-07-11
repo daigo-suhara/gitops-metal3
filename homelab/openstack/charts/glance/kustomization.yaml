@@ -22,6 +22,14 @@ helmCharts:
         size: 30Gi
       volume_staging:
         size: 5Gi
+      # Large images buffered via uwsgi hit ~4GB RSS during 3.5GB uploads;
+      # unlimited pods got OOMKilled by node kubelet mid-transfer (exit 137).
+      pod:
+        resources:
+          enabled: true
+          api:
+            requests: {cpu: "100m", memory: "1Gi"}
+            limits:   {cpu: "2",    memory: "6Gi"}
 patches:
   - target:
       kind: Job
