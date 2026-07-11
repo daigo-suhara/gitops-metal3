@@ -165,6 +165,10 @@ patches:
               # filesystem now and render a static kubeconfig that magnum
               # can consume.
               TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+              # magnum-capi-helm/kubernetes.py doesn't honor
+              # insecure-skip-tls-verify — must provide a valid CA. Use the
+              # SA-mounted ca.crt (base64 encoded) as inline data.
+              CA_B64=$(base64 -w0 /var/run/secrets/kubernetes.io/serviceaccount/ca.crt)
               cat > /extra/kubeconfig.conf <<EOF
               apiVersion: v1
               kind: Config
@@ -172,7 +176,7 @@ patches:
               - name: local
                 cluster:
                   server: https://kubernetes.default.svc:443
-                  insecure-skip-tls-verify: true
+                  certificate-authority-data: $CA_B64
               contexts:
               - name: default
                 context:
@@ -227,6 +231,10 @@ patches:
               # filesystem now and render a static kubeconfig that magnum
               # can consume.
               TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+              # magnum-capi-helm/kubernetes.py doesn't honor
+              # insecure-skip-tls-verify — must provide a valid CA. Use the
+              # SA-mounted ca.crt (base64 encoded) as inline data.
+              CA_B64=$(base64 -w0 /var/run/secrets/kubernetes.io/serviceaccount/ca.crt)
               cat > /extra/kubeconfig.conf <<EOF
               apiVersion: v1
               kind: Config
@@ -234,7 +242,7 @@ patches:
               - name: local
                 cluster:
                   server: https://kubernetes.default.svc:443
-                  insecure-skip-tls-verify: true
+                  certificate-authority-data: $CA_B64
               contexts:
               - name: default
                 context:
