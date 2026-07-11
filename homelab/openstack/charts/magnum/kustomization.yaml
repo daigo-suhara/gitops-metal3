@@ -54,10 +54,13 @@ helmCharts:
         # http://glance.openstack.svc.cluster.local (no matching Service)
         # so cluster template creation errors with 500 Name resolution.
         magnum:
-          glance_client: {endpoint_type: internalURL}
-          nova_client:   {endpoint_type: internalURL}
-          heat_client:   {endpoint_type: internalURL}
-          cinder_client: {endpoint_type: internalURL}
+          glance_client:   {endpoint_type: internalURL}
+          nova_client:     {endpoint_type: internalURL}
+          neutron_client:  {endpoint_type: internalURL}
+          heat_client:     {endpoint_type: internalURL}
+          cinder_client:   {endpoint_type: internalURL}
+          barbican_client: {endpoint_type: internalURL}
+          octavia_client:  {endpoint_type: internalURL}
           # magnum-capi-helm driver reads [capi_helm] (underscore) — the chart
           # otherwise renders [capi-helm] which configparser treats as different.
           capi_helm:
