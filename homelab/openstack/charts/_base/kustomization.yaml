@@ -1,27 +1,33 @@
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
-# Shared across all openstack-helm chart wrappers under ../:
+# Shared across all openstack-helm chart wrappers under ../.
 #
-# 1) Rewrite Jobs' helm.sh/hook (post-install) to argocd hook=Sync.
-#    Reason: the api/conductor Deployments have a kubernetes-entrypoint init
-#    container that waits for the db-init/db-sync/ks-*/rabbit-init Jobs to
-#    complete. If those Jobs run as PostSync hooks, ArgoCD waits for the
-#    Deployment to become Healthy first — deadlock. Sync-phase hooks run
-#    alongside regular Sync resources so the Jobs can complete while the init
-#    container is polling for them.
+# 1) Strip helm.sh/hook* annotations from every Job. openstack-helm marks
+#    the db-init / db-sync / ks-* / rabbit-init Jobs as post-install hooks.
+#    ArgoCD honors those and defers them to the PostSync phase, but the
+#    api / conductor Deployment has a kubernetes-entrypoint init container
+#    that polls for those Jobs — so ArgoCD would wait for Deployment healthy
+#    (blocked on init) while Jobs sit unapplied. Deadlock. Treating the Jobs
+#    as regular Sync-phase resources breaks the loop: ArgoCD applies them
+#    concurrently with the Deployment, the init container finds them, they
+#    complete, the Deployment goes Healthy.
 #
-# 2) Assign sync-wave=-5 to ServiceAccounts. Reason: ArgoCD applies same-wave
-#    resources concurrently; on fresh installs the Job pod would sometimes
-#    be created microseconds before its SA propagated through the informer
-#    cache, producing "serviceaccount X not found" pod-creation errors.
-#    Bumping SAs a wave earlier makes the ordering explicit.
+# 2) Assign sync-wave=-5 to ServiceAccounts. Same-wave resources are applied
+#    concurrently, and on fresh installs the Job pod could sometimes be
+#    scheduled before its SA propagated through kubelet's informer cache
+#    ("serviceaccount X not found"). Bumping SAs a wave earlier fixes it.
 patches:
   - target:
       kind: Job
     patch: |-
-      - op: add
-        path: /metadata/annotations/argocd.argoproj.io~1hook
-        value: Sync
+      apiVersion: batch/v1
+      kind: Job
+      metadata:
+        name: not-important
+        annotations:
+          helm.sh/hook: null
+          helm.sh/hook-weight: null
+          helm.sh/hook-delete-policy: null
   - target:
       kind: ServiceAccount
     patch: |-
