@@ -12,6 +12,16 @@ helmCharts:
     includeCRDs: true
     valuesInline:
       storage: pvc
+      # 2Gi (chart default) can't hold the ~3.5GB StackHPC k8s qcow2 —
+      # PUT /v2/images/.../file returns 413 "storage media is full".
+      # Bump to 30Gi for now; multiple ubuntu + k8s images ~10Gi total.
+      # SC rook-ceph-block has allowVolumeExpansion=true so live resize
+      # is possible, but chart re-creates the PVC on value change so
+      # existing PVCs need a manual `kubectl patch` to catch up.
+      volume:
+        size: 30Gi
+      volume_staging:
+        size: 5Gi
 patches:
   - target:
       kind: Job
