@@ -1,0 +1,66 @@
+# Downloads the StackHPC azimuth-images k8s-preinstalled Ubuntu 22.04 (Jammy)
+# image and registers it in Glance. Idempotent — skips if image already active.
+#
+# Required by magnum-capi-helm driver: the driver looks up the cluster
+# template's image by os_distro/os_version/kube_version properties and
+# expects a Kubernetes-ready qcow2 (kubelet, kubeadm, containerd baked in).
+#
+# Source: https://github.com/stackhpc/azimuth-images/releases/tag/0.32.0
+# The 1.33 stream matches the CAPI operator's KubeadmControlPlane defaults.
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: glance-upload-k8s-1-33-jammy
+  namespace: openstack
+spec:
+  ttlSecondsAfterFinished: 3600
+  backoffLimit: 3
+  template:
+    spec:
+      # Reuses SA/Role/RoleBinding defined in ubuntu-2404-image.yaml
+      serviceAccountName: openstack-image-upload
+      restartPolicy: OnFailure
+      containers:
+        - name: upload
+          image: quay.io/airshipit/openstack-client:2026.1-ubuntu_noble
+          env:
+            - {name: OS_AUTH_URL, value: http://keystone-api.openstack.svc.cluster.local:5000/v3}
+            - {name: OS_USERNAME, value: admin}
+            - name: OS_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: keystone-keystone-admin, key: OS_PASSWORD}
+            - {name: OS_PROJECT_NAME, value: admin}
+            - {name: OS_USER_DOMAIN_NAME, value: Default}
+            - {name: OS_PROJECT_DOMAIN_NAME, value: Default}
+            - {name: OS_IDENTITY_API_VERSION, value: "3"}
+            - {name: OS_INTERFACE, value: internal}
+          resources:
+            requests: {cpu: 100m, memory: 128Mi}
+            limits: {cpu: 500m, memory: 2Gi}
+          volumeMounts:
+            - {name: cache, mountPath: /tmp}
+          command: [sh, -euc]
+          args:
+            - |
+              IMG=ubuntu-jammy-kube-v1.33.13
+              URL=https://azimuth-images.stackhpc.cloud/ubuntu-jammy-kube-v1.33.13-260705-1940.qcow2
+              SHA=1699ba08a303de52a282ddc57a6b7631df33accd8707672160f3a72ddaf2a537
+              STATUS=$(openstack image show "$IMG" -f value -c status 2>/dev/null || true)
+              if [ "$STATUS" = active ]; then
+                echo "$IMG already active"
+                exit 0
+              fi
+              apt-get -qq update
+              apt-get -qq install -y curl
+              curl -fsSL -o /tmp/k8s.qcow2 "$URL"
+              echo "$SHA  /tmp/k8s.qcow2" | sha256sum -c -
+              openstack image create --disk-format qcow2 --container-format bare \
+                --file /tmp/k8s.qcow2 --public \
+                --property os_distro=ubuntu --property os_version=22.04 \
+                --property architecture=x86_64 \
+                --property kube_version=v1.33.13 \
+                "$IMG"
+      volumes:
+        - name: cache
+          emptyDir: {sizeLimit: 3Gi}

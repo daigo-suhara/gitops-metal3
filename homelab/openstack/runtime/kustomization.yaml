@@ -6,3 +6,4 @@ kind: Kustomization
 namespace: openstack
 resources:
   - ubuntu-2404-image.yaml
+  - k8s-1.33-image.yaml
