@@ -36,8 +36,11 @@ spec:
             - {name: OS_IDENTITY_API_VERSION, value: "3"}
             - {name: OS_INTERFACE, value: internal}
           resources:
-            requests: {cpu: 100m, memory: 128Mi}
-            limits: {cpu: 500m, memory: 2Gi}
+            requests: {cpu: 200m, memory: 512Mi}
+            # openstack image create buffers the upload — needs > file size for
+            # the 3.5GB qcow2. 4Gi was hitting weird "Operation not permitted"
+            # (kernel dropping sockets) mid-upload, so pad generously.
+            limits: {cpu: 2, memory: 6Gi}
           volumeMounts:
             - {name: cache, mountPath: /tmp}
           command: [sh, -euc]
@@ -63,4 +66,4 @@ spec:
                 "$IMG"
       volumes:
         - name: cache
-          emptyDir: {sizeLimit: 3Gi}
+          emptyDir: {sizeLimit: 6Gi}
