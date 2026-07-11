@@ -89,7 +89,9 @@ helmCharts:
           # magnum-capi-helm driver reads [capi_helm] (underscore) — the chart
           # otherwise renders [capi-helm] which configparser treats as different.
           capi_helm:
-            kubeconfig_file: /etc/magnum/kubeconfig.conf
+            # Point at the token-based kubeconfig rendered by the init
+            # container at pod boot (not the chart's empty cert one).
+            kubeconfig_file: /extra/kubeconfig.conf
         # magnum-api uwsgi: image ships no magnum-api-wsgi script → point uwsgi
         # at the in-tree magnum.wsgi.api:application module callable instead.
         magnum_api_uwsgi:
@@ -157,6 +159,31 @@ patches:
               curl -sL https://get.helm.sh/helm-v3.16.3-linux-amd64.tar.gz | tar xz -C /tmp
               mv /tmp/linux-amd64/helm /extra/bin/helm
               chmod +x /extra/bin/helm
+              # magnum-capi-helm's kubernetes.py only understands 'token:'
+              # inline in kubeconfig — it has no tokenFile support (see its
+              # kubernetes.py:__init__). Read the SA token off the pod
+              # filesystem now and render a static kubeconfig that magnum
+              # can consume.
+              TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+              cat > /extra/kubeconfig.conf <<EOF
+              apiVersion: v1
+              kind: Config
+              clusters:
+              - name: local
+                cluster:
+                  server: https://kubernetes.default.svc:443
+                  insecure-skip-tls-verify: true
+              contexts:
+              - name: default
+                context:
+                  cluster: local
+                  user: magnum-conductor
+              current-context: default
+              users:
+              - name: magnum-conductor
+                user:
+                  token: $TOKEN
+              EOF
           volumeMounts:
             - {name: extra, mountPath: /extra}
       - op: add
@@ -194,6 +221,31 @@ patches:
               curl -sL https://get.helm.sh/helm-v3.16.3-linux-amd64.tar.gz | tar xz -C /tmp
               mv /tmp/linux-amd64/helm /extra/bin/helm
               chmod +x /extra/bin/helm
+              # magnum-capi-helm's kubernetes.py only understands 'token:'
+              # inline in kubeconfig — it has no tokenFile support (see its
+              # kubernetes.py:__init__). Read the SA token off the pod
+              # filesystem now and render a static kubeconfig that magnum
+              # can consume.
+              TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+              cat > /extra/kubeconfig.conf <<EOF
+              apiVersion: v1
+              kind: Config
+              clusters:
+              - name: local
+                cluster:
+                  server: https://kubernetes.default.svc:443
+                  insecure-skip-tls-verify: true
+              contexts:
+              - name: default
+                context:
+                  cluster: local
+                  user: magnum-conductor
+              current-context: default
+              users:
+              - name: magnum-conductor
+                user:
+                  token: $TOKEN
+              EOF
           volumeMounts:
             - {name: extra, mountPath: /extra}
       - op: add
