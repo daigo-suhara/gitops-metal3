@@ -2,32 +2,29 @@ apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 # Shared across all openstack-helm chart wrappers under ../.
 #
-# 1) Strip helm.sh/hook* annotations from every Job. openstack-helm marks
-#    the db-init / db-sync / ks-* / rabbit-init Jobs as post-install hooks.
-#    ArgoCD honors those and defers them to the PostSync phase, but the
-#    api / conductor Deployment has a kubernetes-entrypoint init container
-#    that polls for those Jobs — so ArgoCD would wait for Deployment healthy
-#    (blocked on init) while Jobs sit unapplied. Deadlock. Treating the Jobs
-#    as regular Sync-phase resources breaks the loop: ArgoCD applies them
-#    concurrently with the Deployment, the init container finds them, they
-#    complete, the Deployment goes Healthy.
+# 1) Remove helm.sh/hook from every Job. openstack-helm annotates the
+#    db-init / db-sync / ks-* / rabbit-init Jobs as post-install hooks;
+#    ArgoCD interprets that as PostSync and defers them until after the
+#    Deployment is Healthy — but the Deployment's kubernetes-entrypoint
+#    init container polls for exactly those Jobs to complete. Deadlock.
+#    Stripping the annotation makes them regular Sync-phase resources,
+#    applied concurrently with the Deployment.
 #
-# 2) Assign sync-wave=-5 to ServiceAccounts. Same-wave resources are applied
-#    concurrently, and on fresh installs the Job pod could sometimes be
-#    scheduled before its SA propagated through kubelet's informer cache
-#    ("serviceaccount X not found"). Bumping SAs a wave earlier fixes it.
+#    We use JSON 6902 remove (not strategic merge with null) because
+#    Kustomize serializes `null` as the string "null" in merge patches,
+#    which ArgoCD still reads as a valid hook value.
+#
+# 2) Assign sync-wave=-5 to ServiceAccounts. Same-wave resources are
+#    applied concurrently, and on fresh installs the Job pod could
+#    sometimes be scheduled before its SA propagated through kubelet's
+#    informer cache ("serviceaccount X not found"). Bumping SAs a wave
+#    earlier fixes this.
 patches:
   - target:
       kind: Job
     patch: |-
-      apiVersion: batch/v1
-      kind: Job
-      metadata:
-        name: not-important
-        annotations:
-          helm.sh/hook: null
-          helm.sh/hook-weight: null
-          helm.sh/hook-delete-policy: null
+      - op: remove
+        path: /metadata/annotations/helm.sh~1hook
   - target:
       kind: ServiceAccount
     patch: |-
