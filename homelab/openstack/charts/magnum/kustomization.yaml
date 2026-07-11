@@ -69,6 +69,20 @@ helmCharts:
           # magnum-api's own openstacksdk-based Connection uses this too.
           keystone_authtoken:
             interface: internal
+          # magnum's newer "service user" auth (used by cert_manager,
+          # capi driver's internal keystone calls) reads [keystone_auth]
+          # not [keystone_authtoken]. Chart doesn't populate it → password
+          # comes through as None. Mirror the authtoken user credentials.
+          keystone_auth:
+            auth_type: password
+            auth_url: http://keystone-api.openstack.svc.cluster.local:5000/v3
+            username: magnum
+            password: password
+            project_name: service
+            project_domain_name: service
+            user_domain_name: service
+            region_name: RegionOne
+            interface: internal
           # magnum-capi-helm driver reads [capi_helm] (underscore) — the chart
           # otherwise renders [capi-helm] which configparser treats as different.
           capi_helm:
