@@ -60,31 +60,40 @@ spec:
                 echo "$IMG already active"
                 exit 0
               fi
-              apt-get -qq update && apt-get -qq install -y curl
-              # Delete any half-uploaded stale image with the same name.
+              apt-get -qq update && apt-get -qq install -y curl jq
+              # Delete any half-uploaded stale image with the same name so
+              # re-runs after a failed streaming upload don't collide.
               openstack image delete "$IMG" 2>/dev/null || true
-              # Create empty image record so we get an ID + auth token.
-              openstack image create --disk-format qcow2 --container-format bare \
-                --public \
-                --property os_distro=ubuntu --property os_version=22.04 \
-                --property architecture=x86_64 \
-                --property kube_version=v1.33.13 \
-                "$IMG"
-              IMG_ID=$(openstack image show "$IMG" -f value -c id)
+              GLANCE=http://glance-api.openstack.svc.cluster.local:9292
               TOKEN=$(openstack token issue -f value -c id)
-              # Stream the qcow2 straight from source to Glance via curl.
-              # Skip the 'openstack image create --file' path which python-glanceclient
-              # buffers into memory (3.5GB → pod eviction). curl --upload-file streams.
-              echo "streaming $URL → glance image $IMG_ID"
-              curl -fsSL "$URL" -o - | \
+              # 1) Create empty image record via Glance API directly. The
+              # `openstack image create` CLI (without --file) tries to read
+              # bytes from stdin and PUTs them with wrong content-type,
+              # yielding a 415 in the container. Skip it.
+              IMG_ID=$(curl -sf -X POST "$GLANCE/v2/images" \
+                -H "X-Auth-Token: $TOKEN" \
+                -H "Content-Type: application/json" \
+                -d "{
+                  \"name\": \"$IMG\",
+                  \"disk_format\": \"qcow2\",
+                  \"container_format\": \"bare\",
+                  \"visibility\": \"public\",
+                  \"os_distro\": \"ubuntu\",
+                  \"os_version\": \"22.04\",
+                  \"architecture\": \"x86_64\",
+                  \"kube_version\": \"v1.33.13\"
+                }" | jq -r .id)
+              echo "created empty image record: $IMG_ID"
+              # 2) Stream the qcow2 from source → PUT to Glance's file endpoint.
+              # curl streams both directions so RAM stays flat; no on-disk stage.
+              echo "streaming $URL → $GLANCE/v2/images/$IMG_ID/file"
+              curl -fsSL "$URL" | \
                 curl -f -X PUT -H "X-Auth-Token: $TOKEN" \
                   -H "Content-Type: application/octet-stream" \
                   --data-binary @- \
-                  "http://glance-api.openstack.svc.cluster.local:9292/v2/images/$IMG_ID/file"
-              # Verify checksum reported by Glance matches upstream.
-              GOT=$(openstack image show "$IMG" -f value -c checksum || true)
-              echo "uploaded checksum: $GOT"
-              openstack image show "$IMG" -c status -c size -c properties
+                  "$GLANCE/v2/images/$IMG_ID/file"
+              # 3) Sanity-check what Glance recorded.
+              openstack image show "$IMG" -c status -c size -c checksum
       volumes:
         - name: cache
           # Streaming path (curl | curl) doesn't touch disk. Keep small.
