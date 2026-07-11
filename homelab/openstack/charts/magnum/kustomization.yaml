@@ -207,16 +207,19 @@ patches:
       - op: add
         path: /spec/template/spec/volumes/-
         value: {name: extra, emptyDir: {}}
-  # Chart's kubeconfig template lacks insecure-skip-tls-verify and token auth;
-  # rewrite the Secret so kubectl-from-Pod uses the in-cluster SA token.
+  # Chart's kubeconfig.tpl only supports cert-based auth (empty client-cert
+  # + empty CA → SSL "no certificate or crl found" on every apply). The
+  # actual file lives inside the `magnum-etc` Secret alongside magnum.conf,
+  # so patch its stringData.kubeconfig.conf to a token+skip-verify variant
+  # that uses the in-cluster SA.
   - target:
       kind: Secret
-      name: magnum-kubeconfig
+      name: magnum-etc
     patch: |-
       apiVersion: v1
       kind: Secret
       metadata:
-        name: magnum-kubeconfig
+        name: magnum-etc
       stringData:
         kubeconfig.conf: |
           apiVersion: v1
