@@ -21,6 +21,14 @@ spec:
       # Reuses SA/Role/RoleBinding defined in ubuntu-2404-image.yaml
       serviceAccountName: openstack-image-upload
       restartPolicy: OnFailure
+      # Avoid the 16GB node (tx1320m3-03) — it's already 120% overcommitted,
+      # so a burstable Job gets evicted before finishing a 5-minute upload.
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - {key: kubernetes.io/hostname, operator: NotIn, values: [tx1320m3-03]}
       containers:
         - name: upload
           image: quay.io/airshipit/openstack-client:2026.1-ubuntu_noble
@@ -37,18 +45,8 @@ spec:
             - {name: OS_INTERFACE, value: internal}
           resources:
             requests: {cpu: 200m, memory: 512Mi}
-            # openstack image create buffers, but the curl+HTTP PUT path (used
-            # below) streams properly — 1Gi is plenty. Keep requests low so
-            # scheduler places on any control-plane node.
+            # curl streaming (below) doesn't buffer — 1Gi is plenty.
             limits: {cpu: 2, memory: 1Gi}
-          # Avoid the 16GB node (tx1320m3-03) — it's already 120% overcommitted,
-          # so a burstable Job gets evicted before finishing a 5-minute upload.
-          affinity:
-            nodeAffinity:
-              requiredDuringSchedulingIgnoredDuringExecution:
-                nodeSelectorTerms:
-                  - matchExpressions:
-                      - {key: kubernetes.io/hostname, operator: NotIn, values: [tx1320m3-03]}
           volumeMounts:
             - {name: cache, mountPath: /tmp}
           command: [sh, -euc]
