@@ -2,8 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: openstack
 components:
-  # Rewrite Jobs to hook=Sync (wave 5) so the api Deployment's
-  # kubernetes-entrypoint init container can find them.
+  # Strip helm.sh/hook* from Jobs (else PostSync deadlock) + sync-wave -5 on SAs.
   - ../_base
 helmCharts:
   - name: magnum
@@ -18,8 +17,7 @@ helmCharts:
         pod_rally_test: false
       # Drop Heat (orchestration) / Barbican (key_manager) from the api and
       # conductor kubernetes-entrypoint dependency lists — we don't deploy
-      # those services in this lab. Without this override the init container
-      # spins forever waiting for heat-api and barbican-api endpoints.
+      # those services in this lab.
       dependencies:
         static:
           api:
@@ -51,21 +49,25 @@ helmCharts:
               - endpoint: internal
                 service: oslo_messaging
       conf:
-        # Fix uwsgi startup: the magnum image (2026.1-ubuntu_noble) doesn't
-        # ship /var/lib/openstack/bin/magnum-api-wsgi, so uwsgi's wsgi-file
-        # 404s and no application loads. Switch to the in-tree magnum.wsgi.api
-        # module which exposes an `application` callable.
+        # magnum-api uwsgi: image ships no magnum-api-wsgi script → point uwsgi
+        # at the in-tree magnum.wsgi.api:application module callable instead.
         magnum_api_uwsgi:
           uwsgi:
             wsgi-file: null
             module: magnum.wsgi.api:application
-        # Chart's api-paste.ini declares Healthcheck as a filter, but
-        # oslo_middleware 7.x removed that mode — its filter factory now
-        # raises NotImplementedError forcing app-mode deployment. Drop
-        # healthcheck from the paste pipeline (we don't need it in a lab).
+        # oslo_middleware 7.x's Healthcheck.factory raises when used as a paste
+        # filter (app-only). Drop it from the pipeline (lab, non-critical).
         paste:
           pipeline:main:
             pipeline: cors request_id authtoken api_v1
+        # The chart renders [capi-helm] with a dash, but the magnum-capi-helm
+        # driver reads oslo.config group name "capi_helm" (underscore) — those
+        # are literal to configparser. Add the underscore section too so the
+        # driver can find its kubeconfig_file setting.
+        # https://opendev.org/openstack/magnum-capi-helm/src/branch/master/magnum_capi_helm/conf.py
+        magnum:
+          capi_helm:
+            kubeconfig_file: /etc/magnum/kubeconfig.conf
         # CAPI driver — magnum-conductor talks to the local (self-hosted) k8s
         # API to create Cluster/OpenStackCluster/KubeadmControlPlane CRs. The
         # chart mounts /etc/magnum/kubeconfig.conf from a Secret it renders
@@ -85,6 +87,79 @@ resources:
   # Grant magnum-conductor edit on Cluster CRs (CAPI + CAPO)
   - rbac-capi.yaml
 patches:
+  # Install magnum-capi-helm driver + helm binary at pod start.
+  # Airshipit's magnum:2026.1-ubuntu_noble image doesn't include the CAPI helm
+  # driver (nor the helm binary the driver invokes). Rather than fork the image,
+  # a shared emptyDir /extra is populated by an initContainer:
+  #   - /extra/pkgs        : pip --target install of magnum-capi-helm==1.4.0
+  #   - /extra/bin/helm    : official Helm 3.16.3 binary
+  # then the main container is given PATH=/extra/bin:$PATH and
+  # PYTHONPATH=/extra/pkgs so importlib.metadata discovers the driver's
+  # entry_points and helm CLI is on PATH.
+  #
+  # Refs:
+  #   https://opendev.org/openstack/magnum-capi-helm/src/branch/master/doc/source/install/index.rst
+  #   entry_point: magnum.drivers → k8s_capi_helm_v1 = magnum_capi_helm.driver:Driver
+  - target:
+      kind: Deployment
+      name: magnum-api
+    patch: |-
+      - op: add
+        path: /spec/template/spec/initContainers/-
+        value:
+          name: install-capi-driver
+          image: quay.io/airshipit/magnum:2026.1-ubuntu_noble
+          command: [sh, -euc]
+          args:
+            - |
+              /var/lib/openstack/bin/pip install --target=/extra/pkgs magnum-capi-helm==1.4.0
+              mkdir -p /extra/bin
+              curl -sL https://get.helm.sh/helm-v3.16.3-linux-amd64.tar.gz | tar xz -C /tmp
+              mv /tmp/linux-amd64/helm /extra/bin/helm
+              chmod +x /extra/bin/helm
+          volumeMounts:
+            - {name: extra, mountPath: /extra}
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value: {name: extra, mountPath: /extra, readOnly: true}
+      - op: add
+        path: /spec/template/spec/containers/0/env
+        value:
+          - {name: PYTHONPATH, value: /extra/pkgs}
+          - {name: PATH, value: "/extra/bin:/var/lib/openstack/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"}
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value: {name: extra, emptyDir: {}}
+  - target:
+      kind: StatefulSet
+      name: magnum-conductor
+    patch: |-
+      - op: add
+        path: /spec/template/spec/initContainers/-
+        value:
+          name: install-capi-driver
+          image: quay.io/airshipit/magnum:2026.1-ubuntu_noble
+          command: [sh, -euc]
+          args:
+            - |
+              /var/lib/openstack/bin/pip install --target=/extra/pkgs magnum-capi-helm==1.4.0
+              mkdir -p /extra/bin
+              curl -sL https://get.helm.sh/helm-v3.16.3-linux-amd64.tar.gz | tar xz -C /tmp
+              mv /tmp/linux-amd64/helm /extra/bin/helm
+              chmod +x /extra/bin/helm
+          volumeMounts:
+            - {name: extra, mountPath: /extra}
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value: {name: extra, mountPath: /extra, readOnly: true}
+      - op: add
+        path: /spec/template/spec/containers/0/env
+        value:
+          - {name: PYTHONPATH, value: /extra/pkgs}
+          - {name: PATH, value: "/extra/bin:/var/lib/openstack/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"}
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value: {name: extra, emptyDir: {}}
   # Chart's kubeconfig template lacks insecure-skip-tls-verify and token auth;
   # rewrite the Secret so kubectl-from-Pod uses the in-cluster SA token.
   - target:
