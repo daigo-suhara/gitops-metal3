@@ -57,13 +57,15 @@ helmCharts:
           # Barbican (key-manager) not deployed → cert store must be local.
           certificates:
             cert_manager_type: x509keypair
-          glance_client:   {endpoint_type: internalURL}
-          nova_client:     {endpoint_type: internalURL}
-          neutron_client:  {endpoint_type: internalURL}
-          heat_client:     {endpoint_type: internalURL}
-          cinder_client:   {endpoint_type: internalURL}
-          barbican_client: {endpoint_type: internalURL}
-          octavia_client:  {endpoint_type: internalURL}
+          # region_name is REQUIRED for each *_client — cinder_region_name()
+          # etc. call keystone().get_validate_region_name() which errors on None.
+          glance_client:   {endpoint_type: internalURL, region_name: RegionOne}
+          nova_client:     {endpoint_type: internalURL, region_name: RegionOne}
+          neutron_client:  {endpoint_type: internalURL, region_name: RegionOne}
+          heat_client:     {endpoint_type: internalURL, region_name: RegionOne}
+          cinder_client:   {endpoint_type: internalURL, region_name: RegionOne}
+          barbican_client: {endpoint_type: internalURL, region_name: RegionOne}
+          octavia_client:  {endpoint_type: internalURL, region_name: RegionOne}
           # magnum's keystone client (for trustee/trust creation) picks the
           # interface from [trust].interface. Default is 'public' — same
           # non-existent hostname issue as the service clients.
