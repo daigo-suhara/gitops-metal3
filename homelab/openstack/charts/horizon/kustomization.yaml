@@ -13,3 +13,76 @@ helmCharts:
     valuesInline:
       manifests:
         job_image_repo_sync: false
+      # Register magnum-ui's dashboard panels. The pip package itself is
+      # installed by the initContainer patch below and exposed via PYTHONPATH.
+      # These 5 enabled/*.py files come from magnum_ui.enabled/ verbatim and
+      # tell Horizon to wire up the "Container Infra" panel group under
+      # Project and Admin dashboards.
+      conf:
+        horizon:
+          local_settings:
+            custom_panels:
+              _1370_project_container_infra_panel_group: |
+                from django.utils.translation import gettext_lazy as _
+                PANEL_GROUP = 'container_infra'
+                PANEL_GROUP_NAME = _('Container Infra')
+                PANEL_GROUP_DASHBOARD = 'project'
+                ADD_INSTALLED_APPS = ['magnum_ui']
+                ADD_ANGULAR_MODULES = ['horizon.dashboard.container-infra']
+                ADD_JS_FILES = ['horizon/lib/angular/angular-route.js']
+                ADD_SCSS_FILES = ['dashboard/container-infra/container-infra.scss']
+                AUTO_DISCOVER_STATIC_FILES = True
+              _1371_project_container_infra_clusters_panel: |
+                PANEL = 'clusters'
+                PANEL_GROUP = 'container_infra'
+                PANEL_DASHBOARD = 'project'
+                ADD_PANEL = 'magnum_ui.content.clusters.panel.Clusters'
+              _1372_project_container_infra_cluster_templates_panel: |
+                PANEL = 'cluster_templates'
+                PANEL_GROUP = 'container_infra'
+                PANEL_DASHBOARD = 'project'
+                ADD_PANEL = 'magnum_ui.content.cluster_templates.panel.ClusterTemplates'
+              _2370_admin_container_infra_panel_group: |
+                from django.utils.translation import gettext_lazy as _
+                PANEL_GROUP = 'container_infra'
+                PANEL_GROUP_NAME = _('Container Infra')
+                PANEL_GROUP_DASHBOARD = 'admin'
+              _2371_admin_container_infra_quotas_panel: |
+                PANEL = 'quotas'
+                PANEL_GROUP = 'container_infra'
+                PANEL_DASHBOARD = 'admin'
+                ADD_PANEL = 'magnum_ui.content.quotas.panel.Quotas'
+patches:
+  # Airshipit's horizon image doesn't include magnum-ui. Same pattern as
+  # magnum-capi-helm: install to a shared emptyDir at pod start, expose via
+  # PYTHONPATH so Django imports 'magnum_ui' when the panel files ADD it to
+  # INSTALLED_APPS.
+  - target:
+      kind: Deployment
+      name: horizon
+    patch: |-
+      - op: add
+        path: /spec/template/spec/initContainers/-
+        value:
+          name: install-magnum-ui
+          image: python:3.12-slim
+          command: [sh, -euc]
+          args:
+            - |
+              # --no-deps: horizon image already has django/oslo/etc; only
+              # magnum_ui itself is missing. Skip deps to avoid version drift.
+              pip install --no-cache-dir --no-deps --target=/extra/pkgs magnum-ui==18.0.0
+              # magnum-ui depends on python-magnumclient at runtime for the
+              # actual API calls; horizon image doesn't ship it either.
+              pip install --no-cache-dir --no-deps --target=/extra/pkgs python-magnumclient
+          volumeMounts:
+            - {name: extra, mountPath: /extra}
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value: {name: extra, mountPath: /extra, readOnly: true}
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value: {name: PYTHONPATH, value: /extra/pkgs}
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value: {name: extra, emptyDir: {}}
