@@ -10,6 +10,20 @@ helmCharts:
     releaseName: keystone
     namespace: openstack
     includeCRDs: true
+    valuesInline:
+      # Advertise a LAN-reachable IP for the *public* keystone URL so
+      # workload clusters created by Magnum/CAPI (whose VMs sit on tenant
+      # networks with no in-cluster DNS) can hit keystone from cloud-provider
+      # add-ons like openstack-cloud-controller-manager.
+      # The IP comes from Cilium's LB pool — kept static via Service
+      # (see runtime/service-aliases.yaml keystone LoadBalancer).
+      endpoints:
+        identity:
+          host_fqdn_override:
+            # 172.16.100.103 is pinned to the keystone LoadBalancer Service
+            # in runtime/service-aliases.yaml — reachable from tenant VMs.
+            public:
+              host: 172.16.100.103
 patches:
   # credential-cleanup is a pre-delete-only hook whose SQL runs against a
   # non-existent table during install and errors. Drop it entirely.
