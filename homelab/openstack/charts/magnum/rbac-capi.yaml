@@ -1,12 +1,23 @@
-# Grant magnum-conductor the ability to create/manage CAPI cluster CRs.
-# Without this, calling `openstack coe cluster create` would fail at the
-# capi-driver stage because the ServiceAccount can't create Cluster,
-# OpenStackCluster, KubeadmControlPlane, etc.
+# Grant magnum-conductor the ability to install the openstack-cluster helm
+# chart into per-cluster namespaces. The chart creates all sorts of core-API
+# and CAPI-family objects (SAs, RBAC, Secrets, ConfigMaps, Cluster,
+# KubeadmControlPlane, HelmRelease, PoolAllocation, ...) so magnum-conductor
+# effectively needs cluster-admin within the addons + capi API groups plus
+# broad write on core objects. Kept as one ClusterRole for auditability.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: magnum-conductor-capi
 rules:
+  - apiGroups: [""]
+    resources: ["*"]
+    verbs: ["*"]
+  - apiGroups: [apps]
+    resources: ["*"]
+    verbs: ["*"]
+  - apiGroups: [rbac.authorization.k8s.io]
+    resources: ["*"]
+    verbs: ["*"]
   - apiGroups: [cluster.x-k8s.io]
     resources: ["*"]
     verbs: ["*"]
@@ -19,9 +30,12 @@ rules:
   - apiGroups: [controlplane.cluster.x-k8s.io]
     resources: ["*"]
     verbs: ["*"]
-  - apiGroups: [""]
-    resources: [namespaces, secrets, configmaps]
-    verbs: [get, list, watch, create, update, patch]
+  - apiGroups: [addons.stackhpc.com]
+    resources: ["*"]
+    verbs: ["*"]
+  - apiGroups: [addons.cluster.x-k8s.io]
+    resources: ["*"]
+    verbs: ["*"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
