@@ -97,6 +97,10 @@ helmCharts:
             # Point at the token-based kubeconfig rendered by the init
             # container at pod boot (not the chart's empty cert one).
             kubeconfig_file: /extra/kubeconfig.conf
+            # magnum-capi-helm 1.4.0 defaults to openstack-cluster chart
+            # 0.10.1, which uses CAPO v1alpha7 CRDs. Our CAPO 0.14.6 only
+            # exposes v1beta1 — upgrade to 0.26.0 which is v1beta1-native.
+            default_helm_chart_version: "0.26.0"
         # magnum-api uwsgi: image ships no magnum-api-wsgi script → point uwsgi
         # at the in-tree magnum.wsgi.api:application module callable instead.
         magnum_api_uwsgi:

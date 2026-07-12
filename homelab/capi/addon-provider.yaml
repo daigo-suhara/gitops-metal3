@@ -1,0 +1,34 @@
+# azimuth-cloud/cluster-api-addon-provider (CAAPH)
+#
+# The openstack-cluster chart used by magnum-capi-helm ships addon manifests
+# (CNI, CCM, CSI, dashboards, ...) as `addons.stackhpc.com/v1alpha1`
+# HelmRelease / Manifests custom resources. Those CRDs plus the reconciler
+# come from this operator; without it, helm install of any cluster fails
+# with "no matches for kind HelmRelease in version addons.stackhpc.com/v1alpha1".
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cluster-api-addon-provider
+  namespace: argocd
+  annotations:
+    # After CAPI operator (wave 15) so providers are up before addons.
+    argocd.argoproj.io/sync-wave: "16"
+spec:
+  project: default
+  source:
+    repoURL: https://azimuth-cloud.github.io/cluster-api-addon-provider
+    chart: cluster-api-addon-provider
+    targetRevision: 0.12.1
+    helm:
+      releaseName: cluster-api-addon-provider
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: capi-addon-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

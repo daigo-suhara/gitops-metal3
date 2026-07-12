@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - operator.yaml
   - providers-app.yaml
+  - addon-provider.yaml
