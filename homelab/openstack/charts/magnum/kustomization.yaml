@@ -54,6 +54,9 @@ helmCharts:
         # http://glance.openstack.svc.cluster.local (no matching Service)
         # so cluster template creation errors with 500 Name resolution.
         magnum:
+          DEFAULT:
+            # Debug logging so we can see helm invocation stderr on failure.
+            debug: true
           # Barbican (key-manager) not deployed → cert store must be local.
           certificates:
             cert_manager_type: x509keypair
