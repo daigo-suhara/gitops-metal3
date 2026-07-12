@@ -50,7 +50,7 @@ helmCharts:
                 PANEL_GROUP_NAME = _('Container Infra')
                 PANEL_GROUP_DASHBOARD = 'admin'
               _2371_admin_container_infra_quotas_panel: |
-                PANEL = 'quotas'
+                PANEL = 'container_infra.quotas'
                 PANEL_GROUP = 'container_infra'
                 PANEL_DASHBOARD = 'admin'
                 ADD_PANEL = 'magnum_ui.content.container_infra.quotas.panel.Quotas'
