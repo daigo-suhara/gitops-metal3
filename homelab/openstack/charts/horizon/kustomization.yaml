@@ -53,7 +53,7 @@ helmCharts:
                 PANEL = 'quotas'
                 PANEL_GROUP = 'container_infra'
                 PANEL_DASHBOARD = 'admin'
-                ADD_PANEL = 'magnum_ui.content.quotas.panel.Quotas'
+                ADD_PANEL = 'magnum_ui.content.container_infra.quotas.panel.Quotas'
 patches:
   # Airshipit's horizon image doesn't include magnum-ui. Same pattern as
   # magnum-capi-helm: install to a shared emptyDir at pod start, expose via
@@ -74,9 +74,11 @@ patches:
               # --no-deps: horizon image already has django/oslo/etc; only
               # magnum_ui itself is missing. Skip deps to avoid version drift.
               pip install --no-cache-dir --no-deps --target=/extra/pkgs magnum-ui==18.0.0
-              # magnum-ui depends on python-magnumclient at runtime for the
-              # actual API calls; horizon image doesn't ship it either.
-              pip install --no-cache-dir --no-deps --target=/extra/pkgs python-magnumclient
+              # magnum-ui depends on python-magnumclient (magnum API calls)
+              # AND python-heatclient (its clusters panel imports it at
+              # module import time — Django check would fail otherwise).
+              pip install --no-cache-dir --no-deps --target=/extra/pkgs \
+                python-magnumclient python-heatclient osc-lib
           volumeMounts:
             - {name: extra, mountPath: /extra}
       - op: add
