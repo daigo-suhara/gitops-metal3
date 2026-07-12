@@ -29,7 +29,10 @@ helmCharts:
                 ADD_INSTALLED_APPS = ['magnum_ui']
                 ADD_ANGULAR_MODULES = ['horizon.dashboard.container-infra']
                 ADD_JS_FILES = ['horizon/lib/angular/angular-route.js']
-                ADD_SCSS_FILES = ['dashboard/container-infra/container-infra.scss']
+                # ADD_SCSS_FILES intentionally omitted: magnum-ui 18.0.0's SCSS
+                # references bootstrap variables ($gray-lighter) that don't
+                # exist in newer horizon, breaking 'manage.py compress'. The
+                # panels function without the custom styling.
                 AUTO_DISCOVER_STATIC_FILES = True
               _1371_project_container_infra_clusters_panel: |
                 PANEL = 'clusters'
