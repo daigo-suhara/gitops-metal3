@@ -163,6 +163,12 @@ patches:
               # and break request handling. All other deps (pbr, oslo_log,
               # oslo_utils) are already in the image's venv.
               pip install --no-cache-dir --no-deps --target=/extra/pkgs magnum-capi-helm==1.4.0
+              # magnum-capi-helm 1.4.0 hardcodes apiServer.enableLoadBalancer=True.
+              # Octavia isn't deployed in this lab; the OpenStackCluster then
+              # fails APIEndpointReady with 'load balancer service client:
+              # No suitable endpoint in service catalog'. Sed the driver source
+              # to disable it (fine for a single-master lab with floating IP).
+              sed -i 's/"enableLoadBalancer": True,/"enableLoadBalancer": False,/' /extra/pkgs/magnum_capi_helm/driver.py
               mkdir -p /extra/bin
               apt-get update -qq && apt-get install -qq -y curl >/dev/null
               curl -sL https://get.helm.sh/helm-v3.16.3-linux-amd64.tar.gz | tar xz -C /tmp
@@ -229,6 +235,12 @@ patches:
               # and break request handling. All other deps (pbr, oslo_log,
               # oslo_utils) are already in the image's venv.
               pip install --no-cache-dir --no-deps --target=/extra/pkgs magnum-capi-helm==1.4.0
+              # magnum-capi-helm 1.4.0 hardcodes apiServer.enableLoadBalancer=True.
+              # Octavia isn't deployed in this lab; the OpenStackCluster then
+              # fails APIEndpointReady with 'load balancer service client:
+              # No suitable endpoint in service catalog'. Sed the driver source
+              # to disable it (fine for a single-master lab with floating IP).
+              sed -i 's/"enableLoadBalancer": True,/"enableLoadBalancer": False,/' /extra/pkgs/magnum_capi_helm/driver.py
               mkdir -p /extra/bin
               apt-get update -qq && apt-get install -qq -y curl >/dev/null
               curl -sL https://get.helm.sh/helm-v3.16.3-linux-amd64.tar.gz | tar xz -C /tmp
