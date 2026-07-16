@@ -19,18 +19,32 @@ spec:
     helm:
       releaseName: dcloud
       valuesObject:
-        # The rook cluster in this repo already publishes a "general"
-        # RBD StorageClass. dcloud creates its own "ceph-rbd" (against
-        # the same rbd pool) for postgres + KubeBlocks Clusters.
+        # Rook already exposes a default RBD StorageClass ("general"),
+        # so let the dcloud chart NOT render its own duplicate and let
+        # postgres / KubeBlocks Clusters bind to the cluster default.
         storageClass:
-          createClass: true
-          className: ceph-rbd
-          clusterID: rook-ceph
-          pool: rbd
+          createClass: false
+          className: ""
         # RGW endpoint served by the CephObjectStore in
         # rook-ceph-cluster.yaml.
         storage:
           rgwEndpoint: "http://rook-ceph-rgw-default.rook-ceph.svc.cluster.local:80"
+        # !! Change these to your public zone before deploying. !!
+        publicServiceDomain: example.com
+        console:
+          publicHostname: cloud.example.com
+        # Public entry point: ingress-nginx (see ingress-nginx.yaml) +
+        # cert-manager (see cert-manager-issuer.yaml).
+        ingress:
+          enabled: true
+          className: nginx
+          tls:
+            enabled: true
+            clusterIssuer: letsencrypt-prod
+          tenantWildcard:
+            enabled: true
+            upstreamService: istio-ingressgateway.istio-system.svc.cluster.local
+            upstreamPort: 80
   destination:
     server: https://kubernetes.default.svc
     namespace: dcloud-system
@@ -41,3 +55,6 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+    retry:
+      limit: 10
+      backoff: { duration: 30s, factor: 2, maxDuration: 5m }
