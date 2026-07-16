@@ -33,18 +33,14 @@ spec:
         publicServiceDomain: example.com
         console:
           publicHostname: cloud.example.com
-        # Public entry point: ingress-nginx (see ingress-nginx.yaml) +
-        # cert-manager (see cert-manager-issuer.yaml).
+        # Public entry point in this homelab is Cloudflare Tunnel (see
+        # cloudflared.yaml). The tunnel proxies:
+        #   cloud.<publicServiceDomain>  -> dcloud-console:8080 (ClusterIP)
+        #   *.<publicServiceDomain>      -> istio-ingressgateway:80
+        # so dcloud's own Ingress feature is left off. Flip
+        # ingress.enabled to true if you switch to ingress-nginx / etc.
         ingress:
-          enabled: true
-          className: nginx
-          tls:
-            enabled: true
-            clusterIssuer: letsencrypt-prod
-          tenantWildcard:
-            enabled: true
-            upstreamService: istio-ingressgateway.istio-system.svc.cluster.local
-            upstreamPort: 80
+          enabled: false
   destination:
     server: https://kubernetes.default.svc
     namespace: dcloud-system
