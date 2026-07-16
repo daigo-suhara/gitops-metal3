@@ -5,3 +5,9 @@ resources:
   - envoy-gateway.yaml
   - rook-ceph-operator.yaml
   - rook-ceph-cluster.yaml
+  - cloudflared.yaml
+  - istio.yaml
+  - knative.yaml
+  - kubevirt.yaml
+  - kubeblocks.yaml
+  - dcloud.yaml

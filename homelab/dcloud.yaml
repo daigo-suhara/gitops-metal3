@@ -1,0 +1,43 @@
+# dcloud application, installed from the public repo. Includes 6 Go
+# services (identity/project/container/compute/storage/database) plus
+# console; postgresql-ha is a sub-chart for the shared session/project
+# data store. Requires: istio, knative-serving, kubevirt, kubeblocks,
+# rook-ceph (with CephObjectStore), cloudflared. See adjacent files.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dcloud
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "30"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/daigo-suhara/dcloud.git
+    targetRevision: HEAD
+    path: charts/dcloud
+    helm:
+      releaseName: dcloud
+      valuesObject:
+        # The rook cluster in this repo already publishes a "general"
+        # RBD StorageClass. dcloud creates its own "ceph-rbd" (against
+        # the same rbd pool) for postgres + KubeBlocks Clusters.
+        storageClass:
+          createClass: true
+          className: ceph-rbd
+          clusterID: rook-ceph
+          pool: rbd
+        # RGW endpoint served by the CephObjectStore in
+        # rook-ceph-cluster.yaml.
+        storage:
+          rgwEndpoint: "http://rook-ceph-rgw-default.rook-ceph.svc.cluster.local:80"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dcloud-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

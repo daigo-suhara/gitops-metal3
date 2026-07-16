@@ -59,7 +59,29 @@ spec:
                 csi.storage.k8s.io/node-stage-secret-name: rook-csi-rbd-node
                 csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
         cephFileSystems: []
-        cephObjectStores: []
+        # dcloud's storage service backends its ObjectBucketClaims to this
+        # CephObjectStore via a StorageClass that rook auto-generates as
+        # "ceph-bucket". Two data pools are replicated x3; the metadata
+        # pool defaults to the same replication.
+        cephObjectStores:
+          - name: default
+            spec:
+              metadataPool:
+                replicated: { size: 3 }
+              dataPool:
+                replicated: { size: 3 }
+              preservePoolsOnDelete: false
+              gateway:
+                port: 80
+                instances: 1
+              healthCheck:
+                bucket: { disabled: false, interval: 60s }
+            storageClass:
+              enabled: true
+              name: rook-ceph-delete-bucket
+              reclaimPolicy: Delete
+              volumeBindingMode: Immediate
+              parameters: {}
         cephObjectStoreUsers: []
         cephFileSystemVolumeSnapshotClass: { enabled: false }
         cephBlockPoolsVolumeSnapshotClass: { enabled: false }

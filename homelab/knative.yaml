@@ -1,0 +1,49 @@
+# Knative Operator + KnativeServing CR wired to net-istio. dcloud's
+# container service creates knative Service CRDs the operator reconciles
+# into Deployments + Routes.
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: knative-operator
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "18"
+spec:
+  project: default
+  source:
+    repoURL: https://knative.github.io/operator
+    chart: knative-operator
+    targetRevision: 1.16.2
+    helm:
+      releaseName: knative-operator
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: knative-operator
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions: [CreateNamespace=true, ServerSideApply=true]
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: knative-serving
+  annotations:
+    argocd.argoproj.io/sync-wave: "19"
+---
+apiVersion: operator.knative.dev/v1beta1
+kind: KnativeServing
+metadata:
+  name: knative-serving
+  namespace: knative-serving
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+spec:
+  ingress:
+    istio:
+      enabled: true
+  config:
+    domain:
+      drkatana.com: ""
+    network:
+      autocreate-cluster-domain-claims: "true"

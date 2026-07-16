@@ -1,0 +1,41 @@
+# KubeVirt operator + a minimal KubeVirt CR. dcloud's compute service
+# creates VirtualMachine CRs against this control plane; the
+# subresources.kubevirt.io API is what /api/v1/compute/{name}/console
+# proxies to over WebSocket.
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kubevirt-operator
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "18"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/kubevirt/kubevirt.git
+    targetRevision: v1.4.0
+    path: manifests/release
+    directory:
+      include: "kubevirt-operator.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kubevirt
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions: [CreateNamespace=true, ServerSideApply=true]
+---
+apiVersion: kubevirt.io/v1
+kind: KubeVirt
+metadata:
+  name: kubevirt
+  namespace: kubevirt
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+spec:
+  configuration:
+    developerConfiguration:
+      # Bare metal nodes have hardware virt; leave software-emulation off.
+      useEmulation: false
+  workloadUpdateStrategy:
+    workloadUpdateMethods: [LiveMigrate]
