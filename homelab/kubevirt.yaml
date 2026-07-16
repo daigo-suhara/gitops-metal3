@@ -35,6 +35,9 @@ metadata:
   namespace: kubevirt
   annotations:
     argocd.argoproj.io/sync-wave: "20"
+    # The kubevirt-operator Application above registers the CRD; ArgoCD
+    # otherwise dry-runs this CR before the CRD lands and fails the sync.
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   configuration:
     developerConfiguration:

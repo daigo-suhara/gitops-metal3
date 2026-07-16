@@ -41,12 +41,13 @@ metadata:
   namespace: knative-serving
   annotations:
     argocd.argoproj.io/sync-wave: "20"
+    # The knative-operator Application above registers the CRD; ArgoCD
+    # otherwise dry-runs this CR before the CRD lands and fails the sync.
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   ingress:
     istio:
       enabled: true
   config:
-    domain:
-      drkatana.com: ""
     network:
       autocreate-cluster-domain-claims: "true"
