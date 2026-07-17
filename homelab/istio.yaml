@@ -67,9 +67,9 @@ spec:
     targetRevision: 1.24.1
     helm:
       releaseName: istio-ingressgateway
-      valuesObject:
-        service:
-          type: ClusterIP
+      # Default values are fine for a homelab. The Service ends up as
+      # LoadBalancer via the L2 announcer; if you want ClusterIP-only,
+      # override in a separate values file.
   destination:
     server: https://kubernetes.default.svc
     namespace: istio-system
