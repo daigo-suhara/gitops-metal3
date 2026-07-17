@@ -20,9 +20,14 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: istio-system
+  # istiod injects the caBundle post-apply; ignore it.
+  ignoreDifferences:
+    - group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+      jqPathExpressions: [".webhooks[]?.clientConfig.caBundle", ".webhooks[]?.failurePolicy"]
   syncPolicy:
     automated: { prune: true, selfHeal: true }
-    syncOptions: [CreateNamespace=true, ServerSideApply=true, ServerSideDiff=true]
+    syncOptions: [CreateNamespace=true, ServerSideApply=true, RespectIgnoreDifferences=true]
     retry:
       limit: 10
       backoff: { duration: 30s, factor: 2, maxDuration: 5m }
@@ -45,9 +50,13 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: istio-system
+  ignoreDifferences:
+    - group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+      jqPathExpressions: [".webhooks[]?.clientConfig.caBundle", ".webhooks[]?.failurePolicy"]
   syncPolicy:
     automated: { prune: true, selfHeal: true }
-    syncOptions: [CreateNamespace=true, ServerSideApply=true, ServerSideDiff=true]
+    syncOptions: [CreateNamespace=true, ServerSideApply=true, RespectIgnoreDifferences=true]
     retry:
       limit: 10
       backoff: { duration: 30s, factor: 2, maxDuration: 5m }

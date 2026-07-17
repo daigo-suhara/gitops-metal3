@@ -20,9 +20,16 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: knative-operator
+  # Aggregation controller populates .rules on this ClusterRole from
+  # the pod-owned CRs; drift is expected.
+  ignoreDifferences:
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRole
+      name: knative-serving-operator-aggregated-stable
+      jsonPointers: [/rules]
   syncPolicy:
     automated: { prune: true, selfHeal: true }
-    syncOptions: [CreateNamespace=true, ServerSideApply=true, ServerSideDiff=true]
+    syncOptions: [CreateNamespace=true, ServerSideApply=true, RespectIgnoreDifferences=true]
     retry:
       limit: 10
       backoff: { duration: 30s, factor: 2, maxDuration: 5m }
