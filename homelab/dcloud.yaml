@@ -39,8 +39,6 @@ spec:
         publicServiceDomain: drkatana.com
         console:
           publicHostname: cloud.daigo-suhara.com
-        container:
-          runtimeClassName: gvisor
         # ArgoCD's `helm template` cannot execute the chart's `lookup`
         # call, so the auto-generated password rotates on every sync
         # and no longer matches the postgres PVC's initial value.
