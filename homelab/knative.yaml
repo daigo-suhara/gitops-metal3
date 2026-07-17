@@ -22,7 +22,7 @@ spec:
     namespace: knative-operator
   syncPolicy:
     automated: { prune: true, selfHeal: true }
-    syncOptions: [CreateNamespace=true, ServerSideApply=true]
+    syncOptions: [CreateNamespace=true, ServerSideApply=true, ServerSideDiff=true]
     retry:
       limit: 10
       backoff: { duration: 30s, factor: 2, maxDuration: 5m }
