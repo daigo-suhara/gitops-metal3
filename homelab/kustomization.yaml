@@ -14,5 +14,4 @@ resources:
   - kubeblocks.yaml
   - dcloud-secret.yaml
   - dcloud.yaml
-  - monitoring.yaml
   - gvisor.yaml
