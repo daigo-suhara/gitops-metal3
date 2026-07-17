@@ -11,4 +11,5 @@ resources:
   - knative.yaml
   - kubevirt.yaml
   - kubeblocks.yaml
+  - dcloud-secret.yaml
   - dcloud.yaml
