@@ -1,0 +1,13 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: cloudflared-tunnel-token
+  namespace: cloudflare
+spec:
+  encryptedData:
+    token: AgCYuY9C99s3uUg+COf7EbcNKkXLakov5mDCru31nlj2EsSRxMS3uQ+5E92QHekNlSJelejY5WuK2+CqYoJemS7v7pOy4Fp/TnyDqjBa5Ld/GdZSRT9uQX93jsHa55x7j/D+GwDy2Rp6u2IpJJvtWHQg+nT5AU3KYphDw0JX2m14GA2Vc9ZFcY4UqLMeyMJUsrOP8yHPoMJ1BdZ5ct5ZbSOtU87zdTNTHpW8DW+a/nEHdMPy3Qa+lYftOt+NRJTObC3plrous+GdTynMRsKpguOfbnyypejfnT23zG20K0KgJ8CRL1psCsaVfaGHOoRbAu8dM491OkVCJhGiWJfFZ9embL9qbZBnN34pK7wdoRQwX6Tu4qWM1snMvHmKhculRx86Q7T5QyQY4FjlO/U5g2LtZqL66DkpzkB33XcONsdXb84n3HqI488ihghKSG73kzL6FWxRJDG/aj6KzT6RbEfYblw8A5dmTmSeEb4hjTt5+9HkuVTLfV49ks6RRn8hnuBMb05nOm6ZdIoydDt8Q3Qy2iacEACuplPwto/364+YJHKd6hIS3HHfCmmVy5S6d1bW3Dz8YjreG+HJAp5+XniTeunRFzibV3d5S7peuBuWMFL9LA3LGiv2S4mVW7FlCiBAXZTsOXwgUTOFcso7YlOLns6pBdSyYHSoRkRicSZ+VPh7XQxBURynTcsRpz31/zv57wC10a9mFnI9P8fxrHISWuSF0jVnMs0N0daLu4SDQMFLSckscPipur3SyZBLUOh87tFMHTQDuYvEzXFKOeI/mH99LKXQckQMF9kYHFLfi9kX4wBCMmTCHSCbl1t0s2/l/q/6SPagqBN0nPDv8kle8UUfG3jFdvTWotGB+biGzJj8fdtc49/pwyIZuxSj0u5fUZaB8mO8XvDdbE/BbAQl+hzDKQ2KIlMsiDAoHeewyv086P1S5N3i
+  template:
+    metadata:
+      name: cloudflared-tunnel-token
+      namespace: cloudflare
