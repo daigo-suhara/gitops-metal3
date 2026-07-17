@@ -19,6 +19,13 @@ spec:
     helm:
       releaseName: dcloud
       valuesObject:
+        # The dcloud chart defaults to the generic "dcloud" owner; the
+        # images this homelab pulls actually live under this GitHub
+        # user's ghcr namespace.
+        image:
+          registry: ghcr.io
+          repositoryOwner: daigo-suhara
+          tag: latest
         # Rook already exposes a default RBD StorageClass ("general"),
         # so let the dcloud chart NOT render its own duplicate and let
         # postgres / KubeBlocks Clusters bind to the cluster default.
