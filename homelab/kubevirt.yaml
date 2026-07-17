@@ -13,11 +13,12 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/kubevirt/kubevirt.git
-    targetRevision: v1.4.0
-    path: manifests/release
-    directory:
-      include: "kubevirt-operator.yaml"
+    # KubeVirt does not ship an installable operator yaml inside the
+    # git tree; a kustomization in this repo pulls the release
+    # download asset instead.
+    repoURL: https://github.com/daigo-suhara/gitops-metal3.git
+    targetRevision: HEAD
+    path: homelab/kubevirt-operator
   destination:
     server: https://kubernetes.default.svc
     namespace: kubevirt

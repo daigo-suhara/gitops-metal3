@@ -20,7 +20,12 @@ spec:
     namespace: kb-system
   syncPolicy:
     automated: { prune: true, selfHeal: true }
-    syncOptions: [CreateNamespace=true, ServerSideApply=true]
+    # SkipDryRunOnMissingResource lets the KubeBlocks Addon CRs land in
+    # the same sync as the CRD they depend on.
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - SkipDryRunOnMissingResource=true
     retry:
       limit: 10
       backoff: { duration: 30s, factor: 2, maxDuration: 5m }
