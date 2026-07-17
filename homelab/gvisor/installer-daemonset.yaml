@@ -36,10 +36,16 @@ spec:
                 URL="https://storage.googleapis.com/gvisor/releases/release/latest/${ARCH}"
                 mkdir -p /usr/local/bin
                 for bin in runsc containerd-shim-runsc-v1; do
-                  curl -fsSL "${URL}/${bin}" -o "/usr/local/bin/${bin}"
-                  chmod 0755 "/usr/local/bin/${bin}"
+                  if [ ! -x "/usr/local/bin/${bin}" ]; then
+                    curl -fsSL "${URL}/${bin}" -o "/usr/local/bin/${bin}"
+                    chmod 0755 "/usr/local/bin/${bin}"
+                  fi
                 done
+                mkdir -p /etc/containerd
                 CFG=/etc/containerd/config.toml
+                if [ ! -f "$CFG" ]; then
+                  containerd config default > "$CFG"
+                fi
                 if ! grep -q "runtimes.runsc" "$CFG"; then
                   cat >> "$CFG" <<EOT
 
