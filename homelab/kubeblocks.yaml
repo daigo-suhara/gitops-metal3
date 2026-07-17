@@ -42,11 +42,14 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: kb-system
+  # The operator mutates its own Addon CRs post-apply (defaults + finalizer).
+  ignoreDifferences:
+    - group: extensions.kubeblocks.io
+      kind: Addon
+      jqPathExpressions: [".spec", ".metadata.finalizers", ".metadata.annotations"]
   syncPolicy:
     automated: { prune: true, selfHeal: true }
-    syncOptions:
-      - CreateNamespace=true
-      - ServerSideApply=true
+    syncOptions: [CreateNamespace=true, ServerSideApply=true, RespectIgnoreDifferences=true]
     retry:
       limit: 10
       backoff: { duration: 30s, factor: 2, maxDuration: 5m }
