@@ -36,7 +36,10 @@ spec:
         # rook-ceph-cluster.yaml.
         storage:
           rgwEndpoint: "http://rook-ceph-rgw-default.rook-ceph.svc.cluster.local:80"
-        publicServiceDomain: daigo-suhara.com
+        # Tenant containers publish under *.drkatana.com (routed by
+        # cloudflared to istio-ingressgateway); the console itself is
+        # served on cloud.daigo-suhara.com.
+        publicServiceDomain: drkatana.com
         console:
           publicHostname: cloud.daigo-suhara.com
         # ArgoCD's `helm template` cannot execute the chart's `lookup`
