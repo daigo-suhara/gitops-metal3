@@ -2,7 +2,6 @@
 # creates VirtualMachine CRs against this control plane; the
 # subresources.kubevirt.io API is what /api/v1/compute/{name}/console
 # proxies to over WebSocket.
----
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -14,8 +13,8 @@ spec:
   project: default
   source:
     # KubeVirt does not ship an installable operator yaml inside the
-    # git tree; a kustomization in this repo pulls the release
-    # download asset instead.
+    # git tree; the subdir kustomization pulls the release download
+    # asset and bundles the KubeVirt CR.
     repoURL: https://github.com/daigo-suhara/gitops-metal3.git
     targetRevision: HEAD
     path: homelab/kubevirt-operator
@@ -24,25 +23,10 @@ spec:
     namespace: kubevirt
   syncPolicy:
     automated: { prune: true, selfHeal: true }
-    syncOptions: [CreateNamespace=true, ServerSideApply=true]
+    # The operator YAML installs the KubeVirt CRD in the same sync;
+    # SkipDryRunOnMissingResource lets the CR pass argocd's pre-apply
+    # dry-run.
+    syncOptions: [CreateNamespace=true, ServerSideApply=true, SkipDryRunOnMissingResource=true]
     retry:
       limit: 10
       backoff: { duration: 30s, factor: 2, maxDuration: 5m }
----
-apiVersion: kubevirt.io/v1
-kind: KubeVirt
-metadata:
-  name: kubevirt
-  namespace: kubevirt
-  annotations:
-    argocd.argoproj.io/sync-wave: "20"
-    # The kubevirt-operator Application above registers the CRD; ArgoCD
-    # otherwise dry-runs this CR before the CRD lands and fails the sync.
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-spec:
-  configuration:
-    developerConfiguration:
-      # Bare metal nodes have hardware virt; leave software-emulation off.
-      useEmulation: false
-  workloadUpdateStrategy:
-    workloadUpdateMethods: [LiveMigrate]
