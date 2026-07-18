@@ -10,7 +10,7 @@ spec:
   releaseName: argocd
   repoURL: https://argoproj.github.io/argo-helm
   chartName: argo-cd
-  version: 9.5.13
+  version: 10.1.4
   namespace: argocd
   options:
     enableClientCache: false

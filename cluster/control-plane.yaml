@@ -82,7 +82,7 @@ spec:
                 hostnames: [kubernetes]
             containers:
               - name: kube-vip
-                image: ghcr.io/kube-vip/kube-vip:v0.8.9
+                image: ghcr.io/kube-vip/kube-vip:v1.2.1
                 args: [manager]
                 env:
                   - { name: vip_interface,     value: eno1 }
