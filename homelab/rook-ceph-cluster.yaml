@@ -33,7 +33,7 @@ spec:
             useAllDevices: false
             nodes:
               - name: tx1320m3-01
-                devices: [{ name: sda }]
+                devices: [{ name: sdb }]
               - name: tx1320m3-02
                 devices: [{ name: sdb }]
               - name: tx1320m3-03
