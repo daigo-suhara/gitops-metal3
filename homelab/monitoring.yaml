@@ -21,6 +21,42 @@ spec:
           persistence:
             enabled: true
             size: 5Gi
+          defaultDashboardsTimezone: Asia/Tokyo
+          grafana.ini:
+            users:
+              default_language: ja-JP
+            dashboards:
+              default_home_dashboard_path: /var/lib/grafana/dashboards/default/node-exporter-full.json
+          dashboardProviders:
+            dashboardproviders.yaml:
+              apiVersion: 1
+              providers:
+                - name: default
+                  orgId: 1
+                  folder: ""
+                  type: file
+                  disableDeletion: false
+                  editable: true
+                  options:
+                    path: /var/lib/grafana/dashboards/default
+          dashboards:
+            default:
+              node-exporter-full:
+                gnetId: 1860
+                revision: 41
+                datasource: Prometheus
+              k8s-views-nodes:
+                gnetId: 15759
+                revision: 37
+                datasource: Prometheus
+              k8s-views-pods:
+                gnetId: 15760
+                revision: 36
+                datasource: Prometheus
+              k8s-views-namespaces:
+                gnetId: 15758
+                revision: 42
+                datasource: Prometheus
         prometheus:
           prometheusSpec:
             retention: 15d
