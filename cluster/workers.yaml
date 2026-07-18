@@ -18,7 +18,7 @@ spec:
       dataTemplate:
         name: homelab-worker
       image:
-        url: https://artifactory.nordix.org/artifactory/metal3/images/k8s_v1.36.2/UBUNTU_24.04_NODE_IMAGE_K8S_v1.36.2.qcow2
+        url: http://172.16.0.10:6180/UBUNTU_24.04_NODE_IMAGE_K8S_v1.36.2.qcow2
         checksum: 4285a3c7568f1e284c71271ffe859f897fa609f8a579cbe5ce7a0bf77043537e
         checksumType: sha256
         diskFormat: qcow2
