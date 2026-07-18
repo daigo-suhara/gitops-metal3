@@ -15,6 +15,20 @@ patches:
     target:
       kind: ConfigMap
       name: ironic
+  # JSON Patch cleanly replaces the base's emptyDir with the PVC. A
+  # strategic merge patch would union the two volume-source fields and
+  # trip "may not specify more than 1 volume type".
+  - target:
+      version: v1
+      kind: Deployment
+      name: baremetal-operator-ironic
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/volumes/0
+        value:
+          name: ironic-data-volume
+          persistentVolumeClaim:
+            claimName: ironic-data
 
 patchesJson6902:
   - target:

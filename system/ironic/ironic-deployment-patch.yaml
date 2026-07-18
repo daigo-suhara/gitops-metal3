@@ -7,15 +7,6 @@ spec:
     spec:
       securityContext:
         runAsNonRoot: false
-      volumes:
-        # Persistent so image-mirror-populate's downloaded qcow2 survives
-        # Ironic pod restarts; backed by the ironic-data PVC managed by
-        # system/image-mirror/. emptyDir is nulled to drop the base's
-        # default and avoid "more than 1 volume type" validation.
-        - name: ironic-data-volume
-          emptyDir: null
-          persistentVolumeClaim:
-            claimName: ironic-data
       containers:
         - name: ironic
           envFrom:
