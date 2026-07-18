@@ -8,9 +8,8 @@
 #     --from-literal=token=<TOKEN>
 #
 # Hostname -> Service routing is configured in the Cloudflare Zero Trust
-# dashboard for the tunnel:
-#   cloud.<your-domain>   -> http://dcloud-console.dcloud-system.svc.cluster.local:8080
-#   *.<your-domain>       -> http://istio-ingressgateway.istio-system.svc.cluster.local:80
+# dashboard for the tunnel. Example:
+#   grafana.<your-domain>  -> http://monitoring-grafana.monitoring.svc.cluster.local:80
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

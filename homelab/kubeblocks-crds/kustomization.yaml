@@ -1,7 +1,0 @@
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-# KubeBlocks 1.0 ships CRDs as a separate release asset. Without this the
-# StorageProvider / Addon CRs the operator chart tries to apply have no
-# CRD to bind to and stay OutOfSync forever.
-resources:
-  - https://github.com/apecloud/kubeblocks/releases/download/v1.0.2/kubeblocks_crds.yaml
