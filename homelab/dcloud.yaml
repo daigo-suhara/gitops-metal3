@@ -1,8 +1,3 @@
-# dcloud application, installed from the public repo. Includes 6 Go
-# services (identity/project/container/compute/storage/database) plus
-# console; postgresql-ha is a sub-chart for the shared session/project
-# data store. Requires: istio, knative-serving, kubevirt, kubeblocks,
-# rook-ceph (with CephObjectStore), cloudflared. See adjacent files.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -19,39 +14,26 @@ spec:
     helm:
       releaseName: dcloud
       valuesObject:
-        # The dcloud chart defaults to the generic "dcloud" owner; the
-        # images this homelab pulls actually live under this GitHub
-        # user's ghcr namespace.
         image:
           registry: ghcr.io
           repositoryOwner: daigo-suhara
           tag: latest
-        # Rook already exposes a default RBD StorageClass ("general"),
-        # so let the dcloud chart NOT render its own duplicate and let
-        # postgres / KubeBlocks Clusters bind to the cluster default.
         storageClass:
           createClass: false
           className: ""
-        # RGW endpoint served by the CephObjectStore in
-        # rook-ceph-cluster.yaml.
-        storage:
-          rgwEndpoint: "http://rook-ceph-rgw-default.rook-ceph.svc.cluster.local:80"
         publicServiceDomain: drkatana.com
         console:
           publicHostname: cloud.daigo-suhara.com
-        # ArgoCD's `helm template` cannot execute the chart's `lookup`
-        # call, so the auto-generated password rotates on every sync
-        # and no longer matches the postgres PVC's initial value.
-        # We manage this Secret out-of-band (SealedSecret would go here)
-        # and tell the chart to just reference it by name.
+          replicaCount: 1
         database:
           externalSecret: dcloud-database
-        # Public entry point in this homelab is Cloudflare Tunnel (see
-        # cloudflared.yaml). The tunnel proxies:
-        #   cloud.<publicServiceDomain>  -> dcloud-console:8080 (ClusterIP)
-        #   *.<publicServiceDomain>      -> istio-ingressgateway:80
-        # so dcloud's own Ingress feature is left off. Flip
-        # ingress.enabled to true if you switch to ingress-nginx / etc.
+        storage:
+          replicaCount: 1
+          rgwEndpoint: "http://rook-ceph-rgw-default.rook-ceph.svc.cluster.local:80"
+        identity:  { replicaCount: 1 }
+        project:   { replicaCount: 1 }
+        container: { replicaCount: 1 }
+        compute:   { replicaCount: 1 }
         ingress:
           enabled: false
   destination:
