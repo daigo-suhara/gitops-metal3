@@ -13,4 +13,5 @@ resources:
   - kubevirt.yaml
   - kubeblocks.yaml
   - dcloud-secret.yaml
+  - backup-repo.yaml
   - dcloud.yaml

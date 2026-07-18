@@ -1,0 +1,26 @@
+# Shared BackupRepo backing every DB backup. PVC-backed so all writes
+# land on Ceph RBD via the "general" StorageClass; no S3 credentials to
+# maintain. Backups from any project namespace target the same repo but
+# stay logically separated by KubeBlocks-generated paths.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: backup-repo
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "25"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/daigo-suhara/gitops-metal3.git
+    targetRevision: HEAD
+    path: homelab/backup-repo
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kb-system
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions: [ServerSideApply=true]
+    retry:
+      limit: 10
+      backoff: { duration: 30s, factor: 2, maxDuration: 5m }
