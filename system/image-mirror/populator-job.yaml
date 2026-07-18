@@ -1,0 +1,51 @@
+# Downloads the CAPI node image into the shared ironic-data PVC so
+# Metal3MachineTemplate can point at http://172.16.0.10:6180/<NAME>
+# (LAN) instead of pulling ~1.6GB over WAN on every provision. Re-runs
+# on every ArgoCD sync via the Sync hook; script is idempotent and
+# short-circuits when the sha256 already matches. When bumping k8s,
+# update the three NODE_IMAGE_* env values and the URL in
+# cluster/control-plane.yaml + cluster/workers.yaml.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: image-mirror-populate
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  ttlSecondsAfterFinished: 3600
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: curl
+          image: curlimages/curl:8.11.1
+          env:
+            - name: NODE_IMAGE_URL
+              value: https://artifactory.nordix.org/artifactory/metal3/images/k8s_v1.36.2/UBUNTU_24.04_NODE_IMAGE_K8S_v1.36.2.qcow2
+            - name: NODE_IMAGE_NAME
+              value: UBUNTU_24.04_NODE_IMAGE_K8S_v1.36.2.qcow2
+            - name: NODE_IMAGE_SHA256
+              value: 4285a3c7568f1e284c71271ffe859f897fa609f8a579cbe5ce7a0bf77043537e
+          command: [sh, -c]
+          args:
+            - |
+              set -eu
+              cd /shared/html
+              if [ -f "$NODE_IMAGE_NAME" ] && echo "$NODE_IMAGE_SHA256  $NODE_IMAGE_NAME" | sha256sum -c 2>/dev/null; then
+                echo "cached: $NODE_IMAGE_NAME"
+                exit 0
+              fi
+              echo "downloading $NODE_IMAGE_URL"
+              curl -fsSL --retry 10 --retry-delay 5 --retry-connrefused -C - -o "$NODE_IMAGE_NAME.tmp" "$NODE_IMAGE_URL"
+              echo "$NODE_IMAGE_SHA256  $NODE_IMAGE_NAME.tmp" | sha256sum -c
+              mv "$NODE_IMAGE_NAME.tmp" "$NODE_IMAGE_NAME"
+              echo "cached: $NODE_IMAGE_NAME"
+          volumeMounts:
+            - name: shared
+              mountPath: /shared/html
+      volumes:
+        - name: shared
+          persistentVolumeClaim:
+            claimName: ironic-data

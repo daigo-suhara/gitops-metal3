@@ -7,6 +7,13 @@ spec:
     spec:
       securityContext:
         runAsNonRoot: false
+      volumes:
+        # Persistent so image-mirror-populate's downloaded qcow2 survives
+        # Ironic pod restarts; backed by the ironic-data PVC managed by
+        # system/image-mirror/.
+        - name: ironic-data-volume
+          persistentVolumeClaim:
+            claimName: ironic-data
       containers:
         - name: ironic
           envFrom:
