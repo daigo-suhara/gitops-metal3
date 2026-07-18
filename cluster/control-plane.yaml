@@ -36,6 +36,8 @@ spec:
   rollout:
     strategy:
       type: RollingUpdate
+      rollingUpdate:
+        maxSurge: 0
   machineTemplate:
     spec:
       infrastructureRef:
