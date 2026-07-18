@@ -18,8 +18,8 @@ spec:
       dataTemplate:
         name: homelab-worker
       image:
-        url: http://172.16.0.10:6180/ubuntu-k8s.qcow2
-        checksum: http://172.16.0.10:6180/ubuntu-k8s.qcow2.sha256
+        url: https://artifactory.nordix.org/artifactory/metal3/images/k8s_v1.36.2/UBUNTU_24.04_NODE_IMAGE_K8S_v1.36.2.qcow2
+        checksum: 4285a3c7568f1e284c71271ffe859f897fa609f8a579cbe5ce7a0bf77043537e
         checksumType: sha256
         diskFormat: qcow2
       hostSelector:
@@ -52,7 +52,7 @@ spec:
         apiGroup: infrastructure.cluster.x-k8s.io
         kind: Metal3MachineTemplate
         name: homelab-worker
-      version: v1.35.4
+      version: v1.36.2
 ---
 apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
 kind: KubeadmConfigTemplate
