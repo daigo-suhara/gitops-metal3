@@ -2,7 +2,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - sealed-secrets.yaml
-  - coredns.yaml
   - cert-manager.yaml
   - cloudflared.yaml
   - rook-ceph-operator.yaml
