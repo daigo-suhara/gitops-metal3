@@ -1,0 +1,57 @@
+# Personal blog site. Front door is Cloudflare Tunnel -> daigo-suhara.com
+# routes to the wordpress ClusterIP Service (added on the Cloudflare Zero
+# Trust dashboard, not in this repo). Bitnami chart auto-generates the
+# admin password + DB credentials into an in-cluster Secret on first
+# install; sync-wave 25 lets rook-ceph (5) and cloudflared (20) come up
+# first so PVCs land and traffic can reach.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: wordpress
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "25"
+spec:
+  project: default
+  source:
+    repoURL: https://charts.bitnami.com/bitnami
+    chart: wordpress
+    targetRevision: 27.0.0
+    helm:
+      releaseName: wordpress
+      valuesObject:
+        wordpressBlogName: Daigo Suhara
+        wordpressUsername: admin
+        wordpressEmail: suharadaigo@gmail.com
+        wordpressScheme: https
+        service:
+          type: ClusterIP
+        persistence:
+          enabled: true
+          size: 10Gi
+          storageClass: general
+        mariadb:
+          enabled: true
+          primary:
+            persistence:
+              enabled: true
+              size: 5Gi
+              storageClass: general
+        ingress:
+          enabled: false
+        # Terminated by Cloudflare Tunnel; WordPress must trust X-Forwarded-*
+        # so canonical URL and cookies are set to https://daigo-suhara.com.
+        extraEnvVars:
+          - name: WORDPRESS_ENABLE_REVERSE_PROXY
+            value: "yes"
+          - name: WORDPRESS_ENABLE_HTTPS
+            value: "yes"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: wordpress
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions: [CreateNamespace=true, ServerSideApply=true]
+    retry:
+      limit: 10
+      backoff: { duration: 30s, factor: 2, maxDuration: 5m }
