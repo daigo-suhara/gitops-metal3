@@ -1,0 +1,60 @@
+# Knative Operator + KnativeServing CR wired to net-istio. dcloud's
+# container service creates knative Service CRDs the operator reconciles
+# into Deployments + Routes.
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: knative-operator
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "18"
+spec:
+  project: default
+  source:
+    repoURL: https://knative.github.io/operator
+    chart: knative-operator
+    targetRevision: 1.16.2
+    helm:
+      releaseName: knative-operator
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: knative-operator
+  # Aggregation controller populates .rules on this ClusterRole from
+  # the pod-owned CRs; drift is expected.
+  ignoreDifferences:
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRole
+      name: knative-serving-operator-aggregated-stable
+      jsonPointers: [/rules]
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions: [CreateNamespace=true, ServerSideApply=true, RespectIgnoreDifferences=true]
+    retry:
+      limit: 10
+      backoff: { duration: 30s, factor: 2, maxDuration: 5m }
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: knative-serving
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/daigo-suhara/gitops-metal3.git
+    targetRevision: HEAD
+    path: homelab/knative-serving
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: knative-serving
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    # The operator installs the KnativeServing CRD; ArgoCD would
+    # otherwise fail the initial dry-run.
+    syncOptions: [CreateNamespace=true, ServerSideApply=true, SkipDryRunOnMissingResource=true]
+    retry:
+      limit: 10
+      backoff: { duration: 30s, factor: 2, maxDuration: 5m }
