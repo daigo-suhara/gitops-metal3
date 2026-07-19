@@ -3,7 +3,6 @@ kind: Kustomization
 resources:
   - sealed-secrets.yaml
   - cert-manager.yaml
-  - cloudflared-secret.yaml
   - cloudflared.yaml
   - rook-ceph-operator.yaml
   - rook-ceph-cluster.yaml

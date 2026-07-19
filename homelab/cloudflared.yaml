@@ -1,6 +1,6 @@
 # Cloudflare Tunnel that publishes the cluster to the internet with no
-# port forward on the home router. The tunnel token is committed as a
-# SealedSecret via homelab/cloudflared-secret.yaml (sync-wave 15), so
+# port forward on the home router. The tunnel token lives in the
+# SealedSecret at homelab/cloudflared/tunnel-token-sealed.yaml, so
 # no manual `kubectl create secret` is needed after a cluster rebuild.
 # To rotate: fetch a new token from Cloudflare Zero Trust ->
 # Networks -> Tunnels, re-seal with kubeseal, and commit.
