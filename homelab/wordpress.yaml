@@ -21,6 +21,8 @@ spec:
       releaseName: wordpress
       valuesObject:
         wordpressBlogName: Daigo Suhara
+        updateStrategy:
+          type: Recreate
         wordpressUsername: admin
         wordpressEmail: suharadaigo@gmail.com
         wordpressScheme: https
