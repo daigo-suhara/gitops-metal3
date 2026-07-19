@@ -25,7 +25,7 @@ spec:
         wordpressEmail: suharadaigo@gmail.com
         wordpressScheme: https
         service:
-          type: ClusterIP
+          type: LoadBalancer
         persistence:
           enabled: true
           size: 10Gi
