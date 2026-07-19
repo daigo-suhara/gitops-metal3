@@ -6,7 +6,5 @@ resources:
   - cloudflared.yaml
   - rook-ceph-operator.yaml
   - rook-ceph-cluster.yaml
-  - istio.yaml
-  - knative.yaml
   - dcloud-secret.yaml
   - dcloud.yaml
