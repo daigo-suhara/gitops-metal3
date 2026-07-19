@@ -11,5 +11,3 @@ resources:
   - dcloud-secret.yaml
   - dcloud.yaml
   - monitoring.yaml
-  - wordpress-auth.yaml
-  - wordpress.yaml
