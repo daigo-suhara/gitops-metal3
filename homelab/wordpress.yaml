@@ -24,6 +24,7 @@ spec:
         wordpressUsername: admin
         wordpressEmail: suharadaigo@gmail.com
         wordpressScheme: https
+        existingSecret: wordpress-auth
         service:
           type: LoadBalancer
         persistence:
@@ -32,6 +33,8 @@ spec:
           storageClass: general
         mariadb:
           enabled: true
+          auth:
+            existingSecret: wordpress-mariadb-auth
           primary:
             persistence:
               enabled: true

@@ -1,0 +1,27 @@
+# SealedSecrets pinning WordPress admin + MariaDB credentials. The Bitnami
+# chart otherwise regenerates its own Secret on every ArgoCD re-sync, which
+# breaks MariaDB after the first pod restart (Access denied for root).
+# Sync-wave 24 lands before wordpress (25) so the referenced Secrets exist
+# when the chart tries to resolve existingSecret.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: wordpress-auth
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "24"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/daigo-suhara/gitops-metal3.git
+    targetRevision: HEAD
+    path: homelab/wordpress-auth
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: wordpress
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions: [CreateNamespace=true, ServerSideApply=true]
+    retry:
+      limit: 10
+      backoff: { duration: 30s, factor: 2, maxDuration: 5m }
