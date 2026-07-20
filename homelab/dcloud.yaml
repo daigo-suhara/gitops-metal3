@@ -39,6 +39,14 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: dcloud-system
+  ignoreDifferences:
+    # knative-operator continuously updates the aggregated ClusterRole
+    # rules to reflect discovered CRDs; Argo would otherwise flag drift
+    # on every reconcile.
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRole
+      name: knative-serving-operator-aggregated-stable
+      jsonPointers: [/rules]
   syncPolicy:
     automated:
       prune: true
@@ -46,6 +54,7 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+      - RespectIgnoreDifferences=true
     retry:
       limit: 10
       backoff: { duration: 30s, factor: 2, maxDuration: 5m }
