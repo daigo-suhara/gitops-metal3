@@ -18,9 +18,9 @@ spec:
       dataTemplate:
         name: homelab-control-plane
       image:
-        url: https://stable.release.flatcar-linux.net/amd64-usr/current/flatcar_production_openstack_image.img
-        checksum: 39abdd660255eb6f29611cce8d66229e5368ac21b8841c50a6b611ae9e6ae2dafe9db1354d185145819386bf7b6c771e28153e522c61deb95aaee7694b12f153
-        checksumType: sha512
+        url: https://github.com/daigo-suhara/gitops-metal3/releases/download/node-image/ubuntu-2404-k8s-v1.36.2/ubuntu-2404-kube-v1.36.2
+        checksum: b765075890301d3f0f992601488d2daff4edd012d0299182b2c9143e36aa0b57
+        checksumType: sha256
         diskFormat: qcow2
       hostSelector:
         matchLabels:
@@ -46,9 +46,8 @@ spec:
         name: homelab-control-plane
   version: v1.36.2
   kubeadmConfigSpec:
-    format: ignition
     users:
-      - name: core
+      - name: ubuntu
         sshAuthorizedKeys:
           - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID+3Q/eAOgoIs0pNtGvQ8ueXK1Gg8CnIdhcU9rwpeMFm suharadaigo
         sudo: ALL=(ALL) NOPASSWD:ALL
@@ -57,27 +56,20 @@ spec:
         certSANs: [172.16.10.100, 127.0.0.1]
     initConfiguration:
       nodeRegistration:
+        name: '{{ ds.meta_data.name }}'
         taints: []
+        kubeletExtraArgs:
+          - name: node-labels
+            value: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
     joinConfiguration:
       controlPlane: {}
       nodeRegistration:
+        name: '{{ ds.meta_data.name }}'
         taints: []
-    preKubeadmCommands:
-      - mkdir -p /var/lib/extensions /etc/extensions
-      - curl -fsSL --retry 30 --retry-delay 5 --retry-all-errors -o /var/lib/extensions/kubernetes.raw https://github.com/flatcar/sysext-bakery/releases/download/kubernetes-v1.36.2/kubernetes-v1.36.2-x86-64.raw
-      - ln -sf /var/lib/extensions/kubernetes.raw /etc/extensions/kubernetes.raw
-      - systemd-sysext refresh
-      - systemctl daemon-reload
+        kubeletExtraArgs:
+          - name: node-labels
+            value: 'metal3.io/uuid={{ ds.meta_data.uuid }}'
     files:
-      - path: /etc/systemd/network/10-eno2-unmanaged.network
-        permissions: "0644"
-        owner: root:root
-        content: |
-          [Match]
-          Name=eno2
-          [Link]
-          Unmanaged=yes
-          ActivationPolicy=down
       - path: /etc/kubernetes/manifests/kube-vip.yaml
         permissions: "0600"
         owner: root:root

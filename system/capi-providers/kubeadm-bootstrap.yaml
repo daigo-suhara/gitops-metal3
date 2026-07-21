@@ -5,9 +5,6 @@ metadata:
   namespace: capi-kubeadm-bootstrap-system
 spec:
   version: v1.12.5
-  manager:
-    featureGates:
-      KubeadmBootstrapFormatIgnition: true
 ---
 apiVersion: operator.cluster.x-k8s.io/v1alpha2
 kind: ControlPlaneProvider
@@ -16,6 +13,3 @@ metadata:
   namespace: capi-kubeadm-control-plane-system
 spec:
   version: v1.12.5
-  manager:
-    featureGates:
-      KubeadmBootstrapFormatIgnition: true
