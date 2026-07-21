@@ -56,15 +56,18 @@ jobs:
           echo '{"kubernetes_semver": "${{ inputs.kubernetes_version }}"}' > /tmp/vars.json
           PACKER_VAR_FILES=/tmp/vars.json make build-qemu-ubuntu-${{ inputs.ubuntu_version }}-cloudimg
 
-      - name: Locate output and compute checksum
+      - name: Locate output, compress, and compute checksum
         id: out
         working-directory: image-builder/images/capi
         run: |
           set -eux
-          ASSET=$(find output -mindepth 2 -maxdepth 2 -type f ! -name '*.json' -print -quit)
-          sha256sum "$ASSET" | tee "$ASSET.sha256"
-          echo "asset=$PWD/$ASSET" >>"$GITHUB_OUTPUT"
-          echo "sha256=$PWD/$ASSET.sha256" >>"$GITHUB_OUTPUT"
+          RAW=$(find output -mindepth 2 -maxdepth 2 -type f ! -name '*.json' -print -quit)
+          qemu-img convert -c -O qcow2 "$RAW" "$RAW.compressed"
+          mv "$RAW.compressed" "$RAW"
+          ls -lh "$RAW"
+          sha256sum "$RAW" | tee "$RAW.sha256"
+          echo "asset=$PWD/$RAW" >>"$GITHUB_OUTPUT"
+          echo "sha256=$PWD/$RAW.sha256" >>"$GITHUB_OUTPUT"
           echo "tag=node-image/ubuntu-${{ inputs.ubuntu_version }}-k8s-${{ inputs.kubernetes_version }}" >>"$GITHUB_OUTPUT"
 
       - name: Publish GitHub release
