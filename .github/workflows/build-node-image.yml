@@ -51,24 +51,20 @@ jobs:
       - name: Build qcow2
         working-directory: image-builder/images/capi
         env:
-          KUBERNETES_SEMVER: ${{ inputs.kubernetes_version }}
-          KUBERNETES_SERIES: ${{ inputs.kubernetes_version }}
           PACKER_LOG: "1"
         run: |
-          make build-qemu-ubuntu-${{ inputs.ubuntu_version }}-cloudimg
+          echo '{"kubernetes_semver": "${{ inputs.kubernetes_version }}"}' > /tmp/vars.json
+          PACKER_VAR_FILES=/tmp/vars.json make build-qemu-ubuntu-${{ inputs.ubuntu_version }}-cloudimg
 
       - name: Locate output and compute checksum
         id: out
         working-directory: image-builder/images/capi
         run: |
           set -eux
-          QCOW2=$(find output -name '*.qcow2' -print -quit)
-          test -n "$QCOW2"
-          ASSET_NAME="ubuntu-${{ inputs.ubuntu_version }}-k8s-${{ inputs.kubernetes_version }}.qcow2"
-          mv "$QCOW2" "$ASSET_NAME"
-          sha256sum "$ASSET_NAME" | tee "$ASSET_NAME.sha256"
-          echo "asset=$PWD/$ASSET_NAME" >>"$GITHUB_OUTPUT"
-          echo "sha256=$PWD/$ASSET_NAME.sha256" >>"$GITHUB_OUTPUT"
+          ASSET=$(find output -mindepth 2 -maxdepth 2 -type f ! -name '*.json' -print -quit)
+          sha256sum "$ASSET" | tee "$ASSET.sha256"
+          echo "asset=$PWD/$ASSET" >>"$GITHUB_OUTPUT"
+          echo "sha256=$PWD/$ASSET.sha256" >>"$GITHUB_OUTPUT"
           echo "tag=node-image/ubuntu-${{ inputs.ubuntu_version }}-k8s-${{ inputs.kubernetes_version }}" >>"$GITHUB_OUTPUT"
 
       - name: Publish GitHub release
