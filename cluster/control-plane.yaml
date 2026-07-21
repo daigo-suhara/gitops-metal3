@@ -18,10 +18,6 @@ spec:
       dataTemplate:
         name: homelab-control-plane
       image:
-        # Vanilla Flatcar Stable 4593.2.4 qcow2 (~500MB). Kubernetes is not
-        # baked in; kubelet/kubeadm arrive via a systemd-sysext downloaded
-        # at first boot (see preKubeadmCommands below). The `current`
-        # symlink alias is stable so it survives Flatcar patch bumps.
         url: https://stable.release.flatcar-linux.net/amd64-usr/current/flatcar_production_qemu_image.img
         checksum: 9cd59da624ad47c58686ea05ab216e0343fa1181219f493f27a81256c68170817f2f40759f9437fad80958f671e658cff9f84a67b2cb40fdc90931ce74651a21
         checksumType: sha512
@@ -50,9 +46,6 @@ spec:
         name: homelab-control-plane
   version: v1.36.2
   kubeadmConfigSpec:
-    # Emit Ignition (Butane-transpiled) instead of cloud-config so the
-    # vanilla Flatcar image can consume it. Metal3 injects the resulting
-    # user-data into the BMH the same way either format.
     format: ignition
     users:
       - name: core
@@ -65,20 +58,11 @@ spec:
     initConfiguration:
       nodeRegistration:
         taints: []
-        kubeletExtraArgs:
-          - name: node-labels
-            value: 'openstack-control-plane=enabled,openstack-compute-node=enabled,openvswitch=enabled'
     joinConfiguration:
       controlPlane: {}
       nodeRegistration:
         taints: []
-        kubeletExtraArgs:
-          - name: node-labels
-            value: 'openstack-control-plane=enabled,openstack-compute-node=enabled,openvswitch=enabled'
     preKubeadmCommands:
-      # Fetch the Kubernetes v1.36.2 sysext from Flatcar's sysext-bakery
-      # (112MB) and merge it into /usr so kubelet/kubeadm/kubectl become
-      # available before kubeadm init/join runs.
       - mkdir -p /var/lib/extensions /etc/extensions
       - curl -fsSL -o /var/lib/extensions/kubernetes.raw https://github.com/flatcar/sysext-bakery/releases/download/kubernetes-v1.36.2/kubernetes-v1.36.2-x86-64.raw
       - ln -sf /var/lib/extensions/kubernetes.raw /etc/extensions/kubernetes.raw
