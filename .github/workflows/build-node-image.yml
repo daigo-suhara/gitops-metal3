@@ -70,6 +70,7 @@ jobs:
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
         run: |
           set -eux
           TAG='${{ steps.out.outputs.tag }}'
@@ -77,6 +78,7 @@ jobs:
             gh release upload "$TAG" '${{ steps.out.outputs.asset }}' '${{ steps.out.outputs.sha256 }}' --clobber
           else
             gh release create "$TAG" \
+              --target '${{ github.sha }}' \
               --title "Ubuntu ${{ inputs.ubuntu_version }} + Kubernetes ${{ inputs.kubernetes_version }}" \
               --notes "Built from k8s-sigs/image-builder@${{ inputs.image_builder_ref }} by run ${{ github.run_id }}." \
               '${{ steps.out.outputs.asset }}' '${{ steps.out.outputs.sha256 }}'
