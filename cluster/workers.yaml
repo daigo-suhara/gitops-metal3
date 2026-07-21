@@ -18,8 +18,8 @@ spec:
       dataTemplate:
         name: homelab-worker
       image:
-        url: https://stable.release.flatcar-linux.net/amd64-usr/current/flatcar_production_qemu_image.img
-        checksum: 9cd59da624ad47c58686ea05ab216e0343fa1181219f493f27a81256c68170817f2f40759f9437fad80958f671e658cff9f84a67b2cb40fdc90931ce74651a21
+        url: https://stable.release.flatcar-linux.net/amd64-usr/current/flatcar_production_openstack_image.img
+        checksum: 39abdd660255eb6f29611cce8d66229e5368ac21b8841c50a6b611ae9e6ae2dafe9db1354d185145819386bf7b6c771e28153e522c61deb95aaee7694b12f153
         checksumType: sha512
         diskFormat: qcow2
       hostSelector:
