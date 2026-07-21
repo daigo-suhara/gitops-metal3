@@ -75,4 +75,7 @@ spec:
         - systemd-sysext refresh
         - systemctl daemon-reload
       joinConfiguration:
-        nodeRegistration: {}
+        nodeRegistration:
+          kubeletExtraArgs:
+            - name: node-labels
+              value: 'node-role.kubernetes.io/worker=true'
