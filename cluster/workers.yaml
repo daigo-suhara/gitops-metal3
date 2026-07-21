@@ -79,6 +79,13 @@ spec:
         - systemd-sysext refresh
         - systemctl daemon-reload
       files:
+        - path: /etc/systemd/system/kubeadm.service.d/wait-network-online.conf
+          permissions: "0644"
+          owner: root:root
+          content: |
+            [Unit]
+            After=network-online.target
+            Wants=network-online.target
         - path: /etc/systemd/network/10-eno2-unmanaged.network
           permissions: "0644"
           owner: root:root
