@@ -75,5 +75,4 @@ spec:
         - systemd-sysext refresh
         - systemctl daemon-reload
       joinConfiguration:
-        nodeRegistration:
-          kubeletExtraArgs: []
+        nodeRegistration: {}
