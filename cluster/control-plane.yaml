@@ -5,10 +5,6 @@ metadata:
   namespace: metal3
 spec:
   clusterName: homelab
-  metaData:
-    objectNames:
-      - key: hostname
-        object: baremetalhost
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
 kind: Metal3MachineTemplate
@@ -60,7 +56,6 @@ spec:
         certSANs: [172.16.10.100, 127.0.0.1]
     initConfiguration:
       nodeRegistration:
-        name: '{{ ds.meta_data.hostname }}'
         taints: []
         kubeletExtraArgs:
           - name: node-labels
@@ -68,7 +63,6 @@ spec:
     joinConfiguration:
       controlPlane: {}
       nodeRegistration:
-        name: '{{ ds.meta_data.hostname }}'
         taints: []
         kubeletExtraArgs:
           - name: node-labels
@@ -83,15 +77,13 @@ spec:
           #!/bin/bash
           set -eux
           export DEBIAN_FRONTEND=noninteractive
-          apt-get update
-          apt-get install -y ca-certificates curl gpg conntrack socat ebtables containerd
           install -d -m 0755 /etc/apt/keyrings
           curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.36/deb/Release.key \
             | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
           echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.36/deb/ /' \
             > /etc/apt/sources.list.d/kubernetes.list
           apt-get update
-          apt-get install -y kubelet=1.36.2-1.1 kubeadm=1.36.2-1.1 kubectl=1.36.2-1.1
+          apt-get install -y containerd kubelet=1.36.2-2.1 kubeadm=1.36.2-2.1 kubectl=1.36.2-2.1
           apt-mark hold kubelet kubeadm kubectl
           containerd config default \
             | sed 's/SystemdCgroup = false/SystemdCgroup = true/' \
