@@ -6,4 +6,3 @@ resources:
   - cloudflared.yaml
   - rook-ceph-operator.yaml
   - rook-ceph-cluster.yaml
-  - dcloud.yaml
