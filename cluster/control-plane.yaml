@@ -39,7 +39,7 @@ spec:
         name: homelab-control-plane
       image:
         url: https://cloud-images.ubuntu.com/releases/24.04/release/ubuntu-24.04-server-cloudimg-amd64.img
-        checksum: d1940f7d69d343355e183dff1e08a59852d32e7309baa7a4bad8365b11b005ac
+        checksum: https://cloud-images.ubuntu.com/releases/24.04/release/SHA256SUMS
         checksumType: sha256
         diskFormat: qcow2
       hostSelector:
