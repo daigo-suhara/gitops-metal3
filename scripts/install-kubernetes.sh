@@ -7,9 +7,9 @@ curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.36/deb/Release.key \
   | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.36/deb/ /' \
   > /etc/apt/sources.list.d/kubernetes.list
-curl -fsSL https://pkgs.k8s.io/addons:/cri-o:/stable:/v1.36/deb/Release.key \
+curl -fsSL https://download.opensuse.org/repositories/isv:/cri-o:/stable:/v1.36/deb/Release.key \
   | gpg --dearmor -o /etc/apt/keyrings/cri-o-apt-keyring.gpg
-echo 'deb [signed-by=/etc/apt/keyrings/cri-o-apt-keyring.gpg] https://pkgs.k8s.io/addons:/cri-o:/stable:/v1.36/deb/ /' \
+echo 'deb [signed-by=/etc/apt/keyrings/cri-o-apt-keyring.gpg] https://download.opensuse.org/repositories/isv:/cri-o:/stable:/v1.36/deb/ /' \
   > /etc/apt/sources.list.d/cri-o.list
 
 apt-get update
