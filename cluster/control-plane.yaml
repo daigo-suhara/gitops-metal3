@@ -5,6 +5,7 @@ metadata:
   namespace: metal3
 spec:
   clusterName: homelab
+  namePrefix: homelab
   prefix: 16
   gateway: 172.16.0.1
   pools:
