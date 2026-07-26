@@ -32,7 +32,7 @@ spec:
           ipAddressFromIPPool: homelab
           routes:
             - network: 0.0.0.0
-              netmask: 0
+              prefix: 0
               gateway:
                 fromIPPool: homelab
     services:
