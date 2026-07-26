@@ -1,17 +1,3 @@
-apiVersion: ipam.metal3.io/v1alpha1
-kind: IPPool
-metadata:
-  name: homelab
-  namespace: metal3
-spec:
-  clusterName: homelab
-  namePrefix: homelab
-  prefix: 16
-  gateway: 172.16.0.1
-  pools:
-    - start: 172.16.10.11
-      end: 172.16.10.29
----
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
 kind: Metal3DataTemplate
 metadata:
