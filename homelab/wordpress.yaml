@@ -32,7 +32,6 @@ spec:
             user: wordpress
             database: wordpress
             existingSecret: wordpress-db-password
-            existingSecretPasswordKey: password
   destination:
     server: https://kubernetes.default.svc
     namespace: wordpress

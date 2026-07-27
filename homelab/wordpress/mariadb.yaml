@@ -11,7 +11,7 @@ spec:
   username: wordpress
   passwordSecretKeyRef:
     name: wordpress-db-password
-    key: password
+    key: mariadb-password
     generate: true
   database: wordpress
   storage:
