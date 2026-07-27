@@ -20,6 +20,7 @@ spec:
           global:
             security:
               allowInsecureImages: true
+          wordpressPassword: admin
           service:
             type: LoadBalancer
           persistence:
