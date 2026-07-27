@@ -27,11 +27,12 @@ spec:
           mariadb:
             enabled: false
           externalDatabase:
-            host: wordpress-db-primary.wordpress.svc.cluster.local
+            host: wordpress-db.wordpress.svc.cluster.local
             port: 3306
             user: wordpress
             database: wordpress
             existingSecret: wordpress-db-password
+            existingSecretPasswordKey: password
   destination:
     server: https://kubernetes.default.svc
     namespace: wordpress
