@@ -25,6 +25,8 @@ spec:
     configs:
       cm:
         kustomize.buildOptions: --enable-helm
+      params:
+        controller.diff.server.side: "true"
     server:
       service:
         type: LoadBalancer
