@@ -20,6 +20,12 @@ spec:
     repoURL: https://github.com/k-orc/openstack-resource-controller
     targetRevision: v2.6.0
     path: config/default
+    kustomize:
+      # config/default leaves the controller image as `controller:latest`
+      # (a Kubebuilder placeholder). Override to the released image so the
+      # Deployment doesn't sit in ImagePullBackOff.
+      images:
+        - controller=quay.io/orc/openstack-resource-controller:v2.6.0
   destination:
     server: https://kubernetes.default.svc
     namespace: orc-system
