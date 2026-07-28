@@ -1,0 +1,90 @@
+# Downloads Ubuntu 24.04 (Noble) cloud image from canonical and registers
+# it in Glance. Idempotent — skips if image already active.
+# CAPI/CAPO uses this image via cloud-init to bootstrap kubeadm nodes.
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: openstack-image-upload
+  namespace: openstack
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: openstack-image-upload
+  namespace: openstack
+rules:
+  - apiGroups: [""]
+    resources: [secrets]
+    verbs: [get]
+    resourceNames: [keystone-keystone-admin]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: openstack-image-upload
+  namespace: openstack
+subjects: [{kind: ServiceAccount, name: openstack-image-upload, namespace: openstack}]
+roleRef: {apiGroup: rbac.authorization.k8s.io, kind: Role, name: openstack-image-upload}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: glance-upload-ubuntu-2404
+  namespace: openstack
+spec:
+  ttlSecondsAfterFinished: 3600
+  backoffLimit: 3
+  template:
+    spec:
+      serviceAccountName: openstack-image-upload
+      restartPolicy: OnFailure
+      containers:
+        - name: upload
+          image: quay.io/airshipit/openstack-client:2026.1-ubuntu_noble
+          env:
+            - name: OS_AUTH_URL
+              value: http://keystone-api.openstack.svc.cluster.local:5000/v3
+            - name: OS_USERNAME
+              value: admin
+            - name: OS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keystone-keystone-admin
+                  key: OS_PASSWORD
+            - name: OS_PROJECT_NAME
+              value: admin
+            - name: OS_USER_DOMAIN_NAME
+              value: Default
+            - name: OS_PROJECT_DOMAIN_NAME
+              value: Default
+            - name: OS_IDENTITY_API_VERSION
+              value: "3"
+            - name: OS_INTERFACE
+              value: internal
+          resources:
+            requests: {cpu: 100m, memory: 128Mi}
+            limits: {cpu: 500m, memory: 1Gi}
+          volumeMounts:
+            - {name: cache, mountPath: /tmp}
+          command: [sh, -euc]
+          args:
+            - |
+              IMG=ubuntu-24.04-noble
+              URL=https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
+              STATUS=$(openstack image show "$IMG" -f value -c status 2>/dev/null || true)
+              if [ "$STATUS" = active ]; then
+                echo "$IMG already active"
+                exit 0
+              fi
+              apt-get -qq update
+              apt-get -qq install -y curl
+              curl -fsSL -o /tmp/noble.img "$URL"
+              openstack image create --disk-format qcow2 --container-format bare \
+                --file /tmp/noble.img --public \
+                --property os_distro=ubuntu --property os_version=24.04 \
+                --property architecture=x86_64 \
+                "$IMG"
+      volumes:
+        - name: cache
+          emptyDir: {sizeLimit: 2Gi}
