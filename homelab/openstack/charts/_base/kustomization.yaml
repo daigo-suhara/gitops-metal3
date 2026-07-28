@@ -48,10 +48,16 @@ patches:
     patch: |-
       - op: remove
         path: /metadata/annotations/helm.sh~1hook-delete-policy
+  # Strategic-merge patch (not JSON 6902) so it deep-merges into any
+  # existing annotations rather than replacing the whole map — otherwise
+  # user-added hook annotations (e.g. argocd.argoproj.io/hook: PreSync on
+  # the cinder-rook-keyring-setup SA) get clobbered.
   - target:
       kind: ServiceAccount
     patch: |-
-      - op: add
-        path: /metadata/annotations
-        value:
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: not-used
+        annotations:
           argocd.argoproj.io/sync-wave: "-5"
