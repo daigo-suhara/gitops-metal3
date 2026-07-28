@@ -30,6 +30,7 @@ kind: Component
 patches:
   - target:
       kind: Job
+      annotationSelector: helm.sh/hook
     patch: |-
       - op: remove
         path: /metadata/annotations/helm.sh~1hook
