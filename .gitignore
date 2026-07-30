@@ -1,3 +1,8 @@
 .DS_Store
 **/.DS_Store
 .claude/
+# `kubectl kustomize --enable-helm` caches fetched Helm charts under
+# a `charts/` sibling of every kustomization.yaml that references helmCharts.
+# We don't want those in git — ArgoCD's repo-server re-fetches them at render.
+homelab/openstack/charts/*/charts/
+

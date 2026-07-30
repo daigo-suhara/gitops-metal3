@@ -1,13 +1,12 @@
-# Creates a Magnum cluster template targeting the CAPI helm driver.
+# Magnum cluster template targeting the magnum-capi-helm driver.
 # Idempotent — skips if template with same name already exists.
 #
-# --master-lb-enabled is *NOT* passed; Octavia isn't deployed in this lab,
-# so a single-master cluster with no LB in front of the API is fine.
+# --master-lb-enabled is *NOT* passed; Octavia isn't deployed in this lab
+# (magnum-capi-helm driver is patched to skip apiServer LB — see
+# charts/magnum/kustomization.yaml).
 #
-# The label 'kube_tag' is what the driver reads to pick a version of the
-# capi-helm-charts chart to install. It should match the image's
-# kube_version property.
----
+# label 'kube_tag' picks the capi-helm-charts chart version to install; must
+# match the glance image's kube_version property.
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -15,26 +14,20 @@ metadata:
   namespace: openstack
 spec:
   ttlSecondsAfterFinished: 3600
-  backoffLimit: 3
+  backoffLimit: 6
   template:
     spec:
-      # Reuses SA/Role/RoleBinding from ubuntu-2404-image.yaml
-      serviceAccountName: openstack-image-upload
+      serviceAccountName: openstack-bootstrap
       restartPolicy: OnFailure
       containers:
-        - name: create-template
+        - name: create
           image: quay.io/airshipit/openstack-client:2026.1-ubuntu_noble
+          envFrom:
+            - configMapRef: {name: openstack-bootstrap-env}
           env:
-            - {name: OS_AUTH_URL, value: http://keystone-api.openstack.svc.cluster.local:5000/v3}
-            - {name: OS_USERNAME, value: admin}
             - name: OS_PASSWORD
               valueFrom:
                 secretKeyRef: {name: keystone-keystone-admin, key: OS_PASSWORD}
-            - {name: OS_PROJECT_NAME, value: admin}
-            - {name: OS_USER_DOMAIN_NAME, value: Default}
-            - {name: OS_PROJECT_DOMAIN_NAME, value: Default}
-            - {name: OS_IDENTITY_API_VERSION, value: "3"}
-            - {name: OS_INTERFACE, value: internal}
           resources:
             requests: {cpu: 50m, memory: 128Mi}
             limits:   {cpu: 500m, memory: 512Mi}
@@ -42,10 +35,8 @@ spec:
           args:
             - |
               TPL=capi-v1-33-jammy
-              # Idempotency: skip if template with this name already exists.
               if openstack coe cluster template show "$TPL" >/dev/null 2>&1; then
-                echo "template $TPL already exists"
-                exit 0
+                echo "template $TPL already exists"; exit 0
               fi
               openstack coe cluster template create "$TPL" \
                 --coe kubernetes \

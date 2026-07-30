@@ -1,0 +1,126 @@
+# Glance images:
+#   - ubuntu-24.04-noble         : generic cloud image (kubeadm nodes)
+#   - ubuntu-jammy-kube-v1.33.13 : StackHPC pre-installed k8s image used by
+#                                  magnum-capi-helm cluster template
+#
+# Both jobs are idempotent (skip on active) and use the shared
+# openstack-bootstrap SA + openstack-bootstrap-env ConfigMap.
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: glance-upload-ubuntu-2404
+  namespace: openstack
+spec:
+  ttlSecondsAfterFinished: 3600
+  backoffLimit: 3
+  template:
+    spec:
+      serviceAccountName: openstack-bootstrap
+      restartPolicy: OnFailure
+      containers:
+        - name: upload
+          image: quay.io/airshipit/openstack-client:2026.1-ubuntu_noble
+          envFrom:
+            - configMapRef: {name: openstack-bootstrap-env}
+          env:
+            - name: OS_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: keystone-keystone-admin, key: OS_PASSWORD}
+          resources:
+            requests: {cpu: 100m, memory: 128Mi}
+            limits:   {cpu: 500m, memory: 1Gi}
+          volumeMounts:
+            - {name: cache, mountPath: /tmp}
+          command: [sh, -euc]
+          args:
+            - |
+              IMG=ubuntu-24.04-noble
+              URL=https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
+              if [ "$(openstack image show "$IMG" -f value -c status 2>/dev/null || true)" = active ]; then
+                echo "$IMG already active"; exit 0
+              fi
+              apt-get -qq update && apt-get -qq install -y curl
+              curl -fsSL -o /tmp/noble.img "$URL"
+              openstack image create --disk-format qcow2 --container-format bare \
+                --file /tmp/noble.img --public \
+                --property os_distro=ubuntu --property os_version=24.04 \
+                --property architecture=x86_64 \
+                "$IMG"
+      volumes:
+        - name: cache
+          emptyDir: {sizeLimit: 2Gi}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: glance-upload-k8s-1-33-jammy
+  namespace: openstack
+spec:
+  ttlSecondsAfterFinished: 3600
+  backoffLimit: 6
+  template:
+    spec:
+      serviceAccountName: openstack-bootstrap
+      restartPolicy: OnFailure
+      # 16GB node (tx1320m3-03) is already >100% overcommitted; a burstable
+      # Job gets evicted before a 5-minute image upload finishes.
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - {key: kubernetes.io/hostname, operator: NotIn, values: [tx1320m3-03]}
+      containers:
+        - name: upload
+          image: quay.io/airshipit/openstack-client:2026.1-ubuntu_noble
+          envFrom:
+            - configMapRef: {name: openstack-bootstrap-env}
+          env:
+            - name: OS_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: keystone-keystone-admin, key: OS_PASSWORD}
+          resources:
+            requests: {cpu: 200m, memory: 512Mi}
+            limits:   {cpu: 2,    memory: 1Gi}
+          volumeMounts:
+            - {name: cache, mountPath: /tmp}
+          command: [sh, -euc]
+          args:
+            - |
+              IMG=ubuntu-jammy-kube-v1.33.13
+              URL=https://azimuth-images.stackhpc.cloud/ubuntu-jammy-kube-v1.33.13-260705-1940.qcow2
+              if [ "$(openstack image show "$IMG" -f value -c status 2>/dev/null || true)" = active ]; then
+                echo "$IMG already active"; exit 0
+              fi
+              apt-get -qq update && apt-get -qq install -y curl jq
+              GLANCE=http://glance-api.openstack.svc.cluster.local:9292
+              TOKEN=$(openstack token issue -f value -c id)
+              # Purge stale queued records left over from failed retries.
+              for id in $(openstack image list --name "$IMG" -f value -c ID); do
+                curl -sf -X DELETE -H "X-Auth-Token: $TOKEN" "$GLANCE/v2/images/$id" || true
+              done
+              # Glance /v2/images/{id}/file 415s on chunked bodies; stage
+              # on disk so curl can PUT with a known Content-Length.
+              IMG_ID=$(curl -sf -X POST "$GLANCE/v2/images" \
+                -H "X-Auth-Token: $TOKEN" \
+                -H "Content-Type: application/json" \
+                -d "{
+                  \"name\": \"$IMG\",
+                  \"disk_format\": \"qcow2\",
+                  \"container_format\": \"bare\",
+                  \"visibility\": \"public\",
+                  \"os_distro\": \"ubuntu\",
+                  \"os_version\": \"22.04\",
+                  \"architecture\": \"x86_64\",
+                  \"kube_version\": \"v1.33.13\"
+                }" | jq -r .id)
+              curl -fsSL "$URL" -o /tmp/k8s.qcow2
+              curl -f -X PUT -H "X-Auth-Token: $TOKEN" \
+                -H "Content-Type: application/octet-stream" \
+                --upload-file /tmp/k8s.qcow2 \
+                "$GLANCE/v2/images/$IMG_ID/file"
+              openstack image show "$IMG" -c status -c size -c checksum
+      volumes:
+        - name: cache
+          emptyDir: {sizeLimit: 5Gi}

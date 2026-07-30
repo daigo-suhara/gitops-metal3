@@ -7,6 +7,5 @@ resources:
   - rook-ceph-operator.yaml
   - rook-ceph-cluster.yaml
   - monitoring.yaml
-  - openstack-infra.yaml
   - openstack/
   - capi/

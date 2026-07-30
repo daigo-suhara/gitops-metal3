@@ -1,0 +1,64 @@
+# Neutron external (provider) network the magnum cluster template attaches
+# VMs to as their floating-IP source. Uses the physical bridge br-ex mapped
+# to physnet1 by the neutron chart.
+#
+# Idempotent — skips if the "external" network already exists.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: neutron-external-network
+  namespace: openstack
+spec:
+  ttlSecondsAfterFinished: 3600
+  backoffLimit: 6
+  template:
+    spec:
+      serviceAccountName: openstack-bootstrap
+      restartPolicy: OnFailure
+      containers:
+        - name: create
+          image: quay.io/airshipit/openstack-client:2026.1-ubuntu_noble
+          envFrom:
+            - configMapRef: {name: openstack-bootstrap-env}
+          env:
+            - name: OS_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: keystone-keystone-admin, key: OS_PASSWORD}
+          resources:
+            requests: {cpu: 50m, memory: 128Mi}
+            limits:   {cpu: 500m, memory: 256Mi}
+          command: [sh, -euc]
+          args:
+            - |
+              NET=external
+              if openstack network show "$NET" >/dev/null 2>&1; then
+                echo "$NET already exists"
+                exit 0
+              fi
+              openstack network create "$NET" \
+                --external --share \
+                --provider-network-type flat \
+                --provider-physical-network physnet1
+              openstack subnet create external-subnet \
+                --network "$NET" \
+                --subnet-range 172.16.100.0/24 \
+                --allocation-pool start=172.16.100.150,end=172.16.100.199 \
+                --gateway 172.16.100.1 \
+                --no-dhcp
+              openstack network show "$NET"
+---
+# Shared env for all bootstrap Jobs so we don't repeat the OS_* block
+# in every Job spec.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openstack-bootstrap-env
+  namespace: openstack
+data:
+  OS_AUTH_URL: http://keystone-api.openstack.svc.cluster.local:5000/v3
+  OS_USERNAME: admin
+  OS_PROJECT_NAME: admin
+  OS_USER_DOMAIN_NAME: Default
+  OS_PROJECT_DOMAIN_NAME: Default
+  OS_IDENTITY_API_VERSION: "3"
+  OS_INTERFACE: internal

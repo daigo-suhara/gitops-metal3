@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# Post-install runtime state applied once keystone/glance/magnum/neutron
+# are Healthy (parent Application has sync-wave "25").
+#
+# - service-aliases.yaml       Extra Services so openstack-helm's public
+#                              catalog URLs (bare svc names on port 80)
+#                              resolve, and pin LB IPs for VM-reachable
+#                              endpoints (keystone/nova/neutron/cinder).
+# - rbac.yaml                  SA/Role/RoleBinding shared by all bootstrap
+#                              Jobs (read keystone-keystone-admin secret).
+# - external-network.yaml      Neutron external network + subnet the magnum
+#                              CAPI template attaches VMs to.
+# - image-uploads.yaml         Glance images: ubuntu-24.04 (generic) and
+#                              stackhpc kube-preinstalled qcow2.
+# - magnum-cluster-template.yaml   Magnum CAPI template for k8s v1.33.
+namespace: openstack
+resources:
+  - service-aliases.yaml
+  - rbac.yaml
+  - external-network.yaml
+  - image-uploads.yaml
+  - magnum-cluster-template.yaml

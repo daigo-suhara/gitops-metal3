@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mariadb
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  project: default
+  source:
+    repoURL: https://tarballs.opendev.org/openstack/openstack-helm-infra
+    chart: mariadb
+    targetRevision: 0.2.67
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openstack
+  syncPolicy:
+    automated: {prune: true, selfHeal: true}
+    syncOptions:
+      - CreateNamespace=true
+      - RespectIgnoreDifferences=true
+  # openstack-helm mariadb-controller writes statefulset.kubernetes.io/pod-name
+  # into Service.spec.selector to route writes at the current Galera leader.
+  # Expected drift.
+  ignoreDifferences:
+    - group: ""
+      kind: Service
+      name: mariadb
+      jsonPointers:
+        - /spec/selector/statefulset.kubernetes.io~1pod-name
