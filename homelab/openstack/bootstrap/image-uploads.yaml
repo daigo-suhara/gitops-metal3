@@ -37,8 +37,11 @@ spec:
             - |
               IMG=ubuntu-24.04-noble
               URL=https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
-              if [ "$(openstack image show "$IMG" -f value -c status 2>/dev/null || true)" = active ]; then
-                echo "$IMG already active"; exit 0
+              # `image show <name>` errors when duplicates exist ("multiple
+              # matches"); use `image list --name` which counts robustly.
+              count=$(openstack image list --name "$IMG" -f value -c ID | wc -l)
+              if [ "$count" -ge 1 ]; then
+                echo "$IMG already exists ($count copies)"; exit 0
               fi
               apt-get -qq update && apt-get -qq install -y curl
               curl -fsSL -o /tmp/noble.img "$URL"
@@ -90,8 +93,13 @@ spec:
             - |
               IMG=ubuntu-jammy-kube-v1.33.13
               URL=https://azimuth-images.stackhpc.cloud/ubuntu-jammy-kube-v1.33.13-260705-1940.qcow2
-              if [ "$(openstack image show "$IMG" -f value -c status 2>/dev/null || true)" = active ]; then
-                echo "$IMG already active"; exit 0
+              # Same duplicate-safe check as the ubuntu-2404 Job. (This
+              # Job's own purge-stale loop below only fires *after* the
+              # count check, so it's only reached when we intend to
+              # upload — never when the image is already good.)
+              count=$(openstack image list --name "$IMG" -f value -c ID | wc -l)
+              if [ "$count" -ge 1 ]; then
+                echo "$IMG already exists ($count copies)"; exit 0
               fi
               apt-get -qq update && apt-get -qq install -y curl jq
               GLANCE=http://glance-api.openstack.svc.cluster.local:9292
