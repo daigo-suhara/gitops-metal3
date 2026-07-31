@@ -60,7 +60,7 @@ spec:
     - {name: novnc, port: 6080, targetPort: 6080}
   selector:
     application: nova
-    component: novncproxy
+    component: novnc-proxy
 ---
 apiVersion: v1
 kind: Service
