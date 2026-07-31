@@ -18,6 +18,14 @@ helmCharts:
         use_fqdn:
           neutron_agent: false
       conf:
+        # Auto-create br-ex on each compute host (via the neutron-ovs-agent
+        # init script). Empty value = bridge only, no physical port — VMs
+        # communicate on tenant Geneve networks; the external network's
+        # floating IPs live on this bridge but are not L2-bridged to LAN.
+        # (Uncomment `br-ex: eno1` to bridge the host NIC, but that moves
+        # eno1's IP into OVS and can break k8s node connectivity.)
+        auto_bridge_add:
+          br-ex: ""
         plugins:
           openvswitch_agent:
             ovs:
