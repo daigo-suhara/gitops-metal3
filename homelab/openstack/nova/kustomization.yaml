@@ -27,8 +27,9 @@ helmCharts:
       conf:
         nova:
           vnc:
-            # LB IP for browser VNC console (svc.cluster.local not resolvable from browser)
-            novncproxy_base_url: http://172.16.100.102:6080/vnc_lite.html
+            # LB IP for browser VNC console (svc.cluster.local not resolvable from browser).
+            # Pinned to nova-novncproxy-lb Service in ../bootstrap/service-aliases.yaml.
+            novncproxy_base_url: http://172.16.100.108:6080/vnc_lite.html
 patches:
   # Strip helm.sh/hook so post-install Jobs become Sync-phase (else PostSync
   # deadlock — init container waits on Jobs that ArgoCD hasn't run yet).

@@ -44,6 +44,24 @@ spec:
     application: nova
     component: os-api
 ---
+# noVNC console proxy — reachable from LAN so browsers can hit VM consoles
+# via horizon or `openstack console url show`. nova conf.vnc.novncproxy_base_url
+# is pinned to this IP (see homelab/openstack/nova/kustomization.yaml).
+apiVersion: v1
+kind: Service
+metadata:
+  name: nova-novncproxy-lb
+  namespace: openstack
+  annotations:
+    io.cilium/lb-ipam-ips: 172.16.100.108
+spec:
+  type: LoadBalancer
+  ports:
+    - {name: novnc, port: 6080, targetPort: 6080}
+  selector:
+    application: nova
+    component: novncproxy
+---
 apiVersion: v1
 kind: Service
 metadata:
