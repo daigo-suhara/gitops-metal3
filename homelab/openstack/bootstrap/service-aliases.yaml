@@ -112,3 +112,21 @@ spec:
   selector:
     application: magnum
     component: api
+---
+# Horizon dashboard exposed on the LAN so users can browse from any host
+# on 172.16.100.0/24 (Cilium LB pool). The chart only ships a ClusterIP
+# named `horizon-int`; a bare `horizon` LB Service is what browsers hit.
+apiVersion: v1
+kind: Service
+metadata:
+  name: horizon
+  namespace: openstack
+  annotations:
+    io.cilium/lb-ipam-ips: 172.16.100.107
+spec:
+  type: LoadBalancer
+  ports:
+    - {name: http, port: 80, targetPort: 80}
+  selector:
+    application: horizon
+    component: server

@@ -1,0 +1,38 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: openstack
+helmCharts:
+  - name: keystone
+    repo: https://tarballs.opendev.org/openstack/openstack-helm
+    version: 2026.1.10+a659ab8a2
+    releaseName: keystone
+    namespace: openstack
+    includeCRDs: true
+    valuesInline:
+      # Advertise a LAN-reachable IP for the *public* keystone URL so
+      # workload clusters created by Magnum/CAPI (whose VMs sit on tenant
+      # networks with no in-cluster DNS) can hit keystone from cloud-provider
+      # add-ons like openstack-cloud-controller-manager.
+      # 172.16.100.103 is pinned on the keystone LoadBalancer in
+      # ../bootstrap/service-aliases.yaml.
+      endpoints:
+        identity:
+          host_fqdn_override:
+            public:
+              host: 172.16.100.103
+patches:
+  # Strip helm.sh/hook so post-install Jobs become Sync-phase (else PostSync
+  # deadlock — init container waits on Jobs that ArgoCD hasn't run yet).
+  - target: {kind: Job, annotationSelector: helm.sh/hook}
+    patch: |-
+      - op: remove
+        path: /metadata/annotations/helm.sh~1hook
+  # credential-cleanup is a pre-delete-only hook whose SQL runs against a
+  # non-existent table during install and errors. Drop it entirely.
+  - target: {kind: Job, name: keystone-credential-cleanup}
+    patch: |-
+      $patch: delete
+      apiVersion: batch/v1
+      kind: Job
+      metadata:
+        name: keystone-credential-cleanup

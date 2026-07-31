@@ -4,5 +4,5 @@
 # `kubectl kustomize --enable-helm` caches fetched Helm charts under
 # a `charts/` sibling of every kustomization.yaml that references helmCharts.
 # We don't want those in git — ArgoCD's repo-server re-fetches them at render.
-homelab/openstack/charts/*/charts/
+homelab/openstack/*/charts/
 
