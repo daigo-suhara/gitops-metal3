@@ -19,13 +19,15 @@ helmCharts:
           neutron_agent: false
       conf:
         # Auto-create br-ex on each compute host (via the neutron-ovs-agent
-        # init script). Empty value = bridge only, no physical port — VMs
-        # communicate on tenant Geneve networks; the external network's
-        # floating IPs live on this bridge but are not L2-bridged to LAN.
-        # (Uncomment `br-ex: eno1` to bridge the host NIC, but that moves
-        # eno1's IP into OVS and can break k8s node connectivity.)
+        # init script) and bridge eno2 (the second, unused NIC) into it so
+        # neutron floating IPs are reachable from the LAN via L2. eno1 stays
+        # untouched (it's the k8s node IP / API endpoint). The init script
+        # also runs `ip link set eno2 up`.
+        #
+        # Cilium's LB IPAM pool is scoped to 172.16.100.100-149 to avoid
+        # ARP conflict with the neutron external-subnet 150-199.
         auto_bridge_add:
-          br-ex: ""
+          br-ex: eno2
         plugins:
           openvswitch_agent:
             ovs:
