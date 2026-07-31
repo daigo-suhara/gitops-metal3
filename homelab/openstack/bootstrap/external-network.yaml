@@ -39,11 +39,15 @@ spec:
                 --external --share \
                 --provider-network-type flat \
                 --provider-physical-network physnet1
+              # CIDR matches the physical LAN so router traffic can reach the
+              # real gateway. allocation-pool 172.16.100.150-199 is neutron's
+              # slice of that /16 (Cilium LB IPAM owns 100-149 for k8s
+              # LoadBalancer Services).
               openstack subnet create external-subnet \
                 --network "$NET" \
-                --subnet-range 172.16.100.0/24 \
+                --subnet-range 172.16.0.0/16 \
                 --allocation-pool start=172.16.100.150,end=172.16.100.199 \
-                --gateway 172.16.100.1 \
+                --gateway 172.16.0.1 \
                 --no-dhcp
               openstack network show "$NET"
 ---
