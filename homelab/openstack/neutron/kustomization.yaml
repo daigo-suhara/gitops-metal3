@@ -9,6 +9,16 @@ helmCharts:
     namespace: openstack
     includeCRDs: true
     valuesInline:
+      # openstack-cloud-controller-manager inside magnum-created workload
+      # clusters resolves the neutron public endpoint from keystone's catalog.
+      # Default puts svc.cluster.local there — unreachable from VMs. Pin the
+      # public URL to the LAN-reachable LoadBalancer IP (see bootstrap/
+      # service-aliases.yaml).
+      endpoints:
+        network:
+          host_fqdn_override:
+            public:
+              host: 172.16.100.105
       manifests:
         daemonset_sriov_agent: false
         pod_rally_test: false

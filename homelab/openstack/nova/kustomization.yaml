@@ -9,6 +9,13 @@ helmCharts:
     namespace: openstack
     includeCRDs: true
     valuesInline:
+      # OCCM in magnum-created workload clusters uses the compute public
+      # endpoint from keystone's catalog. Pin to the LAN-reachable LB IP.
+      endpoints:
+        compute:
+          host_fqdn_override:
+            public:
+              host: 172.16.100.104
       manifests:
         deployment_serialproxy: false
         deployment_spiceproxy: false
