@@ -54,5 +54,5 @@ patches:
         path: /spec/template/spec/containers/0/command/2
         value: |
           cp /etc/nginx/.skyline/nginx.conf /etc/nginx/nginx.conf
-          sed -i 's|location /api/openstack/skyline/ {|location = /api/openstack/skyline/api/v1/contrib/domains { default_type application/json; return 200 "[\"Default\"]"; }\n        location /api/openstack/skyline/ {|' /etc/nginx/nginx.conf
+          sed -i "s|location /api/openstack/skyline/ {|location = /api/openstack/skyline/api/v1/contrib/domains { default_type application/json; return 200 '[\"Default\"]'; }\n        location /api/openstack/skyline/ {|" /etc/nginx/nginx.conf
           exec nginx -g 'daemon off;'
