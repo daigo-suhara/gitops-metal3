@@ -17,4 +17,5 @@ resources:
   - nova/application.yaml
   - horizon/application.yaml
   - magnum/application.yaml
+  - trove/application.yaml
   - bootstrap/application.yaml

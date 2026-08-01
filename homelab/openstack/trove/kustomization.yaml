@@ -1,0 +1,47 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: openstack
+helmCharts:
+  - name: trove
+    repo: https://tarballs.opendev.org/openstack/openstack-helm
+    version: 2026.1.12+223862f9e
+    releaseName: trove
+    namespace: openstack
+    includeCRDs: true
+    valuesInline:
+      # Pin the database public endpoint to the LAN LB IP so anything
+      # outside the openstack namespace (browsers, workload cluster CLI,
+      # trove guest agents in VMs) can resolve it.
+      endpoints:
+        database:
+          host_fqdn_override:
+            public:
+              host: 172.16.100.109
+      manifests:
+        job_image_repo_sync: false
+        pod_rally_test: false
+      conf:
+        trove:
+          DEFAULT:
+            # RabbitMQ URL the guest agent inside DB VMs uses to reach the
+            # openstack-side conductor. Guest VMs live on tenant networks
+            # and reach RabbitMQ via the floating IP the tenant router NATs
+            # through br-ex/eno2. The chart's transport_url points at the
+            # in-cluster rabbitmq svc.cluster.local — unreachable from
+            # guests. Override to the LB IP.
+            transport_url: rabbit://rabbitmq:password@172.16.100.110:5672/trove
+            # Datastores are registered by a bootstrap Job (see
+            # ../bootstrap/trove-datastore-mariadb.yaml).
+            default_datastore: mariadb
+          taskmanager:
+            # Cinder volume type used when Trove provisions a data volume
+            # for the DB instance. Empty = use the default type (rbd1 in
+            # our cinder config).
+            cinder_volume_type: ""
+patches:
+  # Strip helm.sh/hook so post-install Jobs become Sync-phase (else PostSync
+  # deadlock — init container waits on Jobs that ArgoCD hasn't run yet).
+  - target: {kind: Job, annotationSelector: helm.sh/hook}
+    patch: |-
+      - op: remove
+        path: /metadata/annotations/helm.sh~1hook

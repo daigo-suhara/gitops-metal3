@@ -148,3 +148,38 @@ spec:
   selector:
     application: horizon
     component: server
+---
+# Trove API (DBaaS) — used by CLI/Horizon + workload-cluster tools that
+# create/manage DB instances.
+apiVersion: v1
+kind: Service
+metadata:
+  name: trove
+  namespace: openstack
+  annotations:
+    io.cilium/lb-ipam-ips: 172.16.100.109
+spec:
+  type: LoadBalancer
+  ports:
+    - {name: http, port: 80, targetPort: 8779}
+  selector:
+    application: trove
+    component: api
+---
+# RabbitMQ AMQP exposed to LAN so Trove guest agents inside DB VMs on
+# tenant networks can reach the openstack-side conductor. The guest
+# transport_url in trove.conf points at this IP:5672.
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-amqp
+  namespace: openstack
+  annotations:
+    io.cilium/lb-ipam-ips: 172.16.100.110
+spec:
+  type: LoadBalancer
+  ports:
+    - {name: amqp, port: 5672, targetPort: 5672}
+  selector:
+    application: rabbitmq
+    component: server

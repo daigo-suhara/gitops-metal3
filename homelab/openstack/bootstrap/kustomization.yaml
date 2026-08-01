@@ -21,3 +21,4 @@ resources:
   - external-network.yaml
   - image-uploads.yaml
   - magnum-cluster-template.yaml
+  - trove-datastore-mariadb.yaml
