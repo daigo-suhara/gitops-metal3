@@ -45,3 +45,12 @@ patches:
     patch: |-
       - op: remove
         path: /metadata/annotations/helm.sh~1hook
+  # Also strip helm.sh/hook-weight — ArgoCD treats an orphaned weight as
+  # a hook indicator, which pulls the Job into a very early sync-wave
+  # (-5) and creates a deadlock: Job pod can't schedule because its SA
+  # hasn't been applied yet, but ArgoCD won't apply the SA until the
+  # Job is Healthy.
+  - target: {kind: Job, annotationSelector: helm.sh/hook-weight}
+    patch: |-
+      - op: remove
+        path: /metadata/annotations/helm.sh~1hook-weight
