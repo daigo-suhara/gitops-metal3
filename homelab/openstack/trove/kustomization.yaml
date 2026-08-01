@@ -20,6 +20,20 @@ helmCharts:
       manifests:
         job_image_repo_sync: false
         pod_rally_test: false
+      # Chart's default probes are aggressive (timeout 1s, delay 30s) and
+      # trove-api takes 40+ s to complete oslo policy load on cold start
+      # under load. Kubelet kill/restart loop leaves the LB with no
+      # endpoints → 502 from LoadBalancer for a while. Pad the probes.
+      pod:
+        probes:
+          api:
+            trove-api:
+              readiness:
+                enabled: true
+                params: {initialDelaySeconds: 60, periodSeconds: 15, timeoutSeconds: 10, failureThreshold: 6}
+              liveness:
+                enabled: true
+                params: {initialDelaySeconds: 90, periodSeconds: 30, timeoutSeconds: 15, failureThreshold: 6}
       conf:
         trove:
           DEFAULT:
