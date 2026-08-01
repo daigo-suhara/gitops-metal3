@@ -164,7 +164,7 @@ spec:
     - {name: http, port: 80, targetPort: 9999}
   selector:
     application: skyline
-    component: api
+    component: skyline
 ---
 # Trove API (DBaaS) — used by CLI/Horizon + workload-cluster tools that
 # create/manage DB instances.
