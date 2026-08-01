@@ -37,3 +37,22 @@ patches:
     patch: |-
       - op: remove
         path: /metadata/annotations/helm.sh~1hook-weight
+  # Workaround for upstream Skyline bug where the login page's Domain
+  # dropdown calls /api/openstack/skyline/api/v1/contrib/domains, which
+  # requires auth and always 401s pre-login → dropdown stays empty
+  # ("NoData"). See https://bugs.launchpad.net/skyline-apiserver/+bug/2156287
+  # (regression from commit 8aca4f75).
+  #
+  # Insert an nginx `location =` block that intercepts that exact URL
+  # BEFORE the /api/openstack/skyline/ proxy_pass and returns the domain
+  # list statically. Done via sed on the generated nginx.conf right
+  # before nginx starts (the chart cp's the file, sed modifies, nginx
+  # starts).
+  - target: {kind: Deployment, name: skyline}
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/command/2
+        value: |
+          cp /etc/nginx/.skyline/nginx.conf /etc/nginx/nginx.conf
+          sed -i 's|location /api/openstack/skyline/ {|location = /api/openstack/skyline/api/v1/contrib/domains { default_type application/json; return 200 "[\"Default\"]"; }\n        location /api/openstack/skyline/ {|' /etc/nginx/nginx.conf
+          exec nginx -g 'daemon off;'
