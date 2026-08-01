@@ -1,14 +1,16 @@
-# Uploads the Trove generic guest image and registers the mariadb datastore.
+# Uploads the Trove generic guest image and registers a MariaDB datastore
+# version pointing at it (by glance tags).
 #
 # Trove data flow when a user runs `openstack database instance create`:
 #   1. trove-api creates the instance record
-#   2. trove-taskmanager tells nova to boot a VM from the guest image, on
-#      the user's tenant network, attached to a cinder volume
+#   2. trove-taskmanager tells nova to boot a VM from an image matching
+#      the datastore version's image tags (trove,mariadb), on the user's
+#      tenant network, attached to a cinder volume
 #   3. cloud-init runs trove-guestagent inside the VM; the agent connects
-#      to RabbitMQ (172.16.100.110:5672 via the shared secgroup) and
-#      reports back to trove-conductor
-#   4. taskmanager instructs the guest to install & configure the
-#      datastore (mariadb) using the version registered here
+#      to RabbitMQ (172.16.100.110:5672) and reports back to trove-conductor
+#   4. taskmanager instructs the guest to install & configure MariaDB
+#
+# Docs: https://docs.openstack.org/trove/latest/admin/datastore.html
 ---
 apiVersion: batch/v1
 kind: Job
@@ -49,6 +51,8 @@ spec:
               apt-get -qq update && apt-get -qq install -y curl jq
               GLANCE=http://glance-api.openstack.svc.cluster.local:9292
               TOKEN=$(openstack token issue -f value -c id)
+              # Tags trove + mariadb: `openstack datastore version create
+              # --image-tags trove,mariadb` matches by AND of these tags.
               IMG_ID=$(curl -sf -X POST "$GLANCE/v2/images" \
                 -H "X-Auth-Token: $TOKEN" \
                 -H "Content-Type: application/json" \
@@ -59,23 +63,23 @@ spec:
                   \"visibility\": \"public\",
                   \"os_distro\": \"ubuntu\",
                   \"os_version\": \"22.04\",
-                  \"hw_qemu_guest_agent\": \"yes\"
+                  \"hw_qemu_guest_agent\": \"yes\",
+                  \"tags\": [\"trove\", \"mariadb\"]
                 }" | jq -r .id)
               curl -fsSL "$URL" -o /tmp/trove.qcow2
               curl -f -X PUT -H "X-Auth-Token: $TOKEN" \
                 -H "Content-Type: application/octet-stream" \
                 --upload-file /tmp/trove.qcow2 \
                 "$GLANCE/v2/images/$IMG_ID/file"
-              openstack image show "$IMG" -c status -c size -c checksum
+              openstack image show "$IMG" -c status -c size -c tags
       volumes:
         - name: cache
           emptyDir: {sizeLimit: 3Gi}
 ---
-# Registers the "mariadb" datastore and a version pointing at the guest
-# image uploaded above. Runs in the trove-api pod's namespace so it has
-# access to trove-manage + the trove config files the chart mounts.
-#
-# Idempotent — trove-manage is safe to re-run (it upserts).
+# `openstack datastore version create` auto-creates the parent datastore
+# if it doesn't exist, so no trove-manage is required for the basic
+# flow. Validation-rule loading (`trove-manage db_load_datastore_config_parameters`)
+# is optional and skipped here.
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -83,7 +87,7 @@ metadata:
   namespace: openstack
 spec:
   ttlSecondsAfterFinished: 3600
-  backoffLimit: 6
+  backoffLimit: 20
   template:
     spec:
       serviceAccountName: openstack-bootstrap
@@ -103,29 +107,20 @@ spec:
           command: [sh, -euc]
           args:
             - |
-              # Wait for glance image to appear (upload Job runs alongside).
+              # Wait for guest image + trove API to be ready.
               until openstack image show trove-guest-ubuntu-jammy -f value -c status 2>/dev/null | grep -q active; do
-                echo "waiting for trove guest image..."
-                sleep 15
+                echo "waiting for guest image..."; sleep 15
               done
-              IMG_ID=$(openstack image show trove-guest-ubuntu-jammy -f value -c id)
-              echo "image: $IMG_ID"
-
-              # trove-manage is exposed via the trove-api pod. Exec into it.
-              # Alternative: use the "trove datastore-*" API endpoints via CLI.
-              # We use CLI since we already have OS_* creds.
-              if ! openstack datastore show mariadb >/dev/null 2>&1; then
-                echo "datastore mariadb not registered — use trove-manage."
-                echo "Run inside a trove-api pod:"
-                echo "  trove-manage datastore_update mariadb ''"
-                echo "  trove-manage datastore_version_update mariadb 10.11 mariadb $IMG_ID '' 1"
-                echo "  trove-manage datastore_update mariadb 10.11"
-                echo "Or via openstack CLI (requires admin role)."
-                # Best-effort via CLI:
-                openstack datastore version create 10.11 mariadb mariadb \
-                  --image-glance-id "$IMG_ID" --active --default 2>&1 || echo "CLI creation may need trove-manage"
+              until openstack datastore version list mariadb >/dev/null 2>&1 || openstack datastore list >/dev/null 2>&1; do
+                echo "waiting for trove API..."; sleep 15
+              done
+              # Idempotent: skip if version 10.11 already registered.
+              if openstack datastore version list mariadb -f value -c Name 2>/dev/null | grep -qx 10.11; then
+                echo "mariadb 10.11 already registered"
               else
-                echo "datastore mariadb already registered"
+                openstack datastore version create 10.11 mariadb mariadb "" \
+                  --image-tags trove,mariadb --active --default \
+                  --version-number 10.11
               fi
               openstack datastore list
-              openstack datastore version list mariadb 2>&1 || true
+              openstack datastore version list mariadb
