@@ -12,6 +12,15 @@ helmCharts:
       # Skyline UI is served over port 9999. The chart Service (skyline-api)
       # is ClusterIP-only; the LoadBalancer alias sits in
       # ../bootstrap/service-aliases.yaml (172.16.100.111).
+      conf:
+        skyline:
+          # The login page's Domain dropdown reads from openstack.base_domains
+          # (it does NOT fetch /v3/domains — that needs a token, and the login
+          # form is anonymous). Without this the dropdown is empty and users
+          # can't submit the form.
+          openstack:
+            base_domains:
+              - default
       manifests:
         job_image_repo_sync: false
 patches:
