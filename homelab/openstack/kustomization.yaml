@@ -16,6 +16,7 @@ resources:
   - cinder/application.yaml
   - nova/application.yaml
   - horizon/application.yaml
+  - skyline/application.yaml
   - magnum/application.yaml
   - trove/application.yaml
   - bootstrap/application.yaml

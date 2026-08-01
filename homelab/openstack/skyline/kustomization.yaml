@@ -1,0 +1,30 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: openstack
+helmCharts:
+  - name: skyline
+    repo: https://tarballs.opendev.org/openstack/openstack-helm
+    version: 2026.1.6+f1fa8faed
+    releaseName: skyline
+    namespace: openstack
+    includeCRDs: true
+    valuesInline:
+      # Skyline UI is served over port 9999. The chart Service (skyline-api)
+      # is ClusterIP-only; the LoadBalancer alias sits in
+      # ../bootstrap/service-aliases.yaml (172.16.100.111).
+      manifests:
+        job_image_repo_sync: false
+patches:
+  # Strip helm.sh/hook so post-install Jobs become Sync-phase (else PostSync
+  # deadlock — init container waits on Jobs that ArgoCD hasn't run yet).
+  - target: {kind: Job, annotationSelector: helm.sh/hook}
+    patch: |-
+      - op: remove
+        path: /metadata/annotations/helm.sh~1hook
+  # Also strip orphaned helm.sh/hook-weight (ArgoCD treats it as a hook
+  # indicator too, which would pull Jobs to sync-wave -5 and starve
+  # ServiceAccounts).
+  - target: {kind: Job, annotationSelector: helm.sh/hook-weight}
+    patch: |-
+      - op: remove
+        path: /metadata/annotations/helm.sh~1hook-weight

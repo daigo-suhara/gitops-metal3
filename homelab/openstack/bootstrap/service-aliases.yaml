@@ -149,6 +149,23 @@ spec:
     application: horizon
     component: server
 ---
+# Skyline modern dashboard — browser access on LAN. Chart Service
+# skyline-api is ClusterIP:9999.
+apiVersion: v1
+kind: Service
+metadata:
+  name: skyline
+  namespace: openstack
+  annotations:
+    io.cilium/lb-ipam-ips: 172.16.100.111
+spec:
+  type: LoadBalancer
+  ports:
+    - {name: http, port: 80, targetPort: 9999}
+  selector:
+    application: skyline
+    component: api
+---
 # Trove API (DBaaS) — used by CLI/Horizon + workload-cluster tools that
 # create/manage DB instances.
 apiVersion: v1
