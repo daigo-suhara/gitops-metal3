@@ -11,14 +11,16 @@ helmCharts:
     valuesInline:
       manifests:
         job_image_repo_sync: false
-      # Register magnum-ui's dashboard panels. The pip package itself is
-      # installed by the initContainer patch below and exposed via PYTHONPATH.
-      # These 5 enabled/*.py files come from magnum_ui.enabled/ verbatim and
-      # tell Horizon to wire up the "Container Infra" panel group under
-      # Project and Admin dashboards.
+      # Register dashboard plugin panels for services whose UI ships as a
+      # separate pip package (magnum-ui, trove-dashboard). The packages
+      # themselves get pip-installed into a shared emptyDir by the
+      # install-plugins initContainer below and exposed via PYTHONPATH.
+      # These enabled/*.py files come from each plugin's enabled/ dir
+      # verbatim and tell Horizon to wire up the panel groups.
       conf:
         horizon:
           custom_panels:
+              # ------ magnum-ui: Container Infra ------
               _1370_project_container_infra_panel_group: |
                 from django.utils.translation import gettext_lazy as _
                 PANEL_GROUP = 'container_infra'
@@ -52,6 +54,34 @@ helmCharts:
                 PANEL_GROUP = 'container_infra'
                 PANEL_DASHBOARD = 'admin'
                 ADD_PANEL = 'magnum_ui.content.container_infra.quotas.panel.Quotas'
+              # ------ trove-dashboard: Database ------
+              _1740_project_database_panel_group: |
+                from django.utils.translation import gettext_lazy as _
+                PANEL_GROUP = 'database'
+                PANEL_GROUP_NAME = _('Database')
+                PANEL_GROUP_DASHBOARD = 'project'
+                ADD_INSTALLED_APPS = ['trove_dashboard']
+                AUTO_DISCOVER_STATIC_FILES = True
+              _1741_project_database_databases_panel: |
+                PANEL = 'databases'
+                PANEL_GROUP = 'database'
+                PANEL_DASHBOARD = 'project'
+                ADD_PANEL = 'trove_dashboard.content.databases.panel.Databases'
+              _1742_project_database_backups_panel: |
+                PANEL = 'database_backups'
+                PANEL_GROUP = 'database'
+                PANEL_DASHBOARD = 'project'
+                ADD_PANEL = 'trove_dashboard.content.database_backups.panel.Backups'
+              _1743_project_database_clusters_panel: |
+                PANEL = 'database_clusters'
+                PANEL_GROUP = 'database'
+                PANEL_DASHBOARD = 'project'
+                ADD_PANEL = 'trove_dashboard.content.database_clusters.panel.Clusters'
+              _1744_project_database_configurations_panel: |
+                PANEL = 'database_configurations'
+                PANEL_GROUP = 'database'
+                PANEL_DASHBOARD = 'project'
+                ADD_PANEL = 'trove_dashboard.content.database_configurations.panel.Configurations'
 patches:
   # Strip helm.sh/hook so post-install Jobs become Sync-phase (else PostSync
   # deadlock — init container waits on Jobs that ArgoCD hasn't run yet).
@@ -59,10 +89,9 @@ patches:
     patch: |-
       - op: remove
         path: /metadata/annotations/helm.sh~1hook
-  # Airshipit's horizon image doesn't include magnum-ui. Same pattern as
-  # magnum-capi-helm: install to a shared emptyDir at pod start, expose via
-  # PYTHONPATH so Django imports 'magnum_ui' when the panel files ADD it to
-  # INSTALLED_APPS.
+  # Airshipit's horizon image doesn't include magnum-ui or trove-dashboard.
+  # Install both into a shared emptyDir at pod start, expose via PYTHONPATH
+  # so Django imports them when the panel files ADD them to INSTALLED_APPS.
   - target:
       kind: Deployment
       name: horizon
@@ -70,19 +99,20 @@ patches:
       - op: add
         path: /spec/template/spec/initContainers/-
         value:
-          name: install-magnum-ui
+          name: install-plugins
           image: python:3.12-slim
           command: [sh, -euc]
           args:
             - |
-              # --no-deps: horizon image already has django/oslo/etc; only
-              # magnum_ui itself is missing. Skip deps to avoid version drift.
-              pip install --no-cache-dir --no-deps --target=/extra/pkgs magnum-ui==18.0.0
-              # magnum-ui depends on python-magnumclient (magnum API calls)
-              # AND python-heatclient (its clusters panel imports it at
-              # module import time — Django check would fail otherwise).
+              # --no-deps: horizon image already has django/oslo/etc.
               pip install --no-cache-dir --no-deps --target=/extra/pkgs \
-                python-magnumclient python-heatclient osc-lib
+                magnum-ui==18.0.0 \
+                trove-dashboard==22.0.0
+              # Runtime API clients the plugins import at module load time.
+              # magnum-ui needs python-magnumclient + python-heatclient;
+              # trove-dashboard needs python-troveclient. osc-lib is shared.
+              pip install --no-cache-dir --no-deps --target=/extra/pkgs \
+                python-magnumclient python-heatclient python-troveclient osc-lib
           volumeMounts:
             - {name: extra, mountPath: /extra}
       - op: add
