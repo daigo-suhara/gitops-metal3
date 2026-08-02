@@ -1,6 +1,9 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: openstack
+resources:
+  # Secret with trove-guestagent.conf injected into every DB VM.
+  - guestagent-config.yaml
 helmCharts:
   - name: trove
     repo: https://tarballs.opendev.org/openstack/openstack-helm
@@ -67,3 +70,22 @@ patches:
     patch: |-
       - op: remove
         path: /metadata/annotations/helm.sh~1hook-weight
+  # Mount trove-guestagent-etc Secret at the path trove.conf's `guest_config`
+  # option points to. Only trove-taskmanager needs it (it's the one that
+  # renders instance user-data), but harmless to add on api/conductor.
+  - target: {kind: Deployment, name: trove-taskmanager}
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value:
+          name: trove-guestagent-etc
+          mountPath: /etc/trove/trove-guestagent.conf
+          subPath: trove-guestagent.conf
+          readOnly: true
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value:
+          name: trove-guestagent-etc
+          secret:
+            secretName: trove-guestagent-etc
+            defaultMode: 0444

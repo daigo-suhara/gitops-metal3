@@ -1,0 +1,35 @@
+# Trove guest agent config injected into every DB VM at boot.
+#
+# trove-taskmanager reads /etc/trove/trove-guestagent.conf (the file whose path
+# is `guest_config` in trove.conf, default is exactly that path) and writes it
+# into the guest VM's cloud-init user-data at /etc/trove/conf.d/trove-guestagent.conf.
+# The trove-guestagent service inside the VM reads that at startup to know
+# where RabbitMQ lives.
+#
+# openstack-helm's trove chart doesn't render this file — it only renders
+# trove.conf. Without this Secret + mount below, guest_config points at a
+# nonexistent file, taskmanager injects only guest_info.conf (which has no
+# transport_url), and the guest agent uses its baked-in default (bad).
+#
+# Point at trove-rabbitmq-external (bootstrap/trove-rabbitmq.yaml, hostNetwork
+# on tx1320m3-01) so guests reach the broker over LAN without going through
+# k8s Service/kube-proxy DNAT.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: trove-guestagent-etc
+  namespace: openstack
+stringData:
+  trove-guestagent.conf: |
+    [DEFAULT]
+    transport_url = rabbit://trove:trovepassword@172.16.10.12:5672/trove
+    control_exchange = trove
+    trove_auth_url = http://172.16.100.103/v3
+    log_dir = /var/log/trove
+    log_file = trove-guestagent.log
+
+    [oslo_messaging_notifications]
+    driver = messagingv2
+
+    [oslo_concurrency]
+    lock_path = /var/lock/trove
