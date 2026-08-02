@@ -22,3 +22,4 @@ resources:
   - image-uploads.yaml
   - magnum-cluster-template.yaml
   - trove-datastore-mariadb.yaml
+  - trove-rabbitmq.yaml

@@ -1,0 +1,73 @@
+# Dedicated RabbitMQ for Trove guest agents ONLY.
+#
+# Why not the openstack-helm rabbitmq?
+#   The trove-guestagent runs inside a Nova VM on a tenant network. It has to
+#   reach the RabbitMQ AMQP port from *outside* Kubernetes. When we exposed
+#   the openstack-helm rabbitmq via a Cilium LoadBalancer (172.16.100.110),
+#   traffic from the OpenStack qrouter (which lives on a k8s node alongside
+#   Cilium) got hijacked by cilium/kube-proxy: the LB IP was DNAT'd to a pod
+#   IP before the packet exited eno2, breaking the return path. The pod-to-
+#   pod path is fine (which is why openstack-helm's internal wiring works),
+#   but any traffic originating from an OVS/qrouter netns cannot follow
+#   cilium's eBPF hooks. See project_openstack_cidr_overlap.md for the trace.
+#
+# Fix: run a separate rabbitmq on hostNetwork so it binds directly to the
+# node's eno1 IP. No Service, no LB, no DNAT — VM guests connect straight
+# to <node-ip>:5672 via the LAN, avoiding all k8s LB machinery.
+#
+# trove-taskmanager / trove-conductor also connect here (via the same host
+# IP) so guest and control-plane share one broker. openstack-helm's
+# rabbitmq keeps serving keystone/nova/neutron/etc via its ClusterIP.
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: trove-rabbitmq-external-creds
+  namespace: openstack
+stringData:
+  RABBITMQ_DEFAULT_USER: trove
+  RABBITMQ_DEFAULT_PASS: trovepassword
+  RABBITMQ_DEFAULT_VHOST: trove
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trove-rabbitmq-external
+  namespace: openstack
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels: {app: trove-rabbitmq-external}
+  template:
+    metadata:
+      labels: {app: trove-rabbitmq-external}
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      # Pin to tx1320m3-01 so the AMQP endpoint IP is stable (172.16.10.12).
+      # Trove config points to this specific IP; if we let the scheduler roam
+      # we'd need per-node service registration.
+      nodeSelector:
+        kubernetes.io/hostname: tx1320m3-01
+      tolerations: [{operator: Exists}]
+      containers:
+        - name: rabbitmq
+          image: docker.io/rabbitmq:3.13-management
+          envFrom:
+            - secretRef: {name: trove-rabbitmq-external-creds}
+          ports:
+            - {name: amqp, containerPort: 5672, hostPort: 5672}
+            - {name: mgmt, containerPort: 15672, hostPort: 15672}
+          resources:
+            requests: {cpu: 100m, memory: 256Mi}
+            limits:   {cpu: 1, memory: 1Gi}
+          readinessProbe:
+            exec: {command: [rabbitmq-diagnostics, -q, check_port_connectivity]}
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          livenessProbe:
+            exec: {command: [rabbitmq-diagnostics, -q, ping]}
+            initialDelaySeconds: 60
+            periodSeconds: 30

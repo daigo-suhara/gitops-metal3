@@ -37,15 +37,14 @@ helmCharts:
       conf:
         trove:
           DEFAULT:
-            # RabbitMQ URL the guest agent inside DB VMs uses to reach the
-            # openstack-side conductor. Guest VMs live on tenant networks
-            # and reach RabbitMQ via the floating IP the tenant router NATs
-            # through br-ex/eno2. The chart's transport_url points at the
-            # in-cluster rabbitmq svc.cluster.local — unreachable from
-            # guests. Override to the LB IP.
-            transport_url: rabbit://rabbitmq:password@172.16.100.110:5672/trove
-            # Datastores are registered by a bootstrap Job (see
-            # ../bootstrap/trove-datastore-mariadb.yaml).
+            # Trove guest agents inside DB VMs need a RabbitMQ endpoint
+            # reachable from outside the k8s cluster. Cilium LB IPs get
+            # DNATd by kube-proxy before packets exit OVS/eno2, breaking
+            # the return path from qrouter netns. We deploy a dedicated
+            # hostNetwork rabbitmq (bootstrap/trove-rabbitmq.yaml) pinned
+            # to tx1320m3-01's eno1 IP that both taskmanager/conductor
+            # AND guests connect to.
+            transport_url: rabbit://trove:trovepassword@172.16.10.12:5672/trove
             default_datastore: mariadb
           taskmanager:
             # Cinder volume type used when Trove provisions a data volume
