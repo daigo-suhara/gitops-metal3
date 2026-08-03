@@ -23,6 +23,12 @@ spec:
           cleanupPolicy:
             wipeDevicesFromOtherClusters: true
           dataDirHostPath: /var/lib/rook
+          # Rook's CephObjectStore.auth.keystone spec doesn't expose
+          # rgw_keystone_api_version, so RGW defaults to v2 and calls
+          # /v2.0/tokens which our keystone (v3-only) rejects. Force v3.
+          cephConfig:
+            "client.rgw.default.a":
+              rgw_keystone_api_version: "3"
           mon:
             count: 3
             allowMultiplePerNode: false
