@@ -49,6 +49,13 @@ helmCharts:
             # AND guests connect to.
             transport_url: rabbit://trove:trovepassword@172.16.10.12:5672/trove
             default_datastore: mariadb
+            # Inject the 'test' nova keypair into every Trove instance so
+            # `openstack keypair` uploads (~/.ssh/openstack-test-key) let
+            # us SSH the ubuntu user for guest-agent log inspection.
+            # Debug convenience; safe in the homelab since guest VMs live
+            # on an isolated tenant net with only ports 22/3306/4444/456x
+            # reachable from the qrouter netns.
+            nova_keypair: test
           taskmanager:
             # Cinder volume type used when Trove provisions a data volume
             # for the DB instance. Empty = use the default type (rbd1 in

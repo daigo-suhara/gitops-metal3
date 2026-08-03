@@ -23,7 +23,11 @@ stringData:
   trove-guestagent.conf: |
     [DEFAULT]
     transport_url = rabbit://trove:trovepassword@172.16.10.12:5672/trove
-    control_exchange = trove
+    # DO NOT set control_exchange. trove-taskmanager and trove-conductor
+    # inherit oslo_messaging's default ('openstack'); if the guest overrides
+    # this, guest→conductor heartbeat RPCs are published on a different
+    # exchange (`trove`) than the conductor listens on and never arrive —
+    # instance stays in BUILD until it hits usage_timeout and errors out.
     trove_auth_url = http://172.16.100.103/v3
     log_dir = /var/log/trove
     log_file = trove-guestagent.log
