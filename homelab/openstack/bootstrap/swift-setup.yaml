@@ -108,13 +108,33 @@ spec:
               openstack role add --user "$RGW_ID" --project service --project-domain service admin || true
 
               # Write into rook-ceph so CephObjectStore.auth.keystone can mount.
-              kubectl -n rook-ceph create secret generic rgw-keystone-creds \
-                --dry-run=client -o yaml \
-                --from-literal=OS_AUTH_URL=http://keystone-api.openstack.svc.cluster.local:5000/v3 \
-                --from-literal=OS_USERNAME=rgw \
-                --from-literal=OS_PASSWORD="$RGW_PASS" \
-                --from-literal=OS_PROJECT_NAME=service \
-                --from-literal=OS_USER_DOMAIN_NAME=service \
-                --from-literal=OS_PROJECT_DOMAIN_NAME=service \
-                --from-literal=OS_REGION_NAME=RegionOne \
-                | kubectl apply -f -
+              # The openstack-client image doesn't have kubectl, so POST/PUT
+              # the Secret directly to the k8s API with the ServiceAccount
+              # token.
+              APISERVER=https://kubernetes.default.svc
+              TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+              CACERT=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+              b64() { printf '%s' "$1" | base64 -w0; }
+              BODY=$(cat <<JSON
+              {"apiVersion":"v1","kind":"Secret","metadata":{"name":"rgw-keystone-creds","namespace":"rook-ceph"},"type":"Opaque","data":{
+                "OS_AUTH_URL":"$(b64 http://keystone-api.openstack.svc.cluster.local:5000/v3)",
+                "OS_USERNAME":"$(b64 rgw)",
+                "OS_PASSWORD":"$(b64 "$RGW_PASS")",
+                "OS_PROJECT_NAME":"$(b64 service)",
+                "OS_USER_DOMAIN_NAME":"$(b64 service)",
+                "OS_PROJECT_DOMAIN_NAME":"$(b64 service)",
+                "OS_REGION_NAME":"$(b64 RegionOne)"
+              }}
+              JSON
+              )
+              # PUT if exists, else POST.
+              URL=$APISERVER/api/v1/namespaces/rook-ceph/secrets
+              CODE=$(curl -s -o /dev/null -w '%{http_code}' --cacert $CACERT -H "Authorization: Bearer $TOKEN" $URL/rgw-keystone-creds)
+              if [ "$CODE" = "200" ]; then
+                curl -sSf --cacert $CACERT -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+                  -X PUT -d "$BODY" $URL/rgw-keystone-creds >/dev/null
+              else
+                curl -sSf --cacert $CACERT -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+                  -X POST -d "$BODY" $URL >/dev/null
+              fi
+              echo "rgw-keystone-creds updated in rook-ceph"
