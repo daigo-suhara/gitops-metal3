@@ -22,7 +22,9 @@ metadata:
 spec:
   type: LoadBalancer
   ports:
-    - {name: http, port: 80, targetPort: 80}
+    # RGW pod listens on 8080; the sibling rook-ceph-rgw-default svc
+    # already terminates on that. We expose 80 for external clients.
+    - {name: http, port: 80, targetPort: 8080}
   selector:
     app: rook-ceph-rgw
     rook_object_store: default
