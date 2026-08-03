@@ -1,0 +1,120 @@
+# Swift (RadosGW) integration:
+#   1. LoadBalancer Service in rook-ceph ns → RGW pods, LB IP 172.16.100.112
+#      so both openstack CLI (in-cluster) and Trove guest agents (via LAN LB)
+#      can reach the S3/Swift endpoint. Lives in rook-ceph namespace because
+#      that's where the RGW pods are; cross-ns LB Service isn't supported.
+#   2. Job that registers `swift` service + endpoints in keystone catalog
+#      and provisions the `rgw` keystone user (admin role on service project)
+#      that RGW uses to validate Swift API tokens. Also copies its creds into
+#      a Secret in rook-ceph namespace that CephObjectStore.spec.auth.keystone
+#      references.
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: swift
+  namespace: rook-ceph
+  annotations:
+    io.cilium/lb-ipam-ips: 172.16.100.112
+spec:
+  type: LoadBalancer
+  ports:
+    - {name: http, port: 80, targetPort: 80}
+  selector:
+    app: rook-ceph-rgw
+    rook_object_store: default
+---
+# Cross-namespace secret access: bootstrap Job runs in openstack ns but
+# needs to write the rgw creds Secret into rook-ceph ns.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: rgw-keystone-bootstrap
+  namespace: openstack
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: rgw-keystone-bootstrap
+  namespace: rook-ceph
+rules:
+  - apiGroups: [""]
+    resources: [secrets]
+    verbs: [get, create, update, patch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: rgw-keystone-bootstrap
+  namespace: rook-ceph
+subjects:
+  - kind: ServiceAccount
+    name: rgw-keystone-bootstrap
+    namespace: openstack
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: rgw-keystone-bootstrap
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: swift-setup
+  namespace: openstack
+spec:
+  backoffLimit: 20
+  ttlSecondsAfterFinished: 3600
+  template:
+    spec:
+      serviceAccountName: rgw-keystone-bootstrap
+      restartPolicy: OnFailure
+      containers:
+        - name: openstack
+          image: quay.io/airshipit/openstack-client:2026.1-ubuntu_noble
+          env:
+            - {name: OS_AUTH_URL, value: "http://keystone-api.openstack.svc.cluster.local:5000/v3"}
+            - {name: OS_USERNAME, value: admin}
+            - name: OS_PASSWORD
+              valueFrom: {secretKeyRef: {name: keystone-keystone-admin, key: OS_PASSWORD}}
+            - {name: OS_PROJECT_NAME, value: admin}
+            - {name: OS_USER_DOMAIN_NAME, value: Default}
+            - {name: OS_PROJECT_DOMAIN_NAME, value: Default}
+            - {name: OS_IDENTITY_API_VERSION, value: "3"}
+            - {name: OS_INTERFACE, value: internal}
+          command: [bash, -euxc]
+          args:
+            - |
+              # Idempotent registration: skip create if it already exists.
+              openstack service show swift >/dev/null 2>&1 \
+                || openstack service create --name swift --description "Ceph RadosGW" object-store
+
+              SWIFT_URL="http://172.16.100.112/swift/v1/AUTH_%(project_id)s"
+              for iface in public internal admin; do
+                openstack endpoint list --service swift --interface $iface --region RegionOne -f value -c URL 2>/dev/null | grep -q "$SWIFT_URL" \
+                  || openstack endpoint create --region RegionOne swift $iface "$SWIFT_URL"
+              done
+
+              # RGW's keystone service user. Must be admin on the service
+              # project so RGW can validate any tenant's tokens.
+              RGW_PASS=$(openssl rand -base64 24 | tr -dc 'a-zA-Z0-9' | head -c 32)
+              openstack user show rgw --domain service >/dev/null 2>&1 || {
+                openstack user create --domain service --project service --project-domain service --password "$RGW_PASS" rgw
+                openstack role add --user rgw --user-domain service --project service --project-domain service admin
+              }
+              # Read back current password (or the new one just set) — we can't
+              # retrieve an existing password, so rewrite every run to keep
+              # the k8s Secret in sync with keystone.
+              openstack user set --password "$RGW_PASS" rgw
+              openstack role add --user rgw --user-domain service --project service --project-domain service admin || true
+
+              # Write into rook-ceph so CephObjectStore.auth.keystone can mount.
+              kubectl -n rook-ceph create secret generic rgw-keystone-creds \
+                --dry-run=client -o yaml \
+                --from-literal=OS_AUTH_URL=http://keystone-api.openstack.svc.cluster.local:5000/v3 \
+                --from-literal=OS_USERNAME=rgw \
+                --from-literal=OS_PASSWORD="$RGW_PASS" \
+                --from-literal=OS_PROJECT_NAME=service \
+                --from-literal=OS_USER_DOMAIN_NAME=service \
+                --from-literal=OS_PROJECT_DOMAIN_NAME=service \
+                --from-literal=OS_REGION_NAME=RegionOne \
+                | kubectl apply -f -

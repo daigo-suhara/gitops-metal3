@@ -74,6 +74,22 @@ spec:
               gateway:
                 port: 80
                 instances: 1
+              # Keystone integration so RGW serves the Swift API to any
+              # openstack user with a valid token. `rgw-keystone-creds` is
+              # provisioned by homelab/openstack/bootstrap/swift-setup.yaml
+              # (an idempotent Job that also registers the swift service
+              # + endpoints in the keystone catalog).
+              auth:
+                keystone:
+                  url: http://keystone-api.openstack.svc.cluster.local:5000/
+                  acceptedRoles: [admin, member, _member_]
+                  implicitTenants: "swift"
+                  revocationInterval: 1200
+                  tokenCacheSize: 1000
+                  serviceUserSecretName: rgw-keystone-creds
+              protocols:
+                swift:
+                  accountInUrl: true
             storageClass:
               enabled: true
               name: rook-ceph-delete-bucket
