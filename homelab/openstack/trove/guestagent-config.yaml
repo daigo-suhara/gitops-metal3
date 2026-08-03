@@ -37,3 +37,8 @@ stringData:
 
     [oslo_concurrency]
     lock_path = /var/lock/trove
+
+    [mariadb]
+    # Guest agent reads this to pick the container that runs
+    # mariabackup for `openstack database backup create`.
+    backup_docker_image = openstacktrove/db-backup-mariadb:1.1.2
