@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: swift-rgw-rbac
+  namespace: argocd
+  annotations:
+    # Wave 24 so the LB Service + cross-ns RBAC exist BEFORE the
+    # openstack-bootstrap Job (wave 25) tries to write into rook-ceph.
+    argocd.argoproj.io/sync-wave: "24"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/daigo-suhara/gitops-metal3.git
+    targetRevision: HEAD
+    path: homelab/openstack/swift-rgw-rbac
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: rook-ceph
+  syncPolicy:
+    automated: {prune: true, selfHeal: true}
+    syncOptions:
+      - ServerSideApply=true

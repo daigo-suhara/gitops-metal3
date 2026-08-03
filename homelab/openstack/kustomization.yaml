@@ -19,4 +19,5 @@ resources:
   - skyline/application.yaml
   - magnum/application.yaml
   - trove/application.yaml
+  - swift-rgw-rbac/application.yaml
   - bootstrap/application.yaml

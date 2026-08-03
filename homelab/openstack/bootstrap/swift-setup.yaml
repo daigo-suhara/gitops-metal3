@@ -1,60 +1,16 @@
-# Swift (RadosGW) integration:
-#   1. LoadBalancer Service in rook-ceph ns → RGW pods, LB IP 172.16.100.112
-#      so both openstack CLI (in-cluster) and Trove guest agents (via LAN LB)
-#      can reach the S3/Swift endpoint. Lives in rook-ceph namespace because
-#      that's where the RGW pods are; cross-ns LB Service isn't supported.
-#   2. Job that registers `swift` service + endpoints in keystone catalog
-#      and provisions the `rgw` keystone user (admin role on service project)
-#      that RGW uses to validate Swift API tokens. Also copies its creds into
-#      a Secret in rook-ceph namespace that CephObjectStore.spec.auth.keystone
-#      references.
+# Swift/RadosGW keystone catalog registration + rgw user provisioning.
+#
+# The rook-ceph-namespace pieces (LB Service on 172.16.100.112 fronting the
+# RGW pods, plus RBAC granting this Job's ServiceAccount write access to
+# rgw-keystone-creds) live in the sibling swift-rgw-rbac Application —
+# they can't share this kustomization because the root `namespace: openstack`
+# transformer overrides per-resource namespaces.
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: swift
-  namespace: rook-ceph
-  annotations:
-    io.cilium/lb-ipam-ips: 172.16.100.112
-spec:
-  type: LoadBalancer
-  ports:
-    - {name: http, port: 80, targetPort: 80}
-  selector:
-    app: rook-ceph-rgw
-    rook_object_store: default
----
-# Cross-namespace secret access: bootstrap Job runs in openstack ns but
-# needs to write the rgw creds Secret into rook-ceph ns.
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: rgw-keystone-bootstrap
   namespace: openstack
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: rgw-keystone-bootstrap
-  namespace: rook-ceph
-rules:
-  - apiGroups: [""]
-    resources: [secrets]
-    verbs: [get, create, update, patch]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: rgw-keystone-bootstrap
-  namespace: rook-ceph
-subjects:
-  - kind: ServiceAccount
-    name: rgw-keystone-bootstrap
-    namespace: openstack
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: rgw-keystone-bootstrap
 ---
 apiVersion: batch/v1
 kind: Job
