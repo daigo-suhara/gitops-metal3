@@ -97,15 +97,15 @@ spec:
               # RGW's keystone service user. Must be admin on the service
               # project so RGW can validate any tenant's tokens.
               RGW_PASS=$(openssl rand -base64 24 | tr -dc 'a-zA-Z0-9' | head -c 32)
-              openstack user show rgw --domain service >/dev/null 2>&1 || {
-                openstack user create --domain service --project service --project-domain service --password "$RGW_PASS" rgw
-                openstack role add --user rgw --user-domain service --project service --project-domain service admin
-              }
-              # Read back current password (or the new one just set) — we can't
-              # retrieve an existing password, so rewrite every run to keep
-              # the k8s Secret in sync with keystone.
-              openstack user set --password "$RGW_PASS" rgw
-              openstack role add --user rgw --user-domain service --project service --project-domain service admin || true
+              RGW_ID=$(openstack user show rgw --domain service -f value -c id 2>/dev/null || true)
+              if [ -z "$RGW_ID" ]; then
+                RGW_ID=$(openstack user create --domain service --password "$RGW_PASS" rgw -f value -c id)
+              else
+                # Rewrite the password every run so the k8s Secret stays in sync
+                # (keystone doesn't let us retrieve an existing password).
+                openstack user set --password "$RGW_PASS" "$RGW_ID"
+              fi
+              openstack role add --user "$RGW_ID" --project service --project-domain service admin || true
 
               # Write into rook-ceph so CephObjectStore.auth.keystone can mount.
               kubectl -n rook-ceph create secret generic rgw-keystone-creds \
