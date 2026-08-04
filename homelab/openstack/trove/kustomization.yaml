@@ -61,7 +61,7 @@ helmCharts:
             # `openstack database backup create`. Chart doesn't render
             # a default → guest agent crashes with
             # `NoneType has no attribute split` in _image_has_tag.
-            backup_docker_image: openstacktrove/db-backup-mariadb:1.1.0
+            backup_docker_image: quay.io/openstack.trove/db-backup-mariadb:11.4
           taskmanager:
             # Cinder volume type used when Trove provisions a data volume
             # for the DB instance. Empty = use the default type (rbd1 in
