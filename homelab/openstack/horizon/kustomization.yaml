@@ -111,8 +111,12 @@ patches:
               # Runtime API clients the plugins import at module load time.
               # magnum-ui needs python-magnumclient + python-heatclient;
               # trove-dashboard needs python-troveclient. osc-lib is shared.
+              # python-openstackclient is a transitive import path required
+              # by troveclient/utils.py at module load — without it Horizon
+              # crashes with `No module named 'openstackclient'` on start.
               pip install --no-cache-dir --no-deps --target=/extra/pkgs \
-                python-magnumclient python-heatclient python-troveclient osc-lib
+                python-magnumclient python-heatclient python-troveclient \
+                python-openstackclient osc-lib
           volumeMounts:
             - {name: extra, mountPath: /extra}
       - op: add
