@@ -114,9 +114,12 @@ patches:
               # python-openstackclient is a transitive import path required
               # by troveclient/utils.py at module load — without it Horizon
               # crashes with `No module named 'openstackclient'` on start.
+              # Pin to <8 because 8+ requires openstacksdk features
+              # (identity.v3.Proxy) not present in the sdk 4.10 shipped by
+              # the horizon image.
               pip install --no-cache-dir --no-deps --target=/extra/pkgs \
                 python-magnumclient python-heatclient python-troveclient \
-                python-openstackclient osc-lib
+                "python-openstackclient<8" osc-lib
           volumeMounts:
             - {name: extra, mountPath: /extra}
       - op: add
