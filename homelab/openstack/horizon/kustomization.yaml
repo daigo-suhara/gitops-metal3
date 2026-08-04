@@ -119,6 +119,7 @@ patches:
               # the horizon image.
               pip install --no-cache-dir --no-deps --target=/extra/pkgs \
                 python-magnumclient python-heatclient python-troveclient \
+                python-mistralclient \
                 "python-openstackclient<8" osc-lib
           volumeMounts:
             - {name: extra, mountPath: /extra}
