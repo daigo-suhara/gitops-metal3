@@ -1,0 +1,82 @@
+# Bitnami's public Docker Hub catalog (Aug 2025 change) no longer
+# publishes versioned tags for bitnami/wordpress and bitnami/mariadb —
+# only :latest and content-addressable digests remain public. Versioned
+# tags moved to bitnamilegacy/* (frozen at Aug 2025) or bitnamisecure/*
+# (auth required). To keep getting current WP/DB fixes without paid
+# access, override the chart images to bitnami/*:latest with
+# pullPolicy=Always so ArgoCD sync picks up new digests.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: wordpress
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "30"
+spec:
+  project: default
+  source:
+    repoURL: https://charts.bitnami.com/bitnami
+    chart: wordpress
+    targetRevision: 33.0.3
+    helm:
+      releaseName: wordpress
+      valuesObject:
+        image:
+          registry: docker.io
+          repository: bitnami/wordpress
+          tag: latest
+          pullPolicy: Always
+        wordpressUsername: admin
+        wordpressPassword: admin
+        wordpressBlogName: homelab
+        wordpressScheme: http
+        service:
+          type: LoadBalancer
+          ports:
+            http: 80
+        persistence:
+          enabled: true
+          storageClass: general
+          accessModes: [ReadWriteOnce]
+          size: 10Gi
+        resources:
+          requests: { cpu: 100m, memory: 512Mi }
+          limits:   { memory: 1Gi }
+        mariadb:
+          enabled: true
+          architecture: standalone
+          image:
+            registry: docker.io
+            repository: bitnami/mariadb
+            tag: latest
+            pullPolicy: Always
+          auth:
+            rootPassword: wordpress-root
+            database: bitnami_wordpress
+            username: bn_wordpress
+            password: bitnami_wordpress
+          primary:
+            persistence:
+              enabled: true
+              storageClass: general
+              accessModes: [ReadWriteOnce]
+              size: 8Gi
+            resources:
+              requests: { cpu: 100m, memory: 256Mi }
+              limits:   { memory: 1Gi }
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: wordpress
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 10
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m

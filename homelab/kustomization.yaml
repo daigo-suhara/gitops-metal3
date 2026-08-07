@@ -7,5 +7,6 @@ resources:
   - rook-ceph-operator.yaml
   - rook-ceph-cluster.yaml
   - monitoring.yaml
+  - wordpress.yaml
   - openstack/
   - capi/
