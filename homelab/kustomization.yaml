@@ -8,5 +8,4 @@ resources:
   - rook-ceph-cluster.yaml
   - monitoring.yaml
   - wordpress.yaml
-  - openstack/
   - capi/
