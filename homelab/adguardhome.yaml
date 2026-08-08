@@ -1,0 +1,80 @@
+# AdGuard Home as the LAN DNS server. Exposed via Cilium L2 LoadBalancer
+# on a fixed IP so the home router / clients can point their DNS at it.
+#
+# First-time setup: browse to http://172.16.100.130:3000 and finish the
+# wizard (admin user, listen ports). After that the web UI moves to :80
+# and DNS answers on :53.
+#
+# Cilium LB pool is 172.16.100.100-149 (see cluster/addons/cilium.yaml).
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: adguardhome
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "30"
+spec:
+  project: default
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    chart: app-template
+    targetRevision: 3.7.3
+    helm:
+      releaseName: adguardhome
+      valuesObject:
+        controllers:
+          adguardhome:
+            strategy: Recreate
+            containers:
+              app:
+                image:
+                  repository: adguard/adguardhome
+                  tag: v0.107.55
+                resources:
+                  requests: { cpu: 50m, memory: 128Mi }
+                  limits:   { memory: 512Mi }
+        service:
+          app:
+            controller: adguardhome
+            type: LoadBalancer
+            annotations:
+              # Fix the LB IP so DHCP/clients can hard-code it as DNS.
+              io.cilium/lb-ipam-ips: 172.16.100.130
+            ports:
+              http:
+                port: 80
+                targetPort: 80
+              http-setup:
+                port: 3000
+                targetPort: 3000
+              dns-tcp:
+                port: 53
+                protocol: TCP
+                targetPort: 53
+              dns-udp:
+                port: 53
+                protocol: UDP
+                targetPort: 53
+        persistence:
+          config:
+            enabled: true
+            type: persistentVolumeClaim
+            storageClass: general
+            accessMode: ReadWriteOnce
+            size: 2Gi
+            advancedMounts:
+              adguardhome:
+                app:
+                  - path: /opt/adguardhome/conf
+                    subPath: conf
+                  - path: /opt/adguardhome/work
+                    subPath: work
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: adguardhome
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions: [CreateNamespace=true, ServerSideApply=true]
+    retry:
+      limit: 10
+      backoff: { duration: 30s, factor: 2, maxDuration: 5m }

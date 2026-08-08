@@ -8,3 +8,4 @@ resources:
   - rook-ceph-cluster.yaml
   - monitoring.yaml
   - wordpress.yaml
+  - adguardhome.yaml
