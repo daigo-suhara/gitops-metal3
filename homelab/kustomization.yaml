@@ -9,3 +9,4 @@ resources:
   - monitoring.yaml
   - wordpress.yaml
   - dashy.yaml
+  - coder.yaml

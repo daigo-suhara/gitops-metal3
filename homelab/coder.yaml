@@ -1,0 +1,102 @@
+# Coder (coder.com) — LAN-only cloud dev environment.
+# Two Applications: a Bitnami PostgreSQL HA cluster (backing DB) and the
+# Coder server itself. Sync-wave orders PG before Coder so migrations
+# don't race the DB.
+#
+# Access: http://172.16.100.103 (Cilium LB, pinned via io.cilium/lb-ipam-ips
+# on coder.coder.svc). Update CODER_ACCESS_URL below if the IP changes.
+#
+# DB creds are inline (LAN-only, homelab pattern like wordpress.yaml).
+# Rotate by editing the values below and letting ArgoCD reconcile.
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: coder-postgres
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: default
+  source:
+    repoURL: https://charts.bitnami.com/bitnami
+    chart: postgresql-ha
+    targetRevision: 16.3.2
+    helm:
+      releaseName: coder
+      valuesObject:
+        # Bitnami's public bitnami/postgresql-repmgr and bitnami/pgpool
+        # tags were removed (same 2025 change as wordpress.yaml notes).
+        # Override to bitnamilegacy/* which still ships versioned tags.
+        postgresqlImage:
+          registry: docker.io
+          repository: bitnamilegacy/postgresql-repmgr
+          tag: "17.6.0"
+        pgpoolImage:
+          registry: docker.io
+          repository: bitnamilegacy/pgpool
+          tag: latest
+          pullPolicy: Always
+        postgresql:
+          username: coder
+          password: coder-pg-pass
+          database: coder
+          repmgrPassword: coder-repmgr-pass
+        pgpool:
+          adminPassword: coder-pgpool-pass
+        persistence:
+          enabled: true
+          storageClass: general
+          size: 8Gi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: coder
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions: [CreateNamespace=true, ServerSideApply=true]
+    retry:
+      limit: 10
+      backoff: { duration: 30s, factor: 2, maxDuration: 5m }
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: coder
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  project: default
+  source:
+    repoURL: https://helm.coder.com/v2
+    chart: coder
+    targetRevision: 2.36.0
+    helm:
+      releaseName: coder
+      valuesObject:
+        coder:
+          replicaCount: 1
+          service:
+            type: LoadBalancer
+            enableNodePort: false
+            annotations:
+              io.cilium/lb-ipam-ips: "172.16.100.103"
+          env:
+            - name: CODER_PG_CONNECTION_URL
+              value: "postgres://coder:coder-pg-pass@coder-postgresql-ha-pgpool.coder.svc.cluster.local:5432/coder?sslmode=disable"
+            - name: CODER_ACCESS_URL
+              value: "http://172.16.100.103"
+            - name: CODER_WILDCARD_ACCESS_URL
+              value: "*.172.16.100.103.sslip.io"
+          resources:
+            requests: { cpu: 250m, memory: 512Mi }
+            limits:   { memory: 2Gi }
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: coder
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions: [CreateNamespace=true, ServerSideApply=true]
+    retry:
+      limit: 10
+      backoff: { duration: 30s, factor: 2, maxDuration: 5m }
