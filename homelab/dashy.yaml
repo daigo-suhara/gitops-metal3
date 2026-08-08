@@ -66,9 +66,8 @@ spec:
               conf.yml: |
                 pageInfo:
                   title: Homelab
-                  description: metal3 GitOps cluster
                 appConfig:
-                  theme: dashy-docs
+                  theme: tama
                   layout: auto
                   iconSize: medium
                   statusCheck: false
@@ -79,7 +78,7 @@ spec:
                     icon: fas fa-server
                     items:
                       - title: ArgoCD
-                        icon: hl-argocd
+                        icon: hl-argo-cd
                         url: https://argo.daigo-suhara.com
                       - title: Grafana
                         icon: hl-grafana
