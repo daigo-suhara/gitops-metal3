@@ -1,10 +1,574 @@
 @charset "UTF-8";
 /*
- Theme Name: SANGO Child
- Theme URI: https://saruwakakun.design
- Author: SARUWAKA
+ Theme Name: SANGO Child - Warm Editorial
+ Theme URI: https://github.com/daigo-suhara/gitops-metal3
+ Description: Warm dark editorial styling on top of SANGO. Kanagawa-inspired
+              code blocks, copper + celadon accents, serif headings.
+ Author: daigo-suhara (base by SARUWAKA)
  Author URI: https://saruwakakun.com
  Template: sango-theme
- Version: 4.0
+ Version: 1.0.0
 */
-/*こちらはSANGOの子テーマ用CSSです。以下にCSSを記入していきましょう。*/
+
+/* ==========================================================================
+   Design tokens
+   ========================================================================== */
+:root {
+  --we-bg:          #1a1614;
+  --we-bg-soft:     #211c19;
+  --we-bg-band:     #2a2320;
+  --we-bg-code:     #1F1F28;
+
+  --we-fg:          #e8e2d5;
+  --we-fg-strong:   #f4efe4;
+  --we-fg-muted:    #b8ac9a;
+  --we-fg-faint:    #8a8175;
+
+  --we-copper:      #c78d5f;
+  --we-copper-hi:   #dda279;
+  --we-celadon:     #7fc6a7;
+  --we-celadon-hi:  #9ed8bd;
+  --we-gold:        #DCA561;
+
+  --we-line:        #3a322c;
+  --we-line-soft:   #2c2622;
+
+  --we-inline-bg:   #2c2622;
+  --we-inline-fg:   #dda279;
+
+  --we-serif:  "Playfair Display", "Noto Serif JP", "Hiragino Mincho ProN",
+               "Yu Mincho", serif;
+  --we-sans:   "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+               "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+               "Yu Gothic", sans-serif;
+  --we-mono:   "JetBrains Mono", "SFMono-Regular", "SF Mono", Menlo,
+               Consolas, "Liberation Mono", monospace;
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+html, body {
+  background: var(--we-bg) !important;
+  color: var(--we-fg);
+}
+
+body, #container, #main-wrap, #main, .wrap {
+  background: var(--we-bg);
+  color: var(--we-fg);
+  font-family: var(--we-sans);
+  font-size: 16px;
+  line-height: 1.9;
+  font-feature-settings: "palt";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection      { background: rgba(199, 141, 95, .35); color: var(--we-fg-strong); }
+::-moz-selection { background: rgba(199, 141, 95, .35); color: var(--we-fg-strong); }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--we-bg); }
+::-webkit-scrollbar-thumb { background: var(--we-line); border-radius: 5px; }
+::-webkit-scrollbar-thumb:hover { background: #4a3f37; }
+
+/* ==========================================================================
+   Links
+   ========================================================================== */
+a, a:visited {
+  color: var(--we-celadon);
+  text-decoration: none;
+  transition: color .15s ease;
+}
+a:hover {
+  color: var(--we-celadon-hi);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.entry-content a:not(.sng-btn):not(.cbtn) {
+  border-bottom: 1px dotted rgba(127, 198, 167, .4);
+}
+.entry-content a:not(.sng-btn):not(.cbtn):hover {
+  border-bottom-color: var(--we-celadon-hi);
+  border-bottom-style: solid;
+}
+
+/* ==========================================================================
+   Headings - serif editorial
+   ========================================================================== */
+h1, h2, h3, h4, h5, h6,
+.entry-title,
+.entry-content h1,
+.entry-content h2,
+.entry-content h3,
+.entry-content h4,
+.entry-content h5,
+.entry-content h6 {
+  font-family: var(--we-serif);
+  color: var(--we-fg-strong);
+  font-weight: 700;
+  letter-spacing: .01em;
+  background: none;
+}
+
+.entry-content h2::before, .entry-content h2::after,
+.entry-content h3::before, .entry-content h3::after,
+.entry-content h4::before, .entry-content h4::after {
+  content: none !important;
+  background: none !important;
+  border: none !important;
+}
+
+.entry-title {
+  font-size: 2.1em;
+  line-height: 1.35;
+  margin: .3em 0 .6em;
+  border: none;
+}
+
+.entry-content h2 {
+  font-size: 1.7em;
+  line-height: 1.4;
+  margin: 2.6em 0 1.1em;
+  padding: 0 0 .35em;
+  border: none;
+  border-bottom: 1px solid var(--we-line);
+  position: relative;
+}
+.entry-content h2::before {
+  content: "" !important;
+  display: block;
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 3.2em;
+  height: 2px;
+  background: var(--we-copper) !important;
+}
+
+.entry-content h3 {
+  font-size: 1.32em;
+  line-height: 1.5;
+  margin: 2.2em 0 .8em;
+  padding: 0 0 0 .8em;
+  border-left: 3px solid var(--we-copper);
+  border-bottom: none;
+}
+
+.entry-content h4 {
+  font-size: 1.12em;
+  line-height: 1.5;
+  margin: 1.8em 0 .6em;
+  padding: 0;
+  border: none;
+  color: var(--we-copper-hi);
+  font-family: var(--we-sans);
+  letter-spacing: .04em;
+}
+
+.date, .post-date, .entry-date, .meta {
+  font-family: var(--we-sans);
+  font-size: .78em;
+  letter-spacing: .12em;
+  color: var(--we-fg-faint);
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   Paragraphs / lists
+   ========================================================================== */
+.entry-content p { margin: 1.2em 0; color: var(--we-fg); }
+.entry-content strong { color: var(--we-fg-strong); }
+.entry-content em { color: var(--we-copper-hi); font-style: italic; }
+
+.entry-content ul,
+.entry-content ol { margin: 1.2em 0 1.2em 1.6em; }
+.entry-content ul li,
+.entry-content ol li { margin: .35em 0; }
+.entry-content ul li::marker { color: var(--we-copper); }
+.entry-content ol li::marker { color: var(--we-copper); font-weight: 600; }
+
+/* ==========================================================================
+   Inline code
+   ========================================================================== */
+.entry-content :not(pre) > code,
+.entry-content p code,
+.entry-content li code,
+.entry-content h1 code,
+.entry-content h2 code,
+.entry-content h3 code,
+.entry-content h4 code {
+  background: var(--we-inline-bg);
+  color: var(--we-inline-fg);
+  padding: .1em .38em;
+  border-radius: 3px;
+  font-family: var(--we-mono);
+  font-size: .88em;
+  border: 1px solid var(--we-line-soft);
+  word-break: break-word;
+}
+
+/* ==========================================================================
+   Code blocks - Kanagawa Wave
+   ========================================================================== */
+.entry-content pre,
+.entry-content pre[class*="language-"] {
+  position: relative;
+  background: var(--we-bg-code);
+  color: #DCD7BA;
+  border: 1px solid #2A2A37;
+  border-radius: 4px;
+  padding: 1.1em 1.2em;
+  font-family: var(--we-mono);
+  font-size: .88em;
+  line-height: 1.65;
+  overflow-x: auto;
+  margin: 1.6em 0;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, .25);
+}
+.entry-content pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.entry-content pre[class*="language-"]::before {
+  content: attr(data-lang);
+  position: absolute;
+  top: .4em;
+  right: .8em;
+  font-size: .68em;
+  letter-spacing: .12em;
+  color: #727169;
+  text-transform: uppercase;
+  font-family: var(--we-mono);
+}
+
+/* ==========================================================================
+   Blockquote - literary
+   ========================================================================== */
+.entry-content blockquote {
+  border-left: 3px solid var(--we-copper);
+  background: var(--we-bg-soft);
+  color: var(--we-fg-muted);
+  margin: 1.8em 0;
+  padding: 1em 1.4em;
+  border-radius: 0 4px 4px 0;
+  font-family: var(--we-serif);
+  font-style: italic;
+  font-size: 1.02em;
+}
+.entry-content blockquote::before,
+.entry-content blockquote::after { content: none !important; background: none !important; }
+.entry-content blockquote p:first-child { margin-top: 0; }
+.entry-content blockquote p:last-child { margin-bottom: 0; }
+
+/* ==========================================================================
+   Tables
+   ========================================================================== */
+.entry-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.6em 0;
+  font-size: .94em;
+  background: var(--we-bg-soft);
+}
+.entry-content table th,
+.entry-content table td {
+  border: 1px solid var(--we-line);
+  padding: .65em .9em;
+  text-align: left;
+  color: var(--we-fg);
+}
+.entry-content table th {
+  background: var(--we-bg-band);
+  color: var(--we-copper-hi);
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  font-size: .82em;
+}
+.entry-content table tr:nth-child(even) td { background: rgba(255, 255, 255, .015); }
+
+/* ==========================================================================
+   Horizontal rule - hairline with copper diamond
+   ========================================================================== */
+.entry-content hr {
+  border: none;
+  height: 1px;
+  background: var(--we-line);
+  margin: 2.6em 0;
+  position: relative;
+  overflow: visible;
+}
+.entry-content hr::before {
+  content: "\25C6";
+  position: absolute;
+  top: -.65em;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--we-bg);
+  color: var(--we-copper);
+  padding: 0 .6em;
+  font-size: .7em;
+}
+
+/* ==========================================================================
+   Article container
+   ========================================================================== */
+.article, #main .post, .article-inner {
+  background: var(--we-bg) !important;
+  color: var(--we-fg);
+  box-shadow: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+/* ==========================================================================
+   Header / nav
+   ========================================================================== */
+#header-wrap, #header, .header, header,
+.gnav, .gnav-menu-in, #gnav {
+  background: var(--we-bg) !important;
+  color: var(--we-fg);
+  border-bottom: 1px solid var(--we-line-soft);
+  box-shadow: none !important;
+}
+#header a, .gnav a, .gnav-menu-in a, #gnav a {
+  color: var(--we-fg-strong) !important;
+}
+#header a:hover, .gnav a:hover, .gnav-menu-in a:hover {
+  color: var(--we-copper-hi) !important;
+}
+.logo-text, .site-title, #site-title, .site-name {
+  font-family: var(--we-serif);
+  color: var(--we-fg-strong) !important;
+  letter-spacing: .02em;
+}
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+#footer, #footer-in, footer {
+  background: var(--we-bg-soft) !important;
+  color: var(--we-fg-muted);
+  border-top: 1px solid var(--we-line-soft);
+}
+#footer a { color: var(--we-fg-muted); }
+#footer a:hover { color: var(--we-celadon-hi); }
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+.sng-btn, .cbtn, .btn-flat-logo,
+button, input[type="submit"] {
+  background: var(--we-copper) !important;
+  color: #1a1614 !important;
+  border-radius: 3px;
+  border: 1px solid var(--we-copper) !important;
+  box-shadow: none !important;
+  font-family: var(--we-sans);
+  font-weight: 600;
+  letter-spacing: .04em;
+  transition: background .15s, color .15s, transform .1s;
+}
+.sng-btn:hover, .cbtn:hover, button:hover, input[type="submit"]:hover {
+  background: var(--we-copper-hi) !important;
+  border-color: var(--we-copper-hi) !important;
+  color: #1a1614 !important;
+  transform: translateY(-1px);
+}
+
+input[type="text"], input[type="email"], input[type="url"],
+input[type="password"], input[type="search"],
+textarea, select {
+  background: var(--we-bg-soft) !important;
+  color: var(--we-fg) !important;
+  border: 1px solid var(--we-line) !important;
+  border-radius: 3px;
+  padding: .55em .7em;
+  font-family: var(--we-sans);
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--we-copper) !important;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(199, 141, 95, .25);
+}
+
+/* ==========================================================================
+   Post list / cards
+   ========================================================================== */
+.post-list-wrap .post,
+.post-list article,
+.list-panel {
+  background: var(--we-bg-soft) !important;
+  border: 1px solid var(--we-line-soft) !important;
+  border-radius: 4px;
+  box-shadow: none !important;
+  transition: transform .15s, box-shadow .15s, border-color .15s;
+}
+.post-list-wrap .post:hover,
+.post-list article:hover {
+  transform: translateY(-2px);
+  border-color: var(--we-copper);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
+}
+
+.entry-title a,
+.post-list .entry-title a {
+  color: var(--we-fg-strong);
+  font-family: var(--we-serif);
+}
+.entry-title a:hover { color: var(--we-copper-hi); }
+
+.cat, .cat-name, .category, .tag {
+  background: var(--we-bg-band) !important;
+  color: var(--we-celadon) !important;
+  border: 1px solid var(--we-line);
+  border-radius: 2px;
+  padding: .1em .55em;
+  font-size: .75em;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  font-family: var(--we-sans);
+}
+
+/* ==========================================================================
+   TOC
+   ========================================================================== */
+.toc, #toc, .ez-toc {
+  background: var(--we-bg-soft) !important;
+  border: 1px solid var(--we-line-soft) !important;
+  border-radius: 4px;
+  padding: 1em 1.3em;
+  color: var(--we-fg);
+}
+.toc a, #toc a, .ez-toc a { color: var(--we-fg-muted); border: none; }
+.toc a:hover, #toc a:hover { color: var(--we-copper-hi); }
+.toc_title, .toc-title, .ez-toc-title {
+  font-family: var(--we-serif) !important;
+  color: var(--we-copper-hi) !important;
+  border-bottom: 1px solid var(--we-line);
+  padding-bottom: .3em;
+}
+
+/* ==========================================================================
+   Sidebar
+   ========================================================================== */
+#sidebar, .sidebar { color: var(--we-fg-muted); }
+#sidebar .widget, .sidebar .widget {
+  background: transparent !important;
+  border: none !important;
+  padding: 1em 0;
+}
+#sidebar .widget h3, #sidebar .widget h4,
+.sidebar .widget h3, .sidebar .widget h4 {
+  font-family: var(--we-sans);
+  font-size: .78em;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--we-fg-faint) !important;
+  border: none !important;
+  border-bottom: 1px solid var(--we-line-soft) !important;
+  padding-bottom: .4em;
+  background: none !important;
+  margin-bottom: .8em;
+}
+#sidebar a, .sidebar a { color: var(--we-fg); }
+#sidebar a:hover, .sidebar a:hover { color: var(--we-copper-hi); }
+
+/* ==========================================================================
+   Images
+   ========================================================================== */
+.entry-content img {
+  border-radius: 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .35);
+}
+
+/* ==========================================================================
+   Focus visible
+   ========================================================================== */
+a:focus-visible, button:focus-visible, input:focus-visible {
+  outline: 2px solid var(--we-copper);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ==========================================================================
+   Prism.js - Kanagawa Wave
+   ========================================================================== */
+pre[class*="language-"],
+code[class*="language-"] {
+  background: var(--we-bg-code) !important;
+  color: #DCD7BA !important;
+  text-shadow: none !important;
+}
+
+.token.comment, .token.prolog, .token.doctype, .token.cdata
+                        { color: #727169 !important; font-style: italic; }
+.token.punctuation      { color: #C8C093 !important; }
+.token.property, .token.tag, .token.constant,
+.token.symbol, .token.deleted
+                        { color: #E46876 !important; }
+.token.boolean, .token.number
+                        { color: #FF9E3B !important; }
+.token.selector, .token.attr-name, .token.string,
+.token.char, .token.builtin, .token.inserted
+                        { color: #98BB6C !important; }
+.token.operator, .token.entity, .token.url,
+.language-css .token.string, .style .token.string
+                        { color: #C0A36E !important; }
+.token.atrule, .token.attr-value, .token.keyword
+                        { color: #957FB8 !important; }
+.token.function, .token.class-name
+                        { color: #7E9CD8 !important; }
+.token.regex, .token.important, .token.variable
+                        { color: #DCA561 !important; }
+
+pre[class*="language-"].line-numbers { padding-left: 3.6em !important; }
+.line-numbers .line-numbers-rows {
+  border-right: 1px solid #2A2A37 !important;
+  color: #54546D !important;
+}
+
+/* ==========================================================================
+   Comments / pagination
+   ========================================================================== */
+.comment-body, #comments, .comment-form,
+.pagination, .wp-pagenavi {
+  background: var(--we-bg-soft) !important;
+  color: var(--we-fg);
+  border-color: var(--we-line-soft) !important;
+}
+.wp-pagenavi a, .pagination a {
+  background: var(--we-bg-band) !important;
+  color: var(--we-fg) !important;
+  border: 1px solid var(--we-line) !important;
+  border-radius: 2px;
+}
+.wp-pagenavi a:hover {
+  background: var(--we-copper) !important;
+  color: #1a1614 !important;
+  border-color: var(--we-copper) !important;
+}
+.wp-pagenavi .current {
+  background: var(--we-copper) !important;
+  color: #1a1614 !important;
+  border-color: var(--we-copper) !important;
+}
+
+/* Editorial drop cap on the first paragraph of a single post */
+.single .entry-content > p:first-of-type::first-letter {
+  font-family: var(--we-serif);
+  font-size: 3.6em;
+  float: left;
+  line-height: .9;
+  padding: .05em .12em 0 0;
+  color: var(--we-copper);
+  font-weight: 700;
+}
