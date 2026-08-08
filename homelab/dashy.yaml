@@ -68,7 +68,7 @@ spec:
                   title: Homelab
                   description: metal3 GitOps cluster
                 appConfig:
-                  theme: nord-frost
+                  theme: dashy-docs
                   layout: auto
                   iconSize: medium
                   statusCheck: false
@@ -80,19 +80,16 @@ spec:
                     items:
                       - title: ArgoCD
                         icon: si-argo
-                        url: http://argocd.local
+                        url: https://argo.daigo-suhara.com
                       - title: Grafana
                         icon: si-grafana
-                        url: http://grafana.local
-                      - title: Ceph Dashboard
-                        icon: si-ceph
-                        url: http://ceph.local
+                        url: https://monitor.daigo-suhara.com
                   - name: Homelab apps
                     icon: fas fa-house
                     items:
                       - title: WordPress
                         icon: si-wordpress
-                        url: http://wordpress.local
+                        url: https://daigo-suhara.com
         persistence:
           config:
             enabled: true
