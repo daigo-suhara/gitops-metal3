@@ -79,16 +79,16 @@ spec:
                     icon: fas fa-server
                     items:
                       - title: ArgoCD
-                        icon: si-argo
+                        icon: hl-argocd
                         url: https://argo.daigo-suhara.com
                       - title: Grafana
-                        icon: si-grafana
+                        icon: hl-grafana
                         url: https://monitor.daigo-suhara.com
                   - name: Homelab apps
                     icon: fas fa-house
                     items:
                       - title: WordPress
-                        icon: si-wordpress
+                        icon: hl-wordpress
                         url: https://daigo-suhara.com
         persistence:
           config:
