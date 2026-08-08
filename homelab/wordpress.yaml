@@ -28,6 +28,7 @@ spec:
           pullPolicy: Always
         wordpressUsername: admin
         wordpressPassword: admin
+        wordpressEmail: suharadaigo@gmail.com
         wordpressBlogName: homelab
         wordpressScheme: http
         service:
