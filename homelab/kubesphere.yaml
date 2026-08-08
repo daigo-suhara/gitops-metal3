@@ -1,0 +1,50 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kubesphere
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "30"
+spec:
+  project: default
+  sources:
+    # ks-core v4 Helm chart is only published as a source tree in the
+    # kubesphere/kubesphere repo — there is no working https/OCI chart
+    # index for it. Pin to the helm-chart-1.1.5 tag (KubeSphere v4.1.3).
+    - repoURL: https://github.com/kubesphere/kubesphere.git
+      targetRevision: helm-chart-1.1.5
+      path: config/ks-core
+      helm:
+        releaseName: ks-core
+        valuesObject:
+          authentication:
+            # Initial admin password. Must satisfy KubeSphere's complexity
+            # rule (>=8 chars, upper+lower+digit+special). Login: admin.
+            adminPassword: "P@88w0rd"
+          console:
+            # Keep the built-in NodePort (30880) alongside the LB Service
+            # below, so the console stays reachable even if IPAM is down.
+            nodePort: 30880
+          # The upstream chart pins nodeAffinity to control-plane nodes.
+          # This homelab schedules workloads on the worker pool, so drop
+          # the preference and let the scheduler place freely.
+          affinity: {}
+    - repoURL: https://github.com/daigo-suhara/gitops-metal3.git
+      targetRevision: HEAD
+      path: homelab/kubesphere
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kubesphere-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 10
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m
