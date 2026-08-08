@@ -31,6 +31,10 @@ spec:
         wordpressEmail: suharadaigo@gmail.com
         wordpressBlogName: homelab
         wordpressScheme: http
+        # RWO PVC + RollingUpdate blocks new pods (can't multi-attach the
+        # volume). Recreate = old pod releases the PVC before new one starts.
+        updateStrategy:
+          type: Recreate
         service:
           type: LoadBalancer
           ports:
