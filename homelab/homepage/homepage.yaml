@@ -24,15 +24,25 @@ data:
   services.yaml: |
     - Cluster:
         - ArgoCD:
+            description: GitOps control plane
             href: https://argo.daigo-suhara.com
             icon: mdi-source-branch
         - Grafana:
+            description: Monitoring and dashboards
             href: https://monitor.daigo-suhara.com
-            icon: mdi-chart-line
+            icon: si-grafana
+            widget:
+              type: grafana
+              version: 2
+              url: http://monitoring-grafana.monitoring.svc.cluster.local
+              username: admin
+              password: admin
+              fields: ["dashboards", "datasources", "totalalerts", "alertstriggered"]
     - Apps:
         - WordPress:
+            description: Public homelab site
             href: https://daigo-suhara.com
-            icon: mdi-wordpress
+            icon: si-wordpress
 ---
 apiVersion: v1
 kind: ServiceAccount
