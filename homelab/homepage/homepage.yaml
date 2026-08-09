@@ -35,8 +35,6 @@ data:
               type: grafana
               version: 2
               url: http://monitoring-grafana.monitoring.svc.cluster.local
-              username: admin
-              password: admin
               fields: ["dashboards", "datasources", "totalalerts", "alertstriggered"]
     - Apps:
         - WordPress:
