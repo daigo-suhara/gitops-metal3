@@ -1,0 +1,112 @@
+# Dashy homelab dashboard. Exposed via Cilium L2 LoadBalancer on a fixed
+# LAN IP so it can be bookmarked directly.
+#
+# Config lives in Git as a ConfigMap mounted read-only at
+# /app/user-data/conf.yml. To change the dashboard, edit conf.yml in the
+# configMaps block below and let ArgoCD reconcile (the strategy=Recreate
+# controller will roll the pod so Dashy re-reads it on boot).
+#
+# Cilium LB pool is 172.16.100.100-149 (see cluster/addons/cilium.yaml).
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dashy
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "30"
+spec:
+  project: default
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    chart: app-template
+    targetRevision: 3.7.3
+    helm:
+      releaseName: dashy
+      valuesObject:
+        controllers:
+          dashy:
+            strategy: Recreate
+            containers:
+              app:
+                image:
+                  repository: lissy93/dashy
+                  tag: 4.5.7
+                probes:
+                  liveness:
+                    enabled: true
+                    custom: true
+                    spec:
+                      httpGet: { path: /, port: 8080 }
+                      initialDelaySeconds: 60
+                      periodSeconds: 30
+                  readiness:
+                    enabled: true
+                    custom: true
+                    spec:
+                      httpGet: { path: /, port: 8080 }
+                      initialDelaySeconds: 30
+                      periodSeconds: 15
+                resources:
+                  requests: { cpu: 50m, memory: 128Mi }
+                  limits:   { memory: 512Mi }
+        service:
+          app:
+            controller: dashy
+            type: LoadBalancer
+            annotations:
+              io.cilium/lb-ipam-ips: 172.16.100.131
+            ports:
+              http:
+                port: 80
+                targetPort: 8080
+        configMaps:
+          config:
+            enabled: true
+            data:
+              conf.yml: |
+                pageInfo:
+                  title: Homelab
+                appConfig:
+                  theme: tama
+                  layout: auto
+                  iconSize: medium
+                  statusCheck: true
+                  statusCheckInterval: 30
+                  hideComponents:
+                    hideSettings: false
+                sections:
+                  - name: Cluster
+                    icon: fas fa-server
+                    items:
+                      - title: ArgoCD
+                        icon: hl-argo-cd
+                        url: https://argo.daigo-suhara.com
+                      - title: Grafana
+                        icon: hl-grafana
+                        url: https://monitor.daigo-suhara.com
+                  - name: Apps
+                    icon: fas fa-house
+                    items:
+                      - title: WordPress
+                        icon: hl-wordpress
+                        url: https://daigo-suhara.com
+        persistence:
+          config:
+            enabled: true
+            type: configMap
+            name: dashy-config
+            advancedMounts:
+              dashy:
+                app:
+                  - path: /app/user-data/conf.yml
+                    subPath: conf.yml
+                    readOnly: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dashy
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions: [CreateNamespace=true, ServerSideApply=true]
+    retry:
+      limit: 10
+      backoff: { duration: 30s, factor: 2, maxDuration: 5m }
