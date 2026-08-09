@@ -1,0 +1,25 @@
+# Namespace-scoped RBAC that lets the coder server SA create workspace
+# Pods/PVCs/Services in the coder namespace. Required before the
+# Kubernetes starter template will provision anything.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: coder-workspaces
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "15"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/daigo-suhara/gitops-metal3.git
+    targetRevision: HEAD
+    path: homelab/coder-workspaces
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: coder
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions: [ServerSideApply=true]
+    retry:
+      limit: 10
+      backoff: { duration: 30s, factor: 2, maxDuration: 5m }

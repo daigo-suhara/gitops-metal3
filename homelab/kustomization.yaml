@@ -10,3 +10,4 @@ resources:
   - wordpress.yaml
   - dashy.yaml
   - coder.yaml
+  - coder-workspaces.yaml
