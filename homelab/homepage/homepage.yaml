@@ -26,16 +26,16 @@ data:
         - ArgoCD:
             description: GitOps control plane
             href: https://argo.daigo-suhara.com
-            icon: https://raw.githubusercontent.com/argoproj/argo-cd/master/docs/assets/argo.png?v=20260809
+            icon: https://api.iconify.design/devicon:argocd.svg
         - Grafana:
             description: Monitoring and dashboards
             href: https://monitor.daigo-suhara.com
-            icon: https://raw.githubusercontent.com/grafana/grafana/main/public/img/grafana_icon.svg?v=20260809
+            icon: https://api.iconify.design/logos:grafana.svg
     - Apps:
         - WordPress:
             description: Public homelab site
             href: https://daigo-suhara.com
-            icon: https://wordpress.org/files/2023/02/wmark.png?v=20260809
+            icon: https://api.iconify.design/logos:wordpress-icon.svg
 ---
 apiVersion: v1
 kind: ServiceAccount
