@@ -26,11 +26,11 @@ data:
         - ArgoCD:
             description: GitOps control plane
             href: https://argo.daigo-suhara.com
-            icon: mdi-source-branch
+            icon: https://raw.githubusercontent.com/argoproj/argo-cd/master/docs/assets/argo.png
         - Grafana:
             description: Monitoring and dashboards
             href: https://monitor.daigo-suhara.com
-            icon: si-grafana
+            icon: https://raw.githubusercontent.com/grafana/grafana/main/public/img/grafana_icon.svg
             widget:
               type: grafana
               version: 2
@@ -42,7 +42,7 @@ data:
         - WordPress:
             description: Public homelab site
             href: https://daigo-suhara.com
-            icon: si-wordpress
+            icon: https://s.w.org/style/images/about/WordPress-logotype-standard.png
 ---
 apiVersion: v1
 kind: ServiceAccount
