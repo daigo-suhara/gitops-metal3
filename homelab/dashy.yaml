@@ -70,7 +70,8 @@ spec:
                   theme: tama
                   layout: auto
                   iconSize: medium
-                  statusCheck: false
+                  statusCheck: true
+                  statusCheckInterval: 30
                   hideComponents:
                     hideSettings: false
                 sections:
@@ -89,6 +90,17 @@ spec:
                       - title: WordPress
                         icon: hl-wordpress
                         url: https://daigo-suhara.com
+                  - name: Cluster metrics
+                    icon: fas fa-chart-line
+                    widgets:
+                      - type: iframe
+                        options:
+                          url: https://monitor.daigo-suhara.com/d/efa86fd1d0c121a26444b636a3f509a8?orgId=1&refresh=30s&kiosk=tv&theme=dark
+                          frameHeight: 600
+                      - type: iframe
+                        options:
+                          url: https://monitor.daigo-suhara.com/d/ff635a025bcfea7bc3dd4f508990a3e9?orgId=1&refresh=30s&kiosk=tv&theme=dark
+                          frameHeight: 600
         persistence:
           config:
             enabled: true

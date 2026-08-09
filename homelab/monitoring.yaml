@@ -27,6 +27,11 @@ spec:
               default_language: ja-JP
             dashboards:
               default_home_dashboard_path: /var/lib/grafana/dashboards/default/node-exporter-full.json
+            security:
+              allow_embedding: true
+            auth.anonymous:
+              enabled: true
+              org_role: Viewer
           dashboardProviders:
             dashboardproviders.yaml:
               apiVersion: 1
