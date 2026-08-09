@@ -20,33 +20,30 @@ spec:
   project: default
   source:
     repoURL: https://charts.bitnami.com/bitnami
-    chart: postgresql-ha
-    targetRevision: 16.3.2
+    chart: postgresql
+    targetRevision: 18.4.0
     helm:
       releaseName: coder
       valuesObject:
-        # Bitnami's public bitnami/postgresql-repmgr and bitnami/pgpool
-        # tags were removed (same 2025 change as wordpress.yaml notes).
-        # Override to bitnamilegacy/* which still ships versioned tags.
-        postgresql:
-          image:
-            registry: docker.io
-            repository: bitnamilegacy/postgresql-repmgr
-            tag: "17.6.0-debian-12-r2"
+        # Bitnami public bitnami/postgresql tags were dropped in 2025;
+        # use bitnamilegacy/* which still ships versioned tags.
+        image:
+          registry: docker.io
+          repository: bitnamilegacy/postgresql
+          tag: "17.6.0-debian-12-r4"
+        auth:
           username: coder
           password: coder-pg-pass
           database: coder
-          repmgrPassword: coder-repmgr-pass
-        pgpool:
-          image:
-            registry: docker.io
-            repository: bitnamilegacy/pgpool
-            tag: "4.6.3-debian-12-r0"
-          adminPassword: coder-pgpool-pass
-        persistence:
-          enabled: true
-          storageClass: general
-          size: 8Gi
+          postgresPassword: coder-super-pass
+        primary:
+          persistence:
+            enabled: true
+            storageClass: general
+            size: 8Gi
+          resources:
+            requests: { cpu: 100m, memory: 256Mi }
+            limits:   { memory: 1Gi }
   destination:
     server: https://kubernetes.default.svc
     namespace: coder
@@ -82,7 +79,7 @@ spec:
               io.cilium/lb-ipam-ips: "172.16.100.103"
           env:
             - name: CODER_PG_CONNECTION_URL
-              value: "postgres://coder:coder-pg-pass@coder-postgresql-ha-pgpool.coder.svc.cluster.local:5432/coder?sslmode=disable"
+              value: "postgres://coder:coder-pg-pass@coder-postgresql.coder.svc.cluster.local:5432/coder?sslmode=disable"
             - name: CODER_ACCESS_URL
               value: "http://172.16.100.103"
             - name: CODER_WILDCARD_ACCESS_URL
