@@ -84,7 +84,7 @@ spec:
                       - title: Grafana
                         icon: hl-grafana
                         url: https://monitor.daigo-suhara.com
-                  - name: Homelab apps
+                  - name: Apps
                     icon: fas fa-house
                     items:
                       - title: WordPress
