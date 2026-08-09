@@ -35,7 +35,7 @@ data:
         - WordPress:
             description: Public homelab site
             href: https://daigo-suhara.com
-            icon: https://api.iconify.design/logos:wordpress-icon.svg
+            icon: https://api.iconify.design/devicon:wordpress.svg
 ---
 apiVersion: v1
 kind: ServiceAccount
