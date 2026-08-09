@@ -10,14 +10,14 @@ data:
     - Cluster:
         - ArgoCD:
             href: https://argo.daigo-suhara.com
-            icon: hl-argo-cd
+            icon: mdi-source-branch
         - Grafana:
             href: https://monitor.daigo-suhara.com
-            icon: hl-grafana
+            icon: mdi-chart-line
     - Apps:
         - WordPress:
             href: https://daigo-suhara.com
-            icon: hl-wordpress
+            icon: mdi-wordpress
 ---
 apiVersion: apps/v1
 kind: Deployment
