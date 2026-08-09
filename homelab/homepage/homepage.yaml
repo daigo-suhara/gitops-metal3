@@ -26,21 +26,16 @@ data:
         - ArgoCD:
             description: GitOps control plane
             href: https://argo.daigo-suhara.com
-            icon: https://raw.githubusercontent.com/argoproj/argo-cd/master/docs/assets/argo.png
+            icon: https://raw.githubusercontent.com/argoproj/argo-cd/master/docs/assets/argo.png?v=20260809
         - Grafana:
             description: Monitoring and dashboards
             href: https://monitor.daigo-suhara.com
-            icon: https://raw.githubusercontent.com/grafana/grafana/main/public/img/grafana_icon.svg
-            widget:
-              type: grafana
-              version: 2
-              url: http://monitoring-grafana.monitoring.svc.cluster.local
-              fields: ["dashboards", "datasources", "totalalerts", "alertstriggered"]
+            icon: https://raw.githubusercontent.com/grafana/grafana/main/public/img/grafana_icon.svg?v=20260809
     - Apps:
         - WordPress:
             description: Public homelab site
             href: https://daigo-suhara.com
-            icon: https://s.w.org/style/images/about/WordPress-logotype-standard.png
+            icon: https://wordpress.org/files/2023/02/wmark.png?v=20260809
 ---
 apiVersion: v1
 kind: ServiceAccount
