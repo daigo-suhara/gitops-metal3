@@ -43,7 +43,7 @@ spec:
           image: ghcr.io/gethomepage/homepage:latest
           env:
             - name: HOMEPAGE_ALLOWED_HOSTS
-              value: 172.16.100.131
+              value: home.daigo-suhara.com,172.16.100.131
           ports:
             - name: http
               containerPort: 3000
