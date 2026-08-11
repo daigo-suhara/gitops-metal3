@@ -4,6 +4,18 @@ export KUBECONFIG ?= /tmp/homelab-kubeconfig
 help:
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sed 's/:.*##/ - /'
 
+.PHONY: hermes-status
+hermes-status: ## show the local Hermes and llama.cpp workload status
+	@kubectl -n hermes get pods,pvc,svc
+
+.PHONY: hermes-logs
+hermes-logs: ## follow local llama.cpp model download and inference logs
+	@kubectl -n hermes logs deploy/llama-cpp --follow
+
+.PHONY: hermes-chat
+hermes-chat: ## open Hermes' local terminal UI in the running Pod
+	@kubectl -n hermes exec -it deploy/hermes -- /opt/hermes/.venv/bin/hermes
+
 .PHONY: seal-cloudflared-token
 seal-cloudflared-token: ## usage: make seal-cloudflared-token TOKEN=<cloudflare-token>
 	@test -n "$(TOKEN)" || (echo "TOKEN is required. usage: make $@ TOKEN=xxx" && exit 1)

@@ -79,14 +79,14 @@ spec:
         taints: []
         kubeletExtraArgs:
           - name: node-labels
-            value: 'metal3.io/uuid={{ ds.meta_data.uuid }},openstack-control-plane=enabled,openstack-compute-node=enabled,openvswitch=enabled,linuxbridge=enabled,ceph-mon=enabled,ceph-mgr=enabled,ceph-osd=enabled,ceph-mds=enabled'
+            value: 'metal3.io/uuid={{ ds.meta_data.uuid }},ceph-mon=enabled,ceph-mgr=enabled,ceph-osd=enabled,ceph-mds=enabled'
     joinConfiguration:
       controlPlane: {}
       nodeRegistration:
         taints: []
         kubeletExtraArgs:
           - name: node-labels
-            value: 'metal3.io/uuid={{ ds.meta_data.uuid }},openstack-control-plane=enabled,openstack-compute-node=enabled,openvswitch=enabled,linuxbridge=enabled,ceph-mon=enabled,ceph-mgr=enabled,ceph-osd=enabled,ceph-mds=enabled'
+            value: 'metal3.io/uuid={{ ds.meta_data.uuid }},ceph-mon=enabled,ceph-mgr=enabled,ceph-osd=enabled,ceph-mds=enabled'
     preKubeadmCommands:
       - curl -fsSL https://raw.githubusercontent.com/daigo-suhara/gitops-metal3/main/scripts/install-kubernetes.sh | bash
     files:

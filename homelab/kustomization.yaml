@@ -11,3 +11,4 @@ resources:
   - dashy.yaml
   - coder.yaml
   - coder-workspaces.yaml
+  - hermes.yaml

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hermes-config
+data:
+  config.yaml: |
+    model:
+      provider: custom
+      default: gemma-4-e4b-local
+      base_url: http://llama-cpp.hermes.svc.cluster.local:8080/v1
+      api_key: local
+      context_length: 65536
