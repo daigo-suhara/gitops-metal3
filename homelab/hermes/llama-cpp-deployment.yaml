@@ -33,6 +33,14 @@ spec:
             - qwen3-4b-local
             - --ctx-size
             - "65536"
+            # Qwen3 otherwise starts a long reasoning block even for casual
+            # chat. Hermes only has CPU inference, so keep ordinary replies
+            # responsive and reserve reasoning for a future dedicated model.
+            - --reasoning-budget
+            - "0"
+            # One personal chat does not benefit from multiple 64k slots.
+            - --parallel
+            - "1"
             - --jinja
             - --host
             - 0.0.0.0
