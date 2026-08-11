@@ -31,12 +31,10 @@ spec:
         wordpressEmail: suharadaigo@gmail.com
         wordpressBlogName: homelab
         wordpressScheme: http
-        # Temporary migration phase: stop writes before copying the existing
-        # RBD-backed WordPress files to the prepared CephFS claim.
-        replicaCount: 0
-        # The RWX claim is prepared before the one-time data migration. It is
-        # kept in this Helm release so the WordPress application remains the
-        # sole owner of its persistent storage.
+        # CephFS is shared storage, so WordPress web pods can run on separate
+        # nodes. The original RBD PVC is retained separately for rollback.
+        replicaCount: 2
+        podAntiAffinityPreset: hard
         extraDeploy:
           - apiVersion: v1
             kind: PersistentVolumeClaim
@@ -48,19 +46,15 @@ spec:
               resources:
                 requests:
                   storage: 10Gi
-        # RWO PVC + RollingUpdate blocks new pods (can't multi-attach the
-        # volume). Recreate = old pod releases the PVC before new one starts.
         updateStrategy:
-          type: Recreate
+          type: RollingUpdate
         service:
           type: LoadBalancer
           ports:
             http: 80
         persistence:
           enabled: true
-          storageClass: general
-          accessModes: [ReadWriteOnce]
-          size: 10Gi
+          existingClaim: wordpress-rwx
         resources:
           requests: { cpu: 100m, memory: 512Mi }
           limits:   { memory: 1Gi }
