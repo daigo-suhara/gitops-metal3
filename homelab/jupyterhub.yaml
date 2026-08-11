@@ -30,15 +30,24 @@ spec:
             pvc:
               storageClassName: general
               storage: 1Gi
+          # Cilium's policy enforcement blocks the Hub's API-server traffic
+          # with the chart's generated policy on this bare-metal network.
+          networkPolicy:
+            enabled: false
           resources:
             requests: { cpu: 250m, memory: 512Mi }
             limits: { memory: 2Gi }
         proxy:
+          chp:
+            networkPolicy:
+              enabled: false
           service:
             type: LoadBalancer
             annotations:
               io.cilium/lb-ipam-ips: 172.16.100.103
         singleuser:
+          networkPolicy:
+            enabled: false
           storage:
             capacity: 10Gi
             dynamic:
