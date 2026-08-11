@@ -40,14 +40,13 @@ spec:
             - name: XDG_CACHE_HOME
               value: /models/.cache
           resources:
-            requests: { cpu: "4", memory: 12Gi }
+            requests: { cpu: "1", memory: 12Gi }
             limits: { cpu: "16", memory: 24Gi }
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
               drop: [ALL]
             readOnlyRootFilesystem: true
-            runAsNonRoot: true
           startupProbe:
             httpGet: { path: /health, port: http }
             failureThreshold: 90
