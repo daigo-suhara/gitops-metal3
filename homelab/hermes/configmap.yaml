@@ -12,4 +12,6 @@ data:
       default: qwen3-4b-local
       base_url: http://llama-cpp.hermes.svc.cluster.local:8080/v1
       api_key: local
-      context_length: 16384
+      # Hermes Agent requires a 64k-token context window. Qwen3 supports this
+      # server window while retaining substantially smaller model weights.
+      context_length: 65536

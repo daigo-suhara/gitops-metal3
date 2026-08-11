@@ -32,7 +32,7 @@ spec:
             - --alias
             - qwen3-4b-local
             - --ctx-size
-            - "16384"
+            - "65536"
             - --jinja
             - --host
             - 0.0.0.0
