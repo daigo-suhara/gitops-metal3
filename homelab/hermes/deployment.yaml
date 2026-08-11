@@ -18,6 +18,9 @@ spec:
         app.kubernetes.io/name: hermes
     spec:
       automountServiceAccountToken: false
+      # Avoid the hermes-dashboard Service injecting HERMES_DASHBOARD_PORT as
+      # a tcp:// URL; Hermes expects that variable to be a numeric port.
+      enableServiceLinks: false
       securityContext:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
