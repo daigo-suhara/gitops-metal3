@@ -9,6 +9,5 @@ resources:
   - monitoring.yaml
   - wordpress.yaml
   - dashy.yaml
-  - coder.yaml
-  - coder-workspaces.yaml
+  - jupyterhub.yaml
   - hermes.yaml

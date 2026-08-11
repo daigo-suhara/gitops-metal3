@@ -1,0 +1,65 @@
+# JupyterHub — LAN-only multi-user notebook environment.
+#
+# Access: http://172.16.100.103 (Cilium LoadBalancer). User home directories
+# and the Hub database are persisted on the Rook-Ceph "general" StorageClass.
+# The default DummyAuthenticator is intentionally retained for this LAN-only
+# homelab deployment; configure a real authenticator before exposing it outside
+# the trusted network.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: jupyterhub
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  project: default
+  source:
+    repoURL: https://hub.jupyter.org/helm-chart/
+    chart: jupyterhub
+    targetRevision: 4.4.0
+    helm:
+      releaseName: jupyterhub
+      valuesObject:
+        hub:
+          config:
+            JupyterHub:
+              admin_access: true
+              authenticator_class: dummy
+          db:
+            pvc:
+              storageClassName: general
+              storage: 1Gi
+          resources:
+            requests: { cpu: 250m, memory: 512Mi }
+            limits: { memory: 2Gi }
+        proxy:
+          service:
+            type: LoadBalancer
+            annotations:
+              io.cilium/lb-ipam-ips: 172.16.100.103
+        singleuser:
+          storage:
+            capacity: 10Gi
+            dynamic:
+              storageClass: general
+          cpu:
+            guarantee: 0.25
+            limit: 1
+          memory:
+            guarantee: 512M
+            limit: 2G
+        scheduling:
+          userScheduler:
+            enabled: false
+          userPlaceholder:
+            enabled: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: jupyterhub
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions: [CreateNamespace=true, ServerSideApply=true]
+    retry:
+      limit: 10
+      backoff: { duration: 30s, factor: 2, maxDuration: 5m }
