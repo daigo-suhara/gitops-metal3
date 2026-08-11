@@ -8,7 +8,6 @@ resources:
   - rook-ceph-cluster.yaml
   - monitoring.yaml
   - wordpress.yaml
-  - wordpress-storage.yaml
   - dashy.yaml
   - coder.yaml
   - coder-workspaces.yaml

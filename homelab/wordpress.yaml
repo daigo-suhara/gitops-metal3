@@ -31,6 +31,20 @@ spec:
         wordpressEmail: suharadaigo@gmail.com
         wordpressBlogName: homelab
         wordpressScheme: http
+        # The RWX claim is prepared before the one-time data migration. It is
+        # kept in this Helm release so the WordPress application remains the
+        # sole owner of its persistent storage.
+        extraDeploy:
+          - apiVersion: v1
+            kind: PersistentVolumeClaim
+            metadata:
+              name: wordpress-rwx
+            spec:
+              accessModes: [ReadWriteMany]
+              storageClassName: cephfs
+              resources:
+                requests:
+                  storage: 10Gi
         # RWO PVC + RollingUpdate blocks new pods (can't multi-attach the
         # volume). Recreate = old pod releases the PVC before new one starts.
         updateStrategy:
