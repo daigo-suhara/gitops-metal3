@@ -48,13 +48,6 @@ spec:
           resources:
             requests: { cpu: 250m, memory: 512Mi }
             limits: { cpu: "2", memory: 2Gi }
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop: [ALL]
-              # The image's s6 entrypoint drops from root to the hermes user
-              # and fixes ownership of its data directory during startup.
-              add: [CHOWN, SETGID, SETUID]
           livenessProbe:
             httpGet: { path: /health, port: gateway }
             initialDelaySeconds: 20
