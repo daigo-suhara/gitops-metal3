@@ -31,6 +31,9 @@ spec:
         wordpressEmail: suharadaigo@gmail.com
         wordpressBlogName: homelab
         wordpressScheme: http
+        # Temporary migration phase: stop writes before copying the existing
+        # RBD-backed WordPress files to the prepared CephFS claim.
+        replicaCount: 0
         # The RWX claim is prepared before the one-time data migration. It is
         # kept in this Helm release so the WordPress application remains the
         # sole owner of its persistent storage.
