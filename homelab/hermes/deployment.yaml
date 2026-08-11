@@ -52,7 +52,6 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: [ALL]
-            readOnlyRootFilesystem: true
           livenessProbe:
             httpGet: { path: /health, port: gateway }
             initialDelaySeconds: 20
