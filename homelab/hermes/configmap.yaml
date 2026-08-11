@@ -4,9 +4,15 @@ metadata:
   name: hermes-config
 data:
   config.yaml: |
-    # MoA uses cloud reference models. Keep this installation fully local.
-    disabled_toolsets:
-      - moa
+    # Start as a responsive, local personal chat. The default platform bundle
+    # exposes dozens of tool schemas and makes CPU prompt processing take
+    # minutes. Enable individual toolsets later when they are needed.
+    toolsets: []
+    agent:
+      # MoA uses cloud reference models. Keep this installation fully local.
+      disabled_toolsets:
+        - moa
+      max_turns: 1
     model:
       provider: custom
       default: qwen2.5-7b-local
