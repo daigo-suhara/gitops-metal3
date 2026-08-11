@@ -9,9 +9,10 @@ data:
       - moa
     model:
       provider: custom
-      default: qwen3-4b-local
+      default: qwen2.5-7b-local
       base_url: http://llama-cpp.hermes.svc.cluster.local:8080/v1
       api_key: local
-      # Hermes Agent requires a 64k-token context window. Qwen3 supports this
-      # server window while retaining substantially smaller model weights.
+      # Hermes Agent requires this advertised 64k window. The CPU server uses
+      # the model's native 32k window and truncates only older conversation
+      # history beyond that limit.
       context_length: 65536

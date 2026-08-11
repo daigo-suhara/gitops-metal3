@@ -28,16 +28,11 @@ spec:
           image: ghcr.io/ggml-org/llama.cpp:server
           args:
             - -hf
-            - unsloth/Qwen3-4B-GGUF:UD-Q4_K_XL
+            - Qwen/Qwen2.5-7B-Instruct-GGUF:Q4_K_M
             - --alias
-            - qwen3-4b-local
+            - qwen2.5-7b-local
             - --ctx-size
-            - "65536"
-            # Qwen3 otherwise starts a long reasoning block even for casual
-            # chat. Hermes only has CPU inference, so keep ordinary replies
-            # responsive and reserve reasoning for a future dedicated model.
-            - --reasoning-budget
-            - "0"
+            - "32768"
             # One personal chat does not benefit from multiple 64k slots.
             - --parallel
             - "1"
@@ -53,8 +48,8 @@ spec:
             - name: XDG_CACHE_HOME
               value: /models/.cache
           resources:
-            requests: { cpu: "1", memory: 6Gi }
-            limits: { cpu: "16", memory: 12Gi }
+            requests: { cpu: "1", memory: 8Gi }
+            limits: { cpu: "16", memory: 16Gi }
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
