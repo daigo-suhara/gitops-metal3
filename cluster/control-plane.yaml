@@ -34,7 +34,10 @@ metadata:
 spec:
   template:
     spec:
-      automatedCleaningMode: metadata
+      # Preserve the Ceph OSD on /dev/sdb across a CAPI reprovisioning.
+      # The operating-system image is written only to /dev/sda (rootDeviceHints).
+      # Wipe the OSD disk explicitly only when this host is retired.
+      automatedCleaningMode: disabled
       dataTemplate:
         name: homelab-control-plane
       image:
