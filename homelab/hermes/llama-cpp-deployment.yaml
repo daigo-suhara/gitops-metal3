@@ -28,11 +28,11 @@ spec:
           image: ghcr.io/ggml-org/llama.cpp:server
           args:
             - -hf
-            - unsloth/gemma-4-E4B-it-GGUF:UD-Q4_K_XL
+            - unsloth/Qwen3-4B-GGUF:UD-Q4_K_XL
             - --alias
-            - gemma-4-e4b-local
+            - qwen3-4b-local
             - --ctx-size
-            - "65536"
+            - "16384"
             - --jinja
             - --host
             - 0.0.0.0
@@ -45,8 +45,8 @@ spec:
             - name: XDG_CACHE_HOME
               value: /models/.cache
           resources:
-            requests: { cpu: "1", memory: 12Gi }
-            limits: { cpu: "16", memory: 24Gi }
+            requests: { cpu: "1", memory: 6Gi }
+            limits: { cpu: "16", memory: 12Gi }
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

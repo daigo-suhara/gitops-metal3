@@ -1,6 +1,6 @@
 # Hermes: fully local personal AI
 
-`llama.cpp` runs the quantized Gemma 4 E4B model on the workload cluster's
+`llama.cpp` runs the quantized Qwen3 4B model on the workload cluster's
 CPUs. Hermes connects to it through the cluster-internal `llama-cpp` Service;
 no inference request leaves the cluster.
 

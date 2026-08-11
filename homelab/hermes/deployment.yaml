@@ -46,6 +46,10 @@ spec:
             - name: dashboard
               containerPort: 9119
           env:
+            # Roll the Pod when the ConfigMap seed changes, so it never keeps
+            # an older copy in the writable data PVC.
+            - name: HERMES_CONFIG_REVISION
+              value: qwen3-local-v1
             - name: HERMES_DASHBOARD
               value: "1"
             - name: HERMES_DASHBOARD_BASIC_AUTH_USERNAME

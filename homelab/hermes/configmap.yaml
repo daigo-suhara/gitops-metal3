@@ -4,9 +4,12 @@ metadata:
   name: hermes-config
 data:
   config.yaml: |
+    # MoA uses cloud reference models. Keep this installation fully local.
+    disabled_toolsets:
+      - moa
     model:
       provider: custom
-      default: gemma-4-e4b-local
+      default: qwen3-4b-local
       base_url: http://llama-cpp.hermes.svc.cluster.local:8080/v1
       api_key: local
-      context_length: 65536
+      context_length: 16384
