@@ -87,8 +87,8 @@ spec:
                   - name: Apps
                     icon: fas fa-house
                     items:
-                      - title: WordPress
-                        icon: hl-wordpress
+                      - title: Portfolio
+                        icon: fas fa-user
                         url: https://daigo-suhara.com
         persistence:
           config:

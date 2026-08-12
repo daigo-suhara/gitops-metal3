@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portfolio
+  labels:
+    app.kubernetes.io/name: portfolio
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: portfolio
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: portfolio
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        # Built from https://github.com/daigo-suhara/portfolio. GitHub Actions
+        # publishes this exact source revision to GHCR on pushes to main.
+        - name: portfolio
+          image: ghcr.io/daigo-suhara/portfolio:sha-b2fd459
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+              # The image serves on its standard HTTP port (80).
+              add: [NET_BIND_SERVICE]
+            readOnlyRootFilesystem: true
+          resources:
+            requests: { cpu: 25m, memory: 64Mi }
+            limits: { memory: 128Mi }
+          livenessProbe:
+            httpGet: { path: /, port: http }
+            initialDelaySeconds: 5
+          readinessProbe:
+            httpGet: { path: /, port: http }
+            initialDelaySeconds: 2
+          volumeMounts:
+            - name: cache
+              mountPath: /var/cache/nginx
+            - name: run
+              mountPath: /var/run
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: cache
+          emptyDir: {}
+        - name: run
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
