@@ -41,9 +41,9 @@ spec:
       dataTemplate:
         name: homelab-control-plane
       image:
-        # The OCI manifest digest provides content integrity. CAPM3 rejects a
-        # separate checksum for oci:// image URLs.
-        url: oci://ghcr.io/daigo-suhara/metal3-oci-test@sha256:e1019c5f8aac61cbcc72816a203512d67a70ed9b1ea674f20e3676038862c1e2
+        url: https://cloud-images.ubuntu.com/releases/24.04/release/ubuntu-24.04-server-cloudimg-amd64.img
+        checksum: https://cloud-images.ubuntu.com/releases/24.04/release/SHA256SUMS
+        checksumType: sha256
         diskFormat: qcow2
       hostSelector:
         matchLabels:
