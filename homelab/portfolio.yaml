@@ -1,11 +1,7 @@
-# This Application deliberately keeps the previous `wordpress` identity.
-# Updating an Application in place lets Argo CD prune the WordPress, MariaDB,
-# and their Services during the same reconciliation; creating a second
-# Application would leave the old release behind.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: wordpress
+  name: portfolio
   namespace: argocd
   labels:
     app.kubernetes.io/name: portfolio
@@ -19,10 +15,7 @@ spec:
     path: homelab/portfolio
   destination:
     server: https://kubernetes.default.svc
-    # Retain the former namespace and Service name so the existing Cloudflare
-    # Tunnel route (wordpress.wordpress.svc.cluster.local:80) keeps serving
-    # daigo-suhara.com without a dashboard-side change.
-    namespace: wordpress
+    namespace: portfolio
   syncPolicy:
     automated:
       prune: true

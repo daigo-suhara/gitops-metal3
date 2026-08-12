@@ -22,19 +22,18 @@ spec:
         # Built from https://github.com/daigo-suhara/portfolio. GitHub Actions
         # publishes this exact source revision to GHCR on pushes to main.
         - name: portfolio
-          image: ghcr.io/daigo-suhara/portfolio:sha-b2fd459
+          image: ghcr.io/daigo-suhara/portfolio:sha-9e09bd1
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 8080
           securityContext:
+            runAsNonRoot: true
+            runAsUser: 101
+            runAsGroup: 101
             allowPrivilegeEscalation: false
             capabilities:
               drop: [ALL]
-              # nginx initialises its cache directories, then switches workers
-              # to its unprivileged user.
-              # It otherwise retains a fully dropped capability set.
-              add: [CHOWN, NET_BIND_SERVICE, SETGID, SETUID]
             readOnlyRootFilesystem: true
           resources:
             requests: { cpu: 25m, memory: 64Mi }
@@ -46,16 +45,8 @@ spec:
             httpGet: { path: /, port: http }
             initialDelaySeconds: 2
           volumeMounts:
-            - name: cache
-              mountPath: /var/cache/nginx
-            - name: run
-              mountPath: /var/run
             - name: tmp
               mountPath: /tmp
       volumes:
-        - name: cache
-          emptyDir: {}
-        - name: run
-          emptyDir: {}
         - name: tmp
           emptyDir: {}
