@@ -22,7 +22,7 @@ spec:
         # Built from https://github.com/daigo-suhara/portfolio. GitHub Actions
         # publishes this exact source revision to GHCR on pushes to main.
         - name: portfolio
-          image: ghcr.io/daigo-suhara/portfolio:sha-9e09bd1
+          image: ghcr.io/daigo-suhara/portfolio:sha-c76f409
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
