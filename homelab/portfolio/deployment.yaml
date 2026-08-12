@@ -31,8 +31,9 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: [ALL]
-              # The image serves on its standard HTTP port (80).
-              add: [NET_BIND_SERVICE]
+              # nginx initialises its cache directories for its worker user.
+              # It otherwise retains a fully dropped capability set.
+              add: [CHOWN, NET_BIND_SERVICE]
             readOnlyRootFilesystem: true
           resources:
             requests: { cpu: 25m, memory: 64Mi }
