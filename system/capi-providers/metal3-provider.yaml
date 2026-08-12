@@ -4,4 +4,4 @@ metadata:
   name: metal3
   namespace: capi-metal3-system
 spec:
-  version: v1.13.1
+  version: v1.13.2
