@@ -1,15 +1,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: portfolio
+  name: mysite
   annotations:
     io.cilium/lb-ipam-ips: 172.16.100.113
   labels:
-    app.kubernetes.io/name: portfolio
+    app.kubernetes.io/name: mysite
 spec:
   type: LoadBalancer
   selector:
-    app.kubernetes.io/name: portfolio
+    app.kubernetes.io/name: mysite
   ports:
     - name: http
       port: 80

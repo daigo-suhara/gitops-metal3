@@ -1,10 +1,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: portfolio
+  name: mysite
   namespace: argocd
   labels:
-    app.kubernetes.io/name: portfolio
+    app.kubernetes.io/name: mysite
   annotations:
     argocd.argoproj.io/sync-wave: "30"
 spec:
@@ -12,10 +12,10 @@ spec:
   source:
     repoURL: https://github.com/daigo-suhara/gitops-metal3.git
     targetRevision: HEAD
-    path: homelab/portfolio
+    path: homelab/mysite
   destination:
     server: https://kubernetes.default.svc
-    namespace: portfolio
+    namespace: mysite
   syncPolicy:
     automated:
       prune: true
