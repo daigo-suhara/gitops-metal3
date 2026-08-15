@@ -22,7 +22,7 @@ spec:
         # Built from https://github.com/daigo-suhara/mysite. GitHub Actions
         # publishes this exact source revision to GHCR on pushes to main.
         - name: mysite
-          image: ghcr.io/daigo-suhara/mysite:sha-32a944e
+          image: ghcr.io/daigo-suhara/mysite:sha-cc10b75
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
