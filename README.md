@@ -9,9 +9,6 @@ IPMIを搭載した物理サーバへのOSインストールからKubernetesク�
 - Cluster API
 - Argo CD
 - Kubernetes
-- MicroK8s
-- Cilium
-- cert-manager
 
 ## 手順
 
