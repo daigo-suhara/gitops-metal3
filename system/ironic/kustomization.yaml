@@ -6,6 +6,10 @@ resources:
   - https://github.com/metal3-io/baremetal-operator//config/default?ref=v0.13.0
   - https://github.com/metal3-io/baremetal-operator//ironic-deployment/default?ref=v0.13.0
 
+images:
+  - name: quay.io/metal3-io/ironic
+    newTag: release-38.0
+
 patches:
   - path: ironic-deployment-patch.yaml
     target:
