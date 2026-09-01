@@ -8,7 +8,6 @@ data:
   GATEWAY_IP: 172.16.0.1
   DNS_IP: 8.8.8.8
   HTTP_PORT: "6180"
-  CACHEURL: http://172.16.0.10:6180/images
   DHCP_RANGE: 172.16.10.101,172.16.10.200
   IRONIC_KERNEL_PARAMS: console=tty0 console=ttyS0,115200 nomodeset
   IRONIC_FAST_TRACK: "true"
