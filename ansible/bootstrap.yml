@@ -8,6 +8,7 @@
 
   tasks:
     - name: Check out the homelab repository
+      become: false
       ansible.builtin.git:
         repo: "{{ repo_url }}"
         version: "{{ repo_ref }}"
