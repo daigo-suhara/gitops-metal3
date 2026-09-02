@@ -91,7 +91,7 @@ spec:
           - name: node-labels
             value: 'metal3.io/uuid={{ ds.meta_data.uuid }},ceph-mon=enabled,ceph-mgr=enabled,ceph-osd=enabled,ceph-mds=enabled'
     preKubeadmCommands:
-      - curl -fsSL https://raw.githubusercontent.com/daigo-suhara/gitops-metal3/main/scripts/install-kubernetes.sh | bash
+      - curl -fsSL https://raw.githubusercontent.com/daigo-suhara/homelab/main/scripts/install-kubernetes.sh | bash
     files:
       - path: /etc/kubernetes/manifests/kube-vip.yaml
         permissions: "0600"

@@ -1,16 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: ironic
+  name: cluster
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-wave: "20"
 spec:
   project: default
   source:
-    repoURL: https://github.com/daigo-suhara/gitops-metal3.git
+    repoURL: https://github.com/daigo-suhara/homelab.git
     targetRevision: HEAD
-    path: system/ironic
+    path: infra/cluster
   destination:
     server: https://kubernetes.default.svc
     namespace: metal3
@@ -26,3 +26,4 @@ spec:
         maxDuration: 3m
     syncOptions:
       - CreateNamespace=true
+      - ServerSideApply=true

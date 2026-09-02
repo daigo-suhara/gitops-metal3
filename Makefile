@@ -22,8 +22,8 @@ seal-cloudflared-token: ## usage: make seal-cloudflared-token TOKEN=<cloudflare-
 	@kubectl create secret generic cloudflared-tunnel-token \
 		--namespace cloudflare --dry-run=client -o yaml \
 		--from-literal=token='$(TOKEN)' \
-		| kubeseal -o yaml > homelab/cloudflared/tunnel-token-sealed.yaml
-	@echo "→ homelab/cloudflared/tunnel-token-sealed.yaml written. commit & push to deploy."
+		| kubeseal -o yaml > apps/cloudflared/tunnel-token-sealed.yaml
+	@echo "→ apps/cloudflared/tunnel-token-sealed.yaml written. commit & push to deploy."
 
 .PHONY: seal-dcloud-database
 seal-dcloud-database: ## usage: make seal-dcloud-database PASSWORD=<postgres-password>
@@ -37,8 +37,8 @@ seal-dcloud-database: ## usage: make seal-dcloud-database PASSWORD=<postgres-pas
 		--from-literal=admin-password='$(PASSWORD)' \
 		--from-literal=DCLD_DATABASE_URL='postgresql://dcloud:$(PASSWORD)@dcloud-postgresql-ha-pgpool:5432/dcloud?sslmode=disable' \
 		--from-literal=DCLD_DATABASE_MIGRATION_URL='postgresql://dcloud:$(PASSWORD)@dcloud-postgresql-ha-postgresql:5432/dcloud?sslmode=disable' \
-		| kubeseal -o yaml > homelab/dcloud-secret/dcloud-database-sealed.yaml
-	@echo "→ homelab/dcloud-secret/dcloud-database-sealed.yaml written. commit & push to deploy."
+		| kubeseal -o yaml > apps/dcloud-secret/dcloud-database-sealed.yaml
+	@echo "→ apps/dcloud-secret/dcloud-database-sealed.yaml written. commit & push to deploy."
 
 # --- sealed-secrets master key backup/restore -------------------------------
 #

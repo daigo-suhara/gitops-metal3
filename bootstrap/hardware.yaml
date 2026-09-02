@@ -1,16 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: cluster
+  name: hardware
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "20"
+    argocd.argoproj.io/sync-wave: "10"
 spec:
   project: default
   source:
-    repoURL: https://github.com/daigo-suhara/gitops-metal3.git
+    repoURL: https://github.com/daigo-suhara/homelab.git
     targetRevision: HEAD
-    path: cluster
+    path: infra/hardware
   destination:
     server: https://kubernetes.default.svc
     namespace: metal3
@@ -27,3 +27,12 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+      - RespectIgnoreDifferences=true
+  ignoreDifferences:
+    - group: metal3.io
+      kind: BareMetalHost
+      jsonPointers:
+        - /spec/consumerRef
+        - /spec/image
+        - /spec/userData
+        - /spec/architecture

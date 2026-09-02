@@ -73,4 +73,4 @@ spec:
             - name: node-labels
               value: 'node-role.kubernetes.io/worker=true,metal3.io/uuid={{ ds.meta_data.uuid }}'
       preKubeadmCommands:
-        - curl -fsSL https://raw.githubusercontent.com/daigo-suhara/gitops-metal3/main/scripts/install-kubernetes.sh | bash
+        - curl -fsSL https://raw.githubusercontent.com/daigo-suhara/homelab/main/scripts/install-kubernetes.sh | bash

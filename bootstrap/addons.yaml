@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: addons
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "30"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/daigo-suhara/homelab.git
+    targetRevision: HEAD
+    path: infra/cluster/addons
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: metal3
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

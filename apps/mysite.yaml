@@ -10,9 +10,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/daigo-suhara/gitops-metal3.git
+    repoURL: https://github.com/daigo-suhara/homelab.git
     targetRevision: HEAD
-    path: homelab/mysite
+    path: apps/mysite
   destination:
     server: https://kubernetes.default.svc
     namespace: mysite
