@@ -51,3 +51,29 @@
         cmd: kubectl --kubeconfig {{ bootstrap_kubeconfig }} apply -k {{ repo_dir }}/infra/cluster
       register: cluster_apply
       changed_when: true
+    - name: Save the workload cluster kubeconfig
+      ansible.builtin.shell:
+        cmd: >-
+          clusterctl get kubeconfig homelab
+          --kubeconfig {{ bootstrap_kubeconfig }}
+          --namespace metal3 > {{ target_kubeconfig }}
+      register: target_kubeconfig_result
+      retries: 60
+      delay: 60
+      until: target_kubeconfig_result.rc == 0
+      changed_when: true
+
+    - name: Restrict target kubeconfig permissions
+      ansible.builtin.file:
+        path: "{{ target_kubeconfig }}"
+        owner: "{{ ansible_user }}"
+        mode: "0600"
+    - name: Install the CAPI addon provider
+      ansible.builtin.command:
+        cmd: kubectl --kubeconfig {{ bootstrap_kubeconfig }} apply -k {{ repo_dir }}/infra/system/caaph
+      changed_when: true
+
+    - name: Install workload-cluster addons
+      ansible.builtin.command:
+        cmd: kubectl --kubeconfig {{ bootstrap_kubeconfig }} apply -k {{ repo_dir }}/infra/cluster/addons
+      changed_when: true
