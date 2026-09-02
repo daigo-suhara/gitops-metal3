@@ -8,3 +8,4 @@ target_kubeconfig: /home/{{ ansible_user }}/.kube/homelab-kubeconfig
 capi_version: v1.14.0
 capm3_version: v1.13.2
 metal3_ipam_version: v1.11.0
+clusterctl_version: v1.14.0
