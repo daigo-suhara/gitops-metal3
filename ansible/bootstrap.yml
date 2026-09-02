@@ -14,6 +14,7 @@
         version: "{{ repo_ref }}"
         dest: "{{ repo_dir }}"
         update: true
+        force: true
 
     - name: Install clusterctl
       ansible.builtin.get_url:
