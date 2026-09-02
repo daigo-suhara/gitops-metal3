@@ -9,5 +9,3 @@ resources:
   - monitoring.yaml
   - mysite.yaml
   - dashy.yaml
-  - jupyterhub.yaml
-  - hermes.yaml
