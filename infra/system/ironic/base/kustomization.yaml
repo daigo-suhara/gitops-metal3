@@ -6,6 +6,15 @@ resources:
   - ironic.yaml
 patches:
   - target:
+      group: admissionregistration.k8s.io
+      version: v1
+      kind: ValidatingWebhookConfiguration
+      name: baremetal-operator-validating-webhook-configuration
+    patch: |-
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1inject-ca-from
+        value: metal3/baremetal-operator-serving-cert
+  - target:
       group: cert-manager.io
       version: v1
       kind: Certificate
