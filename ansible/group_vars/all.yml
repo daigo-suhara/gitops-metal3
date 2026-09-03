@@ -3,3 +3,5 @@ repo_url: https://github.com/daigo-suhara/homelab.git
 repo_ref: main
 repo_dir: /home/{{ ansible_user }}/homelab
 bootstrap_kubeconfig: /home/{{ ansible_user }}/.kube/config
+target_kubeconfig: /home/{{ ansible_user }}/.kube/homelab-kubeconfig
+clusterctl_version: v1.14.0

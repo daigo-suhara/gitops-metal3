@@ -16,6 +16,14 @@
         update: true
         force: true
 
+    - name: Install clusterctl
+      ansible.builtin.get_url:
+        url: "https://github.com/kubernetes-sigs/cluster-api/releases/download/{{ clusterctl_version }}/clusterctl-linux-amd64"
+        dest: /usr/local/bin/clusterctl
+        mode: "0755"
+        owner: root
+        group: root
+
     - name: Install MicroK8s
       ansible.builtin.command:
         argv: [snap, install, microk8s, --classic]
