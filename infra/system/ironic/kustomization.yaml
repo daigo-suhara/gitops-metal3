@@ -3,5 +3,5 @@ kind: Kustomization
 namespace: metal3
 
 resources:
-  - https://github.com/metal3-io/baremetal-operator/config/use-irso?ref=main
+  - https://github.com/metal3-io/baremetal-operator/config/use-irso?ref=v0.13.0
   - ironic.yaml
