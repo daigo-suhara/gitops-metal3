@@ -1,0 +1,16 @@
+apiVersion: ironic.metal3.io/v1alpha1
+kind: Ironic
+metadata:
+  name: ironic
+  namespace: metal3
+spec:
+  version: "38.0"
+  networking:
+    interface: enx00e04c247a98
+    ipAddress: 172.16.0.10
+    keepalived:
+      enabled: true
+    dhcp:
+      networkCIDR: 172.16.0.0/16
+      rangeBegin: 172.16.10.101
+      rangeEnd: 172.16.10.200
