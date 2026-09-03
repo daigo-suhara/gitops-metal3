@@ -51,10 +51,6 @@ stringData:
     metadata:
       name: default
     spec:
-      # Split of 172.16.100.0/24:
-      #   100-149: Cilium L2 announcement (this pool)
-      #   150-199: neutron external-subnet allocation-pool
-      #     (see apps/openstack/bootstrap/external-network.yaml)
       blocks:
         - start: 172.16.100.100
           stop:  172.16.100.149

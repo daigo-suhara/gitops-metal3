@@ -1,13 +1,3 @@
-# Cloudflare Tunnel that publishes the cluster to the internet with no
-# port forward on the home router. The tunnel token lives in the
-# SealedSecret at apps/cloudflared/tunnel-token-sealed.yaml, so
-# no manual `kubectl create secret` is needed after a cluster rebuild.
-# To rotate: fetch a new token from Cloudflare Zero Trust ->
-# Networks -> Tunnels, re-seal with kubeseal, and commit.
-#
-# Hostname -> Service routing is configured in the Cloudflare Zero Trust
-# dashboard for the tunnel. Example:
-#   grafana.<your-domain>  -> http://monitoring-grafana.monitoring.svc.cluster.local:80
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

@@ -28,14 +28,6 @@ seal-dcloud-database: ## usage: make seal-dcloud-database PASSWORD=<postgres-pas
 		| kubeseal -o yaml > apps/dcloud-secret/dcloud-database-sealed.yaml
 	@echo "→ apps/dcloud-secret/dcloud-database-sealed.yaml written. commit & push to deploy."
 
-# --- sealed-secrets master key backup/restore -------------------------------
-#
-# The workload cluster's sealed-secrets controller generates a fresh keypair
-# on first boot. Rebuilding the cluster (or wiping kube-system Secrets) means
-# every SealedSecret in git becomes undecryptable. These targets snapshot the
-# active keypair to the mgmt node, and restore it into a rebuilt workload so
-# all existing SealedSecrets keep unsealing to the same plaintext.
-
 BACKUP_HOST ?= mgmt
 BACKUP_USER ?= ubuntu
 BACKUP_DIR  ?= /home/ubuntu/backups

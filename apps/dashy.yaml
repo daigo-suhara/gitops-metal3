@@ -1,12 +1,3 @@
-# Dashy homelab dashboard. Exposed via Cilium L2 LoadBalancer on a fixed
-# LAN IP so it can be bookmarked directly.
-#
-# Config lives in Git as a ConfigMap mounted read-only at
-# /app/user-data/conf.yml. To change the dashboard, edit conf.yml in the
-# configMaps block below and let ArgoCD reconcile (the strategy=Recreate
-# controller will roll the pod so Dashy re-reads it on boot).
-#
-# Cilium LB pool is 172.16.100.100-149 (see cluster/addons/cilium.yaml).
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

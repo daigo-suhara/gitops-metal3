@@ -90,10 +90,6 @@ spec:
                 csi.storage.k8s.io/controller-publish-secret-namespace: rook-ceph
                 csi.storage.k8s.io/node-stage-secret-name: rook-csi-cephfs-node
                 csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
-        # dcloud's storage service backends its ObjectBucketClaims to this
-        # CephObjectStore via a StorageClass that rook auto-generates as
-        # "ceph-bucket". Two data pools are replicated x3; the metadata
-        # pool defaults to the same replication.
         cephObjectStores:
           - name: default
             spec:
