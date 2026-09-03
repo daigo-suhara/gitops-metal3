@@ -55,3 +55,7 @@ restore-sealed-key: ## apply the backed-up keypair to the current KUBECONFIG clu
 		| kubectl -n kube-system apply -f -
 	@kubectl -n kube-system rollout restart deploy sealed-secrets-controller
 	@echo "→ key applied, controller restarted; existing SealedSecrets will unseal on next reconcile."
+
+.PHONY: pivot
+pivot: ## move Cluster API resources from the bootstrap cluster to the workload cluster
+	@./scripts/pivot.sh
