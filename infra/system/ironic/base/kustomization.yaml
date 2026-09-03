@@ -6,6 +6,18 @@ resources:
   - ironic.yaml
 patches:
   - target:
+      group: apiextensions.k8s.io
+      version: v1
+      kind: CustomResourceDefinition
+      name: baremetalhosts.metal3.io
+    patch: |-
+      apiVersion: apiextensions.k8s.io/v1
+      kind: CustomResourceDefinition
+      metadata:
+        name: baremetalhosts.metal3.io
+        labels:
+          clusterctl.cluster.x-k8s.io/move: ""
+  - target:
       group: admissionregistration.k8s.io
       version: v1
       kind: ValidatingWebhookConfiguration

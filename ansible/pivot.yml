@@ -35,6 +35,25 @@
         mode: "0600"
       become: false
 
+    - name: Pause the workload cluster before pivot
+      ansible.builtin.command:
+        cmd: >-
+          kubectl --kubeconfig {{ bootstrap_kubeconfig }} -n metal3 patch
+          cluster homelab --type=merge -p '{"spec":{"paused":true}}'
+      changed_when: true
+
+    - name: Wait for BareMetalHost pause state
+      ansible.builtin.shell:
+        cmd: >-
+          test "$(kubectl --kubeconfig {{ bootstrap_kubeconfig }} -n metal3
+          get bmh -o jsonpath='{range .items[*]}{.metadata.annotations.baremetalhost\\.metal3\\.io/paused}{"\\n"}{end}'
+          | grep -c .)" -eq "$(kubectl --kubeconfig {{ bootstrap_kubeconfig }} -n metal3 get bmh --no-headers | wc -l)"
+      register: bmh_pause_state
+      retries: 60
+      delay: 5
+      until: bmh_pause_state.rc == 0
+      changed_when: false
+
     - name: Wait for workload Argo CD
       ansible.builtin.command:
         cmd: >-
@@ -130,4 +149,11 @@
         cmd: >-
           kubectl --kubeconfig {{ target_kubeconfig }} apply
           -f {{ repo_dir }}/bootstrap/workload-app-of-apps.yaml
+      changed_when: true
+
+    - name: Resume the workload cluster after pivot
+      ansible.builtin.command:
+        cmd: >-
+          kubectl --kubeconfig {{ target_kubeconfig }} -n metal3 patch
+          cluster homelab --type=merge -p '{"spec":{"paused":false}}'
       changed_when: true
