@@ -5,10 +5,6 @@ namespace: metal3
 resources:
   - https://github.com/metal3-io/baremetal-operator//config/default?ref=v0.13.0
   - https://github.com/metal3-io/baremetal-operator//ironic-deployment/default?ref=v0.13.0
-  - ironic-pvc.yaml
-
-components:
-  - https://github.com/metal3-io/baremetal-operator//ironic-deployment/components/keepalived?ref=v0.13.0
 
 images:
   - name: quay.io/metal3-io/ironic
@@ -23,25 +19,6 @@ patches:
     target:
       kind: ConfigMap
       name: ironic
-  - target:
-      kind: ConfigMap
-      name: ironic-bmo-configmap
-    patch: |-
-      - op: add
-        path: /data/PROVISIONING_IP
-        value: 172.16.0.10
-      - op: add
-        path: /data/PROVISIONING_INTERFACE
-        value: enx00e04c247a98
-      - op: add
-        path: /data/DEPLOY_KERNEL_URL
-        value: http://172.16.0.10:6180/images/ironic-python-agent.kernel
-      - op: add
-        path: /data/DEPLOY_RAMDISK_URL
-        value: http://172.16.0.10:6180/images/ironic-python-agent.initramfs
-      - op: add
-        path: /data/IRONIC_ENDPOINT
-        value: http://172.16.0.10:6385/v1/
   # JSON Patch cleanly replaces the base's emptyDir with the PVC. A
   # strategic merge patch would union the two volume-source fields and
   # trip "may not specify more than 1 volume type".
