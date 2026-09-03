@@ -1,0 +1,95 @@
+---
+- name: Bootstrap Argo CD on the temporary cluster
+  hosts: bootstrap_hosts
+  become: true
+  gather_facts: false
+  vars_files:
+    - group_vars/all.yml
+
+  tasks:
+    - name: Check out the homelab repository
+      become: false
+      ansible.builtin.git:
+        repo: "{{ repo_url }}"
+        version: "{{ repo_ref }}"
+        dest: "{{ repo_dir }}"
+        update: true
+        force: true
+
+    - name: Install MicroK8s
+      ansible.builtin.command:
+        argv: [snap, install, microk8s, --classic]
+        creates: /snap/bin/microk8s
+
+    - name: Add the SSH user to the microk8s group
+      ansible.builtin.user:
+        name: "{{ ansible_user }}"
+        groups: microk8s
+        append: true
+
+    - name: Start MicroK8s
+      ansible.builtin.command: microk8s start
+      changed_when: true
+
+    - name: Wait for MicroK8s
+      ansible.builtin.command: microk8s status --wait-ready
+      changed_when: false
+
+    - name: Enable bootstrap addons
+      ansible.builtin.command: microk8s enable dns storage rbac
+      register: microk8s_addons
+      changed_when: "'Nothing to do' not in microk8s_addons.stdout"
+
+    - name: Create the kubeconfig directory
+      become: false
+      ansible.builtin.file:
+        path: "{{ bootstrap_kubeconfig | dirname }}"
+        state: directory
+        mode: "0700"
+
+    - name: Write the bootstrap kubeconfig
+      ansible.builtin.shell:
+        cmd: "microk8s config > {{ bootstrap_kubeconfig }}"
+      become_user: "{{ ansible_user }}"
+      changed_when: true
+
+    - name: Restrict kubeconfig permissions
+      ansible.builtin.file:
+        path: "{{ bootstrap_kubeconfig }}"
+        owner: "{{ ansible_user }}"
+        mode: "0600"
+
+    - name: Create the Argo CD namespace
+      ansible.builtin.shell:
+        cmd: >-
+          kubectl --kubeconfig {{ bootstrap_kubeconfig }} create namespace argocd
+          --dry-run=client -o yaml |
+          kubectl --kubeconfig {{ bootstrap_kubeconfig }} apply -f -
+      changed_when: true
+
+    - name: Install Argo CD
+      ansible.builtin.command:
+        cmd: >-
+          kubectl --kubeconfig {{ bootstrap_kubeconfig }} -n argocd apply
+          --server-side --force-conflicts
+          -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+      changed_when: true
+
+    - name: Wait for Argo CD server
+      ansible.builtin.command:
+        cmd: >-
+          kubectl --kubeconfig {{ bootstrap_kubeconfig }} -n argocd wait
+          --for=condition=available deployment/argocd-server --timeout=600s
+      changed_when: false
+
+    - name: Enable Helm rendering in Argo CD
+      ansible.builtin.command:
+        cmd: >-
+          kubectl --kubeconfig {{ bootstrap_kubeconfig }} -n argocd patch configmap argocd-cm
+          --type merge -p '{"data":{"kustomize.buildOptions":"--enable-helm"}}'
+      changed_when: true
+
+    - name: Apply the bootstrap App-of-Apps
+      ansible.builtin.command:
+        cmd: kubectl --kubeconfig {{ bootstrap_kubeconfig }} apply -f {{ repo_dir }}/bootstrap/app-of-apps.yaml
+      changed_when: true
