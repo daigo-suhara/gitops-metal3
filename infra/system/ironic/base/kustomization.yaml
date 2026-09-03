@@ -1,6 +1,18 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: metal3
 resources:
-  - namespace.yaml
   - https://github.com/metal3-io/baremetal-operator/config/use-irso?ref=v0.13.0
   - ironic.yaml
+patches:
+  - target:
+      group: cert-manager.io
+      version: v1
+      kind: Certificate
+      name: baremetal-operator-serving-cert
+    patch: |-
+      - op: replace
+        path: /spec/dnsNames
+        value:
+          - baremetal-operator-webhook-service.metal3.svc
+          - baremetal-operator-webhook-service.metal3.svc.cluster.local
