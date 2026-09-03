@@ -1,7 +1,7 @@
 ---
 - name: Pivot Cluster API management to the workload cluster
   hosts: bootstrap_hosts
-  become: true
+  become: false
   gather_facts: false
   vars_files:
     - group_vars/all.yml
@@ -22,7 +22,6 @@
           clusterctl get kubeconfig homelab
           --kubeconfig {{ bootstrap_kubeconfig }}
           --namespace metal3 > {{ target_kubeconfig }}
-      become_user: "{{ ansible_user }}"
       register: target_kubeconfig_result
       retries: 60
       delay: 30
@@ -123,7 +122,6 @@
           --to-kubeconfig {{ target_kubeconfig }}
           --namespace metal3
           -v 5
-      become_user: "{{ ansible_user }}"
       register: clusterctl_move
       changed_when: true
 
