@@ -56,13 +56,6 @@
           deployment/baremetal-operator-controller-manager --replicas=0
       changed_when: true
 
-    - name: Release the Ironic VIP from the bootstrap host
-      ansible.builtin.command:
-        cmd: >-
-          kubectl --kubeconfig {{ bootstrap_kubeconfig }} -n metal3 delete
-          ironic/ironic --wait=true --timeout=300s
-      changed_when: true
-
     - name: Prepare providers and Ironic on the workload cluster
       ansible.builtin.command:
         cmd: >-
@@ -123,6 +116,13 @@
           --namespace metal3
           -v 5
       register: clusterctl_move
+      changed_when: true
+
+    - name: Release the Ironic VIP from the bootstrap host
+      ansible.builtin.command:
+        cmd: >-
+          kubectl --kubeconfig {{ bootstrap_kubeconfig }} -n metal3 delete
+          ironic/ironic --wait=true --timeout=300s
       changed_when: true
 
     - name: Enable full infrastructure reconciliation on the workload cluster
