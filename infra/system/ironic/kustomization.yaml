@@ -11,6 +11,13 @@ images:
   - name: quay.io/metal3-io/ironic
     newTag: release-38.0
 
+configMapGenerator:
+  - name: ipxe-configmap
+    literals:
+      - IPXE_ENABLE_TLS_CENV_ARG=false
+      - IPXE_ENABLE_IPV6_CENV_ARG=true
+      - IRONIC_IP=172.16.0.10
+
 patches:
   - path: ironic-deployment-patch.yaml
     target:
@@ -34,6 +41,32 @@ patches:
           name: ironic-data-volume
           persistentVolumeClaim:
             claimName: ironic-data
+  - target:
+      version: v1
+      kind: Deployment
+      name: baremetal-operator-ironic
+    patch: |-
+      - op: add
+        path: /spec/template/spec/initContainers/1
+        value:
+          name: ipxe-builder
+          image: quay.io/metal3-io/ipxe-builder
+          command:
+            - /bin/buildipxe.sh
+          envFrom:
+            - configMapRef:
+                name: ipxe-configmap
+          volumeMounts:
+            - mountPath: /shared
+              name: ironic-data-volume
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            privileged: false
+            runAsUser: 997
+            runAsGroup: 994
 
 patchesJson6902:
   - target:
