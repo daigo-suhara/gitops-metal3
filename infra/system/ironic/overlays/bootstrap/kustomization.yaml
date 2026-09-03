@@ -12,3 +12,9 @@ patches:
       - op: replace
         path: /spec/networking/interface
         value: enx00e04c247a98
+      - op: replace
+        path: /spec/networking/ipAddress
+        value: 172.16.0.10
+      - op: replace
+        path: /spec/networking/keepalived/enabled
+        value: false
